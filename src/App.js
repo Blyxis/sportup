@@ -1,26 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
-const SK = "ironlog_v5";
+const SK = "sportup_v1";
 
-const seed = {
-  groups: [
-    {
-      id: 1, name: "DOS",
-      exercises: [
-        { id: 101, name: "Tractions", defaultKg: 0, bodyweight: true, defaultLeste: 0 },
-        { id: 102, name: "Rowing barre", defaultKg: 60, bodyweight: false },
-      ]
-    },
-    {
-      id: 2, name: "GAINAGE",
-      exercises: [
-        { id: 201, name: "Planche", defaultKg: 0, bodyweight: true },
-      ]
-    }
-  ],
-  sessions: []
-};
+const seed = { groups: [], sessions: [] };
 
 const uid = () => Date.now() + Math.random();
 function fmt(iso) {
@@ -54,54 +37,108 @@ function findSimilarExos(db, name, excludeGroupId, excludeExoId) {
   return matches;
 }
 
+// ── Palette minimaliste ────────────────────────────────────────────────
 const C = {
-  bg: "#000", surface: "#111", card: "#161616", border: "#2a2a2a",
-  text: "#ffffff", muted: "#888", faint: "#444",
-  accent: "#ff4500", green: "#22c55e", blue: "#60a5fa",
-  font: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+  bg: "#0a0a0a",
+  surface: "#141414",
+  card: "#1a1a1a",
+  border: "#272727",
+  borderLight: "#333",
+  text: "#f0f0f0",
+  muted: "#6b6b6b",
+  faint: "#3a3a3a",
+  accent: "#8b9dcc",
+  accentDim: "#1e2540",
+  accentText: "#b8c5e8",
+  green: "#7aaa8a",
+  greenDim: "#1a2820",
+  greenText: "#a8c8b0",
+  danger: "#c47070",
+  dangerDim: "#2a1818",
+  font: "'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif",
 };
 
+// ── CSS global + transitions ───────────────────────────────────────────
 const globalCss = `
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&display=swap');
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { background: #000; }
+  body { background: #0a0a0a; }
   input[type=number]::-webkit-inner-spin-button,
   input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
   input[type=number] { -moz-appearance: textfield; }
-  button:active { opacity: 0.8; }
+  button { transition: background 0.1s ease, border-color 0.1s ease, opacity 0.1s ease, transform 0.1s ease; }
+  button:active { opacity: 0.7; transform: scale(0.97); }
+  input:focus { outline: none; border-color: #8b9dcc !important; }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateX(8px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+  .page-enter { animation: slideUp 0.16s ease both; }
+  .slide-in   { animation: slideIn 0.14s ease both; }
 `;
 
 const S = {
-  app: { minHeight: "100vh", background: C.bg, color: C.text, fontFamily: C.font, maxWidth: 480, margin: "0 auto", paddingBottom: 60 },
-  hdr: { borderBottom: `1px solid ${C.border}`, padding: "16px 20px", display: "flex", justifyContent: "space-between", alignItems: "center", position: "sticky", top: 0, background: "#000", zIndex: 10 },
-  logo: { fontSize: 15, fontWeight: 800, color: C.text, letterSpacing: -0.5 },
-  logoAccent: { color: C.accent },
+  app: { minHeight: "100vh", background: C.bg, color: C.text, fontFamily: C.font, maxWidth: 480, margin: "0 auto", paddingBottom: 80 },
+  hdr: { borderBottom: `1px solid ${C.border}`, padding: "14px 20px", display: "flex", justifyContent: "space-between", alignItems: "center", position: "sticky", top: 0, background: C.bg, zIndex: 10 },
   body: { padding: "20px" },
-  h1: { fontSize: 28, fontWeight: 800, letterSpacing: -1, lineHeight: 1.1, marginBottom: 4 },
+  h1: { fontSize: 26, fontWeight: 700, letterSpacing: -0.5, lineHeight: 1.15, marginBottom: 4, color: C.text },
   sub: { fontSize: 13, color: C.muted, marginBottom: 24 },
-  sec: { fontSize: 11, fontWeight: 600, color: C.faint, textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 12, marginTop: 24 },
-  btn: { background: C.accent, color: "#fff", border: "none", borderRadius: 10, padding: "14px 20px", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: C.font, width: "100%", marginBottom: 10, display: "block" },
-  btnGreen: { background: C.green, color: "#000", border: "none", borderRadius: 10, padding: "14px 20px", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: C.font, width: "100%", marginBottom: 10, display: "block" },
-  btnSmall: (color) => ({ background: color || C.surface, color: color ? "#000" : C.text, border: `1px solid ${C.border}`, borderRadius: 8, padding: "8px 14px", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: C.font }),
-  ghost: { background: C.surface, color: C.text, border: `1px solid ${C.border}`, borderRadius: 10, padding: "13px 20px", fontSize: 14, fontWeight: 500, cursor: "pointer", fontFamily: C.font, width: "100%", marginBottom: 10, display: "block" },
-  danger: { background: "none", color: "#ef4444", border: `1px solid #3f0000`, borderRadius: 8, padding: "11px 16px", fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: C.font, width: "100%", marginTop: 8 },
-  input: { background: C.surface, border: `1px solid ${C.border}`, borderRadius: 8, color: C.text, padding: "12px 14px", fontSize: 15, width: "100%", fontFamily: C.font, outline: "none" },
-  back: { background: "none", border: "none", color: C.muted, fontSize: 14, fontWeight: 500, cursor: "pointer", fontFamily: C.font, padding: 0, marginBottom: 20 },
-  navBtn: (active) => ({ background: "none", border: "none", color: active ? C.text : C.muted, fontSize: 14, fontWeight: active ? 600 : 400, cursor: "pointer", fontFamily: C.font, padding: "4px 0" }),
-  tag: { background: C.card, borderRadius: 6, padding: "6px 10px", fontSize: 12, color: C.muted, textAlign: "center", minWidth: 52 },
-  tagVal: { fontSize: 16, fontWeight: 700, color: C.text, display: "block" },
-  tagLabel: { fontSize: 10, color: C.faint, display: "block", marginTop: 1 },
+  sec: { fontSize: 10, fontWeight: 600, color: C.faint, textTransform: "uppercase", letterSpacing: 2, marginBottom: 12, marginTop: 24 },
+  btn: { background: C.accent, color: "#0a0f1e", border: "none", borderRadius: 10, padding: "14px 20px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: C.font, width: "100%", marginBottom: 10, display: "block", letterSpacing: 0.2 },
+  btnGreen: { background: C.green, color: "#0a1410", border: "none", borderRadius: 10, padding: "14px 20px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: C.font, width: "100%", marginBottom: 10, display: "block" },
+  btnSmall: (color) => ({ background: color || C.surface, color: color ? "#0a0a0a" : C.text, border: `1px solid ${C.border}`, borderRadius: 8, padding: "8px 14px", fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: C.font }),
+  ghost: { background: "transparent", color: C.text, border: `1px solid ${C.border}`, borderRadius: 10, padding: "13px 20px", fontSize: 14, fontWeight: 500, cursor: "pointer", fontFamily: C.font, width: "100%", marginBottom: 10, display: "block" },
+  danger: { background: "none", color: C.danger, border: `1px solid ${C.dangerDim}`, borderRadius: 8, padding: "11px 16px", fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: C.font, width: "100%", marginTop: 8 },
+  input: { background: C.surface, border: `1px solid ${C.border}`, borderRadius: 8, color: C.text, padding: "12px 14px", fontSize: 15, width: "100%", fontFamily: C.font, outline: "none", transition: "border-color 0.15s" },
+  back: { background: "none", border: "none", color: C.muted, fontSize: 13, fontWeight: 500, cursor: "pointer", fontFamily: C.font, padding: 0, marginBottom: 20, display: "flex", alignItems: "center", gap: 4 },
+  navBtn: (active) => ({ background: "none", border: "none", color: active ? C.text : C.muted, fontSize: 13, fontWeight: active ? 600 : 400, cursor: "pointer", fontFamily: C.font, padding: "4px 0", borderBottom: active ? `1.5px solid ${C.accent}` : "1.5px solid transparent", transition: "color 0.15s, border-color 0.15s", paddingBottom: 2 }),
+  tag: { background: C.card, border: `1px solid ${C.border}`, borderRadius: 8, padding: "6px 10px", fontSize: 12, color: C.muted, textAlign: "center", minWidth: 52 },
+  tagVal: { fontSize: 15, fontWeight: 700, color: C.text, display: "block" },
+  tagLabel: { fontSize: 9, color: C.faint, display: "block", marginTop: 1, textTransform: "uppercase", letterSpacing: 1 },
   statBox: { background: C.surface, border: `1px solid ${C.border}`, borderRadius: 10, padding: "14px 10px", textAlign: "center" },
-  statNum: { fontSize: 30, fontWeight: 800, color: C.accent, lineHeight: 1 },
-  statLabel: { fontSize: 11, color: C.faint, marginTop: 3 },
-  toggle: (active) => ({ flex: 1, padding: "10px", borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: "pointer", fontFamily: C.font, background: active ? C.accent : C.surface, color: active ? "#fff" : C.muted, border: `1px solid ${active ? C.accent : C.border}` }),
+  statNum: { fontSize: 28, fontWeight: 800, color: C.accent, lineHeight: 1 },
+  statLabel: { fontSize: 10, color: C.faint, marginTop: 3, textTransform: "uppercase", letterSpacing: 1 },
+  toggle: (active) => ({ flex: 1, padding: "10px", borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: "pointer", fontFamily: C.font, background: active ? C.accentDim : C.surface, color: active ? C.accentText : C.muted, border: `1px solid ${active ? C.accent : C.border}`, transition: "all 0.15s" }),
 };
+
+// ── Logo Sport'Up ──────────────────────────────────────────────────────
+function Logo({ onClick }) {
+  return (
+    <div onClick={onClick} style={{ display: "flex", alignItems: "center", gap: 7, cursor: onClick ? "pointer" : "default" }}>
+      <svg width="26" height="26" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="dg" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#e8924a"/>
+            <stop offset="55%" stopColor="#d07840"/>
+            <stop offset="100%" stopColor="#f2ede6"/>
+          </linearGradient>
+        </defs>
+        {/* Plaques gauche */}
+        <rect x="1" y="7" width="5.5" height="14" rx="2" fill="url(#dg)"/>
+        <rect x="6" y="9.5" width="3.5" height="9" rx="1.5" fill="url(#dg)"/>
+        {/* Barre centrale */}
+        <rect x="9.5" y="12" width="9" height="4" rx="1.5" fill="url(#dg)"/>
+        {/* Plaques droite */}
+        <rect x="18.5" y="9.5" width="3.5" height="9" rx="1.5" fill="url(#dg)"/>
+        <rect x="21.5" y="7" width="5.5" height="14" rx="2" fill="url(#dg)"/>
+      </svg>
+      <span style={{ fontSize: 15, fontWeight: 800, letterSpacing: -0.3, background: "linear-gradient(135deg, #e8924a 0%, #d07840 40%, #f0ece6 100%)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+        Sport'Up
+      </span>
+    </div>
+  );
+}
 
 // ── Card ───────────────────────────────────────────────────────────────
 function Card({ onClick, children, style }) {
   const [hov, setHov] = useState(false);
   return (
-    <div style={{ background: C.card, border: `1px solid ${hov && onClick ? C.accent : C.border}`, borderRadius: 12, padding: "14px 16px", marginBottom: 10, cursor: onClick ? "pointer" : "default", transition: "border-color 0.15s", ...style }}
+    <div style={{ border: `1px solid ${hov && onClick ? C.borderLight : C.border}`, borderRadius: 12, padding: "14px 16px", marginBottom: 10, cursor: onClick ? "pointer" : "default", transition: "border-color 0.12s, background 0.12s", background: hov && onClick ? "#1e1e1e" : C.card, ...style }}
       onClick={onClick} onMouseEnter={() => setHov(true)} onMouseLeave={() => setHov(false)}>
       {children}
     </div>
@@ -112,16 +149,16 @@ function Card({ onClick, children, style }) {
 function Stepper({ label, value, onChange, step = 1, min = 0, unit = "" }) {
   const dec = () => onChange(Math.max(min, Math.round((parseFloat(value || 0) - step) * 100) / 100));
   const inc = () => onChange(Math.round((parseFloat(value || 0) + step) * 100) / 100);
-  const btnS = { background: C.surface, border: `1px solid ${C.border}`, borderRadius: 8, width: 40, height: 40, fontSize: 22, fontWeight: 300, color: C.text, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontFamily: C.font };
+  const btnS = { background: C.surface, border: `1px solid ${C.border}`, borderRadius: 8, width: 38, height: 38, fontSize: 20, fontWeight: 300, color: C.text, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, fontFamily: C.font };
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
-      <div style={{ fontSize: 11, color: C.faint, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1 }}>{label}</div>
+      <div style={{ fontSize: 10, color: C.faint, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1.5 }}>{label}</div>
       <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
         <button style={btnS} onClick={dec}>−</button>
         <div style={{ textAlign: "center" }}>
           <input type="number" value={value} onChange={e => onChange(e.target.value === "" ? "" : parseFloat(e.target.value))}
-            style={{ ...S.input, textAlign: "center", fontSize: 22, fontWeight: 800, padding: "8px 4px", width: 72, border: "none", background: "transparent" }} />
-          {unit && <div style={{ fontSize: 11, color: C.faint, marginTop: -4 }}>{unit}</div>}
+            style={{ ...S.input, textAlign: "center", fontSize: 22, fontWeight: 800, padding: "6px 4px", width: 68, border: "none", background: "transparent" }} />
+          {unit && <div style={{ fontSize: 10, color: C.faint, marginTop: -4 }}>{unit}</div>}
         </div>
         <button style={btnS} onClick={inc}>+</button>
       </div>
@@ -144,11 +181,11 @@ function Calendar({ calDate, setCalDate, sessions }) {
     <Card style={{ marginBottom: 20, cursor: "default" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
         <button onClick={() => setCalDate(new Date(y, m - 1, 1))} style={S.back}>←</button>
-        <span style={{ fontSize: 14, fontWeight: 700 }}>{calDate.toLocaleDateString("fr-FR", { month: "long", year: "numeric" })}</span>
+        <span style={{ fontSize: 13, fontWeight: 600 }}>{calDate.toLocaleDateString("fr-FR", { month: "long", year: "numeric" })}</span>
         <button onClick={() => setCalDate(new Date(y, m + 1, 1))} style={S.back}>→</button>
       </div>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)", gap: 3 }}>
-        {["L","M","M","J","V","S","D"].map((d, i) => <div key={i} style={{ fontSize: 11, color: C.faint, textAlign: "center", paddingBottom: 6, fontWeight: 600 }}>{d}</div>)}
+        {["L","M","M","J","V","S","D"].map((d, i) => <div key={i} style={{ fontSize: 10, color: C.faint, textAlign: "center", paddingBottom: 6, fontWeight: 600 }}>{d}</div>)}
         {cells.map((d, i) => {
           if (!d) return <div key={i} />;
           const iso = `${y}-${m}-${d}`;
@@ -156,39 +193,79 @@ function Calendar({ calDate, setCalDate, sessions }) {
           const isSel = calDate.getDate() === d && calDate.getMonth() === m && calDate.getFullYear() === y;
           const hasSess = sessionDays.has(iso);
           return (
-            <div key={i} onClick={() => setCalDate(new Date(y, m, d))} style={{ height: 34, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 13, fontWeight: isSel || isT ? 700 : 400, cursor: "pointer", borderRadius: 8, background: isSel ? C.accent : hasSess ? "#1a0800" : "transparent", color: isSel ? "#fff" : isT ? C.accent : hasSess ? "#ff8040" : C.muted, border: isT && !isSel ? `1px solid ${C.accent}` : "1px solid transparent" }}>
+            <div key={i} onClick={() => setCalDate(new Date(y, m, d))} style={{ height: 32, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 12, fontWeight: isSel || isT ? 700 : 400, cursor: "pointer", borderRadius: 7, background: isSel ? C.accent : hasSess ? C.accentDim : "transparent", color: isSel ? "#0a0f1e" : isT ? C.accentText : hasSess ? C.accentText : C.muted, border: isT && !isSel ? `1px solid ${C.accent}` : "1px solid transparent", transition: "background 0.1s" }}>
               {d}
             </div>
           );
         })}
       </div>
-      <div style={{ fontSize: 12, color: C.muted, textAlign: "right", marginTop: 10 }}>
+      <div style={{ fontSize: 11, color: C.muted, textAlign: "right", marginTop: 10 }}>
         Séance le <span style={{ color: C.text, fontWeight: 600 }}>{calDate.toLocaleDateString("fr-FR")}</span>
       </div>
     </Card>
   );
 }
 
-// ── LogFormWidget ──────────────────────────────────────────────────────
+// ── LogFormWidget — poids ET reps modifiables par série ────────────────
 function LogFormWidget({ logForm, setLogForm, exo }) {
   const mode = logForm.mode || "reps";
   const series = parseInt(logForm.series) || 1;
-  const sets = logForm.sets && logForm.sets.length === series ? logForm.sets : Array(series).fill(parseInt(logForm.reps) || 10);
+  const isBodyweight = exo?.bodyweight;
+
+  // Normalise les sets en objets {reps, kg} ou {reps, leste}
+  function buildSets(n, existing, defReps, defKg, defLeste) {
+    const arr = [];
+    for (let i = 0; i < n; i++) {
+      const ex = existing && existing[i];
+      if (ex && typeof ex === "object") {
+        arr.push(ex);
+      } else {
+        const r = typeof ex === "number" ? ex : (parseInt(defReps) || 10);
+        arr.push(isBodyweight ? { reps: r, leste: parseFloat(defLeste) || 0 } : { reps: r, kg: parseFloat(defKg) || 0 });
+      }
+    }
+    return arr;
+  }
+
+  const currentSets = buildSets(series, logForm.sets, logForm.reps, logForm.kg, logForm.leste);
 
   function updateSeries(v) {
     const n = Math.max(1, parseInt(v) || 1);
-    const newSets = Array(n).fill(0).map((_, i) => sets[i] !== undefined ? sets[i] : (parseInt(logForm.reps) || 10));
+    const newSets = buildSets(n, currentSets, logForm.reps, logForm.kg, logForm.leste);
     setLogForm({ ...logForm, series: n, sets: newSets });
   }
-  function updateSetRep(idx, delta) {
-    const newSets = [...sets];
-    newSets[idx] = Math.max(0, (newSets[idx] || 0) + delta);
-    setLogForm({ ...logForm, sets: newSets });
+
+  function updateReps(idx, delta) {
+    const s = currentSets.map((x, i) => i === idx ? { ...x, reps: Math.max(0, (x.reps || 0) + delta) } : x);
+    setLogForm({ ...logForm, sets: s });
   }
 
-  // Bodyweight display
-  const isBodyweight = exo?.bodyweight;
-  const leste = logForm.leste !== undefined ? logForm.leste : (exo?.defaultLeste || 0);
+  function updateWeight(idx, delta) {
+    const s = currentSets.map((x, i) => {
+      if (i !== idx) return x;
+      return isBodyweight
+        ? { ...x, leste: Math.max(0, Math.round(((x.leste || 0) + delta) * 10) / 10) }
+        : { ...x, kg: Math.max(0, Math.round(((x.kg || 0) + delta) * 10) / 10) };
+    });
+    setLogForm({ ...logForm, sets: s });
+  }
+
+  // Appliquer un poids global à toutes les séries
+  function applyGlobalWeight(val) {
+    const parsed = parseFloat(val) || 0;
+    const s = currentSets.map(x => isBodyweight ? { ...x, leste: parsed } : { ...x, kg: parsed });
+    setLogForm({ ...logForm, sets: s, kg: parsed, leste: parsed });
+  }
+
+  const globalWeight = currentSets.length > 0
+    ? (isBodyweight ? (currentSets[0].leste || 0) : (currentSets[0].kg || 0))
+    : 0;
+
+  const iconBtn = (onClick) => ({
+    background: C.card, border: `1px solid ${C.border}`, borderRadius: 6,
+    width: 28, height: 28, color: C.text, cursor: "pointer", fontSize: 16,
+    display: "flex", alignItems: "center", justifyContent: "center", fontFamily: C.font
+  });
 
   return (
     <div>
@@ -200,41 +277,65 @@ function LogFormWidget({ logForm, setLogForm, exo }) {
 
       {mode === "reps" && (
         <>
-          <div style={{ display: "flex", justifyContent: "space-around", marginBottom: 24 }}>
+          {/* Séries */}
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
             <Stepper label="Séries" value={logForm.series} onChange={updateSeries} step={1} min={1} />
-            {isBodyweight ? (
-              <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6 }}>
-                <div style={{ fontSize: 11, color: C.faint, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1 }}>Leste</div>
-                <div style={{ background: "#0d1f00", border: `1px solid #2a4a00`, borderRadius: 10, padding: "10px 14px", textAlign: "center" }}>
-                  <div style={{ fontSize: 12, color: C.green, fontWeight: 600, marginBottom: 6 }}>Poids du corps</div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                    <button onClick={() => setLogForm({ ...logForm, leste: Math.max(0, leste - 2.5) })} style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 6, width: 28, height: 28, color: C.text, cursor: "pointer", fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center" }}>−</button>
-                    <div style={{ fontSize: 16, fontWeight: 800, minWidth: 48, textAlign: "center" }}>
-                      {leste > 0 ? `+${leste}kg` : "0kg"}
-                    </div>
-                    <button onClick={() => setLogForm({ ...logForm, leste: leste + 2.5 })} style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 6, width: 28, height: 28, color: C.text, cursor: "pointer", fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center" }}>+</button>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <Stepper label="Poids" value={logForm.kg} onChange={v => setLogForm({ ...logForm, kg: v })} step={2.5} min={0} unit="kg" />
-            )}
           </div>
 
-          {/* Reps par série */}
+          {/* Poids global rapide */}
+          <div style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 10, padding: "12px 14px", marginBottom: 14 }}>
+            <div style={{ fontSize: 10, color: C.faint, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 8 }}>
+              {isBodyweight ? "Leste (appliqué à toutes)" : "Poids global (toutes les séries)"}
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <button onClick={() => applyGlobalWeight(Math.max(0, Math.round((globalWeight - 2.5) * 10) / 10))} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 7, width: 34, height: 34, color: C.text, cursor: "pointer", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center" }}>−</button>
+              <div style={{ flex: 1, textAlign: "center", fontSize: 18, fontWeight: 800 }}>
+                {isBodyweight ? (globalWeight > 0 ? `+${globalWeight}kg` : "PDC") : `${globalWeight}kg`}
+              </div>
+              <button onClick={() => applyGlobalWeight(Math.round((globalWeight + 2.5) * 10) / 10)} style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 7, width: 34, height: 34, color: C.text, cursor: "pointer", fontSize: 18, display: "flex", alignItems: "center", justifyContent: "center" }}>+</button>
+            </div>
+          </div>
+
+          {/* Tableau séries */}
           <div style={{ marginBottom: 16 }}>
-            <div style={{ fontSize: 12, color: C.faint, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1, marginBottom: 10 }}>Reps par série</div>
-            <div style={{ display: "flex", flexWrap: "wrap", gap: 10 }}>
-              {sets.map((reps, idx) => (
-                <div key={idx} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 4 }}>
-                  <div style={{ fontSize: 11, color: C.faint }}>S{idx + 1}</div>
-                  <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                    <button onClick={() => updateSetRep(idx, -1)} style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 6, width: 30, height: 30, color: C.text, cursor: "pointer", fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center" }}>−</button>
-                    <div style={{ background: C.card, borderRadius: 8, padding: "6px 10px", fontSize: 18, fontWeight: 800, color: C.text, minWidth: 44, textAlign: "center" }}>{reps}</div>
-                    <button onClick={() => updateSetRep(idx, 1)} style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 6, width: 30, height: 30, color: C.text, cursor: "pointer", fontSize: 16, display: "flex", alignItems: "center", justifyContent: "center" }}>+</button>
+            <div style={{ fontSize: 10, color: C.faint, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 10 }}>
+              Détail par série
+            </div>
+            <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              {currentSets.map((s, idx) => {
+                const w = isBodyweight ? (s.leste || 0) : (s.kg || 0);
+                return (
+                  <div key={idx} style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 10, padding: "10px 12px", display: "flex", alignItems: "center", gap: 10 }}>
+                    {/* Numéro */}
+                    <div style={{ fontSize: 10, color: C.faint, fontWeight: 700, minWidth: 22, textTransform: "uppercase", letterSpacing: 1 }}>S{idx+1}</div>
+
+                    {/* Reps */}
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 9, color: C.faint, textTransform: "uppercase", letterSpacing: 1, marginBottom: 5 }}>Reps</div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                        <button onClick={() => updateReps(idx, -1)} style={iconBtn()}>−</button>
+                        <div style={{ fontSize: 18, fontWeight: 800, minWidth: 28, textAlign: "center" }}>{s.reps || 0}</div>
+                        <button onClick={() => updateReps(idx, 1)} style={iconBtn()}>+</button>
+                      </div>
+                    </div>
+
+                    <div style={{ width: 1, height: 34, background: C.border, flexShrink: 0 }} />
+
+                    {/* Poids */}
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 9, color: C.faint, textTransform: "uppercase", letterSpacing: 1, marginBottom: 5 }}>{isBodyweight ? "Leste" : "Poids"}</div>
+                      <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                        <button onClick={() => updateWeight(idx, -2.5)} style={iconBtn()}>−</button>
+                        <div style={{ fontSize: 14, fontWeight: 800, minWidth: 44, textAlign: "center", color: isBodyweight && w === 0 ? C.muted : C.text }}>
+                          {isBodyweight ? (w > 0 ? `+${w}` : "PDC") : `${w}`}
+                          {!isBodyweight && <span style={{ fontSize: 10, color: C.faint, fontWeight: 400 }}>kg</span>}
+                        </div>
+                        <button onClick={() => updateWeight(idx, 2.5)} style={iconBtn()}>+</button>
+                      </div>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </>
@@ -249,7 +350,7 @@ function LogFormWidget({ logForm, setLogForm, exo }) {
       )}
 
       <div style={{ marginBottom: 4 }}>
-        <div style={{ fontSize: 12, color: C.faint, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1, marginBottom: 6 }}>Note (optionnel)</div>
+        <div style={{ fontSize: 10, color: C.faint, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 6 }}>Note (optionnel)</div>
         <input style={S.input} placeholder="Sensation, fatigue…" value={logForm.note || ""} onChange={e => setLogForm({ ...logForm, note: e.target.value })} />
       </div>
     </div>
@@ -257,34 +358,66 @@ function LogFormWidget({ logForm, setLogForm, exo }) {
 }
 
 // ── PerfTags ───────────────────────────────────────────────────────────
-function PerfTags({ entry }) {
+function PerfTags({ entry, isBodyweight: bwProp }) {
   const mode = entry.mode || "reps";
+  const isBodyweight = bwProp !== undefined ? bwProp : (entry.bodyweight || (entry.leste !== undefined && entry.kg === undefined));
+
   if (mode === "time") {
     return (
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 8 }}>
         <div style={S.tag}><span style={S.tagVal}>{entry.series || "—"}</span><span style={S.tagLabel}>SÉRIES</span></div>
         <div style={S.tag}><span style={S.tagVal}>{entry.timeMin || 0}:{String(entry.timeSec || 0).padStart(2,"0")}</span><span style={S.tagLabel}>TEMPS</span></div>
-        {entry.note && <div style={{ fontSize: 12, color: C.muted, alignSelf: "center", fontStyle: "italic" }}>💬 {entry.note}</div>}
+        {entry.note && <div style={{ fontSize: 11, color: C.muted, alignSelf: "center", fontStyle: "italic" }}>💬 {entry.note}</div>}
       </div>
     );
   }
+
   const sets = entry.sets || [];
+  const isNewFormat = sets.length > 0 && typeof sets[0] === "object";
+
+  if (isNewFormat) {
+    // Regrouper les séries ayant mêmes reps+poids
+    const groups = [];
+    sets.forEach(s => {
+      const w = isBodyweight ? (s.leste || 0) : (s.kg || 0);
+      const key = `${s.reps}-${w}`;
+      const last = groups[groups.length - 1];
+      if (last && last.key === key) { last.count++; }
+      else { groups.push({ key, reps: s.reps, w, count: 1 }); }
+    });
+    return (
+      <div style={{ display: "flex", gap: 6, flexWrap: "wrap", marginTop: 8, alignItems: "center" }}>
+        {groups.map((g, i) => (
+          <div key={i} style={{ ...S.tag, minWidth: "auto", padding: "5px 9px" }}>
+            <span style={{ ...S.tagVal, fontSize: 12 }}>
+              {g.count > 1 ? `${g.count}×` : ""}{g.reps}<span style={{ fontSize: 10, color: C.faint, fontWeight: 400 }}>r</span>
+              {" "}<span style={{ fontSize: 11, color: C.muted, fontWeight: 500 }}>
+                {isBodyweight ? (g.w > 0 ? `+${g.w}kg` : "PDC") : `${g.w}kg`}
+              </span>
+            </span>
+          </div>
+        ))}
+        {entry.note && <div style={{ fontSize: 11, color: C.muted, fontStyle: "italic" }}>💬 {entry.note}</div>}
+      </div>
+    );
+  }
+
+  // Legacy
   const setsStr = sets.length > 0 ? sets.join(" / ") : (entry.reps || "—");
-  const isBodyweight = entry.bodyweight || (entry.leste !== undefined && entry.kg === undefined);
   return (
     <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 8, alignItems: "center" }}>
       <div style={S.tag}><span style={S.tagVal}>{entry.series || "—"}</span><span style={S.tagLabel}>SÉRIES</span></div>
-      <div style={{ ...S.tag, minWidth: "auto", padding: "6px 12px" }}><span style={{ ...S.tagVal, fontSize: 13 }}>{setsStr}</span><span style={S.tagLabel}>REPS</span></div>
+      <div style={{ ...S.tag, minWidth: "auto" }}><span style={{ ...S.tagVal, fontSize: 13 }}>{setsStr}</span><span style={S.tagLabel}>REPS</span></div>
       {isBodyweight
-        ? <div style={{ ...S.tag, borderColor: "#1a3a00" }}><span style={{ ...S.tagVal, color: C.green, fontSize: 13 }}>PDC{entry.leste > 0 ? ` +${entry.leste}kg` : ""}</span><span style={S.tagLabel}>POIDS</span></div>
-        : <div style={S.tag}><span style={S.tagVal}>{entry.kg ? `${entry.kg}` : "—"}</span><span style={S.tagLabel}>KG</span></div>
+        ? <div style={S.tag}><span style={{ ...S.tagVal, color: C.greenText, fontSize: 13 }}>PDC{entry.leste > 0 ? ` +${entry.leste}kg` : ""}</span><span style={S.tagLabel}>POIDS</span></div>
+        : <div style={S.tag}><span style={S.tagVal}>{entry.kg || "—"}</span><span style={S.tagLabel}>KG</span></div>
       }
-      {entry.note && <div style={{ fontSize: 12, color: C.muted, fontStyle: "italic" }}>💬 {entry.note}</div>}
+      {entry.note && <div style={{ fontSize: 11, color: C.muted, fontStyle: "italic" }}>💬 {entry.note}</div>}
     </div>
   );
 }
 
-// ── ExoSettingsCard : formulaire dans group detail ─────────────────────
+// ── ExoSettingsCard ────────────────────────────────────────────────────
 function ExoSettingsCard({ exo, onSave, onDelete, onNavigate }) {
   const [open, setOpen] = useState(false);
   const [bw, setBw] = useState(exo.bodyweight || false);
@@ -297,61 +430,54 @@ function ExoSettingsCard({ exo, onSave, onDelete, onNavigate }) {
   }
 
   return (
-    <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, marginBottom: 10 }}>
-      {/* Header row */}
+    <div style={{ background: C.card, border: `1px solid ${C.border}`, borderRadius: 12, marginBottom: 10, overflow: "hidden" }}>
       <div style={{ display: "flex", alignItems: "center", padding: "14px 16px", gap: 10 }}>
         <div style={{ flex: 1, cursor: "pointer" }} onClick={() => onNavigate(exo.id)}>
-          <div style={{ fontSize: 16, fontWeight: 600 }}>{exo.name}</div>
-          <div style={{ fontSize: 12, color: C.muted, marginTop: 2 }}>
-            {exo.bodyweight ? `Poids du corps${exo.defaultLeste > 0 ? ` + leste par défaut ${exo.defaultLeste}kg` : ""}` : (exo.defaultKg > 0 ? `Poids habituel : ${exo.defaultKg}kg` : "Pas de poids défini")}
+          <div style={{ fontSize: 15, fontWeight: 600 }}>{exo.name}</div>
+          <div style={{ fontSize: 11, color: C.muted, marginTop: 2 }}>
+            {exo.bodyweight ? `Poids du corps${exo.defaultLeste > 0 ? ` · leste ${exo.defaultLeste}kg` : ""}` : (exo.defaultKg > 0 ? `Poids habituel : ${exo.defaultKg}kg` : "Pas de poids défini")}
           </div>
-          {exo.canonicalId && <div style={{ fontSize: 11, color: "#60a5fa", marginTop: 3 }}>🔗 Données partagées</div>}
+          {exo.canonicalId && <div style={{ fontSize: 10, color: C.accent, marginTop: 3 }}>🔗 Données partagées</div>}
         </div>
-        <button onClick={() => setOpen(!open)} style={{ background: open ? C.border : C.surface, border: `1px solid ${C.border}`, borderRadius: 8, padding: "6px 12px", color: C.muted, fontSize: 13, cursor: "pointer", fontFamily: C.font, fontWeight: 600 }}>
-          {open ? "Fermer" : "⚙️ Régler"}
+        <button onClick={() => setOpen(!open)} style={{ background: open ? C.accentDim : C.surface, border: `1px solid ${open ? C.accent : C.border}`, borderRadius: 8, padding: "6px 12px", color: open ? C.accentText : C.muted, fontSize: 12, cursor: "pointer", fontFamily: C.font, fontWeight: 600, transition: "all 0.15s" }}>
+          {open ? "Fermer" : "⚙️"}
         </button>
-        <span style={{ color: C.faint, fontSize: 20, cursor: "pointer" }} onClick={() => onNavigate(exo.id)}>›</span>
+        <span style={{ color: C.faint, fontSize: 18, cursor: "pointer" }} onClick={() => onNavigate(exo.id)}>›</span>
       </div>
 
-      {/* Settings panel */}
       {open && (
-        <div style={{ padding: "0 16px 16px", borderTop: `1px solid ${C.border}` }}>
+        <div style={{ padding: "0 16px 16px", borderTop: `1px solid ${C.border}` }} className="slide-in">
           <div style={{ paddingTop: 14 }}>
-            {/* Bodyweight toggle */}
-            <div style={{ fontSize: 12, color: C.faint, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>Type de poids</div>
+            <div style={{ fontSize: 10, color: C.faint, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 8 }}>Type de poids</div>
             <div style={{ display: "flex", gap: 8, marginBottom: 16 }}>
               <button style={S.toggle(!bw)} onClick={() => setBw(false)}>🏋️ Poids en kg</button>
               <button style={S.toggle(bw)} onClick={() => setBw(true)}>🧍 Poids du corps</button>
             </div>
-
             {!bw && (
               <div style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: 12, color: C.faint, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>Poids habituel (valeur par défaut)</div>
+                <div style={{ fontSize: 10, color: C.faint, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 8 }}>Poids habituel</div>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <button onClick={() => setKg(v => Math.max(0, Math.round((v - 2.5) * 10) / 10))} style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 8, width: 40, height: 40, fontSize: 20, color: C.text, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>−</button>
-                  <input type="number" value={kg} onChange={e => setKg(parseFloat(e.target.value) || 0)} style={{ ...S.input, textAlign: "center", fontSize: 20, fontWeight: 800, width: 100 }} />
-                  <span style={{ color: C.muted, fontSize: 14 }}>kg</span>
-                  <button onClick={() => setKg(v => Math.round((v + 2.5) * 10) / 10)} style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 8, width: 40, height: 40, fontSize: 20, color: C.text, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>+</button>
+                  <button onClick={() => setKg(v => Math.max(0, Math.round((v - 2.5) * 10) / 10))} style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 8, width: 38, height: 38, fontSize: 18, color: C.text, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>−</button>
+                  <input type="number" value={kg} onChange={e => setKg(parseFloat(e.target.value) || 0)} style={{ ...S.input, textAlign: "center", fontSize: 18, fontWeight: 800, width: 90 }} />
+                  <span style={{ color: C.muted, fontSize: 13 }}>kg</span>
+                  <button onClick={() => setKg(v => Math.round((v + 2.5) * 10) / 10)} style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 8, width: 38, height: 38, fontSize: 18, color: C.text, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>+</button>
                 </div>
               </div>
             )}
-
             {bw && (
               <div style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: 12, color: C.faint, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>Leste par défaut (si tu en portes un habituellement)</div>
+                <div style={{ fontSize: 10, color: C.faint, fontWeight: 600, textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 8 }}>Leste par défaut</div>
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <button onClick={() => setLeste(v => Math.max(0, Math.round((v - 2.5) * 10) / 10))} style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 8, width: 40, height: 40, fontSize: 20, color: C.text, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>−</button>
-                  <input type="number" value={leste} onChange={e => setLeste(parseFloat(e.target.value) || 0)} style={{ ...S.input, textAlign: "center", fontSize: 20, fontWeight: 800, width: 100 }} />
-                  <span style={{ color: C.muted, fontSize: 14 }}>kg</span>
-                  <button onClick={() => setLeste(v => Math.round((v + 2.5) * 10) / 10)} style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 8, width: 40, height: 40, fontSize: 20, color: C.text, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>+</button>
+                  <button onClick={() => setLeste(v => Math.max(0, Math.round((v - 2.5) * 10) / 10))} style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 8, width: 38, height: 38, fontSize: 18, color: C.text, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>−</button>
+                  <input type="number" value={leste} onChange={e => setLeste(parseFloat(e.target.value) || 0)} style={{ ...S.input, textAlign: "center", fontSize: 18, fontWeight: 800, width: 90 }} />
+                  <span style={{ color: C.muted, fontSize: 13 }}>kg</span>
+                  <button onClick={() => setLeste(v => Math.round((v + 2.5) * 10) / 10)} style={{ background: C.surface, border: `1px solid ${C.border}`, borderRadius: 8, width: 38, height: 38, fontSize: 18, color: C.text, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center" }}>+</button>
                 </div>
-                {leste === 0 && <div style={{ fontSize: 12, color: C.muted, marginTop: 6 }}>Laisser à 0 si pas de leste habituel</div>}
               </div>
             )}
-
             <div style={{ display: "flex", gap: 8 }}>
               <button onClick={save} style={{ ...S.btnSmall(C.green), flex: 1, padding: "10px" }}>✓ Enregistrer</button>
-              <button onClick={() => onDelete(exo.id)} style={{ background: "none", color: "#ef4444", border: `1px solid #3f0000`, borderRadius: 8, padding: "10px 14px", fontSize: 13, cursor: "pointer", fontFamily: C.font }}>Supprimer</button>
+              <button onClick={() => onDelete(exo.id)} style={{ background: "none", color: C.danger, border: `1px solid ${C.dangerDim}`, borderRadius: 8, padding: "10px 14px", fontSize: 13, cursor: "pointer", fontFamily: C.font }}>Supprimer</button>
             </div>
           </div>
         </div>
@@ -372,9 +498,10 @@ export default function App() {
   const [showCal, setShowCal] = useState(false);
   const [newGName, setNewGName] = useState("");
   const [newEName, setNewEName] = useState("");
-  const [logForm, setLogForm] = useState({ mode: "reps", series: 4, reps: 10, kg: 20, sets: [10,10,10,10], leste: 0, timeMin: 1, timeSec: 0, note: "" });
-  const [importConfirm, setImportConfirm] = useState(null); // groupId en attente de confirm
-  const [mergePrompt, setMergePrompt] = useState(null); // { newExo, pendingName, matches: [{exo, group}] }
+  const [logForm, setLogForm] = useState({ mode: "reps", series: 4, reps: 10, kg: 20, sets: [], leste: 0, timeMin: 1, timeSec: 0, note: "" });
+  const [importConfirm, setImportConfirm] = useState(null);
+  const [mergePrompt, setMergePrompt] = useState(null);
+  const pageKey = useRef(0);
 
   useEffect(() => {
     const style = document.createElement("style");
@@ -397,7 +524,13 @@ export default function App() {
     try { await window.storage.set(SK, JSON.stringify(next)); } catch {}
   }
 
-  if (!db) return <div style={{ ...S.app, padding: 40, color: C.muted, fontSize: 16 }}>Chargement…</div>;
+  function navigate(newView, fn) {
+    pageKey.current += 1;
+    if (fn) fn();
+    setView(newView);
+  }
+
+  if (!db) return <div style={{ ...S.app, padding: 40, color: C.muted, fontSize: 14 }}>Chargement…</div>;
 
   const selGroup = db.groups.find(g => g.id === selGroupId) || null;
   const selSession = db.sessions.find(s => s.id === selSessionId) || null;
@@ -407,7 +540,6 @@ export default function App() {
     db.groups.forEach(g => g.exercises.forEach(e => { if (e.id === exoId) canon = e.canonicalId || exoId; }));
     return canon || exoId;
   }
-
   function getAllLinkedIds(exoId) {
     const canon = getCanonicalId(exoId);
     const ids = new Set([exoId]);
@@ -416,7 +548,6 @@ export default function App() {
     }));
     return ids;
   }
-
   function perfsForExo(exoId) {
     const linkedIds = getAllLinkedIds(exoId);
     const res = [];
@@ -427,30 +558,25 @@ export default function App() {
   }
 
   function makeDefaultForm(exo, lastPerf) {
-    if (lastPerf) {
-      const series = parseInt(lastPerf.series) || 4;
-      const reps = parseInt(lastPerf.reps) || 10;
-      return {
-        mode: lastPerf.mode || "reps",
-        series,
-        reps,
-        kg: lastPerf.kg !== undefined ? lastPerf.kg : (exo?.defaultKg || 20),
-        leste: lastPerf.leste !== undefined ? lastPerf.leste : (exo?.defaultLeste || 0),
-        sets: lastPerf.sets || Array(series).fill(reps),
-        timeMin: lastPerf.timeMin || 1,
-        timeSec: lastPerf.timeSec || 0,
-        note: ""
-      };
+    const series = lastPerf ? (parseInt(lastPerf.series) || 4) : 4;
+    const reps = lastPerf ? (parseInt(lastPerf.reps) || 10) : 10;
+    const kg = lastPerf ? (lastPerf.kg !== undefined ? lastPerf.kg : (exo?.defaultKg || 0)) : (exo?.bodyweight ? 0 : (exo?.defaultKg || 20));
+    const leste = lastPerf ? (lastPerf.leste !== undefined ? lastPerf.leste : (exo?.defaultLeste || 0)) : (exo?.defaultLeste || 0);
+    const isBw = exo?.bodyweight;
+
+    let newSets;
+    if (lastPerf && lastPerf.sets && lastPerf.sets.length > 0) {
+      newSets = lastPerf.sets.map(s => {
+        if (typeof s === "object") return s;
+        return isBw ? { reps: s, leste } : { reps: s, kg };
+      });
+      while (newSets.length < series) newSets.push(newSets[newSets.length - 1] || (isBw ? { reps, leste } : { reps, kg }));
+      newSets = newSets.slice(0, series);
+    } else {
+      newSets = Array(series).fill(null).map(() => isBw ? { reps, leste } : { reps, kg });
     }
-    const series = 4;
-    const reps = 10;
-    return {
-      mode: "reps", series, reps,
-      kg: exo?.bodyweight ? 0 : (exo?.defaultKg || 20),
-      leste: exo?.defaultLeste || 0,
-      sets: Array(series).fill(reps),
-      timeMin: 1, timeSec: 0, note: ""
-    };
+
+    return { mode: lastPerf?.mode || "reps", series, reps, kg, leste, sets: newSets, timeMin: lastPerf?.timeMin || 1, timeSec: lastPerf?.timeSec || 0, note: "" };
   }
 
   function addGroup() {
@@ -460,17 +586,15 @@ export default function App() {
   }
   function deleteGroup(gid) {
     saveDb({ ...db, groups: db.groups.filter(g => g.id !== gid) });
-    setSelGroupId(null); setView("groups");
+    navigate("groups", () => setSelGroupId(null));
   }
   function addExercise(forceName) {
     const name = (forceName || newEName).trim();
     if (!name || !selGroupId) return;
     const newExoId = uid();
     const newExo = { id: newExoId, name, defaultKg: 0, bodyweight: false, defaultLeste: 0 };
-    // Check for similar existing exercises
     const similar = findSimilarExos(db, name, selGroupId, null);
     if (similar.length > 0) {
-      // Temporarily store the exo to add, prompt user
       setMergePrompt({ newExo, groupId: selGroupId, matches: similar, linked: [] });
       setNewEName("");
       return;
@@ -478,19 +602,14 @@ export default function App() {
     saveDb({ ...db, groups: db.groups.map(g => g.id === selGroupId ? { ...g, exercises: [...g.exercises, newExo] } : g) });
     setNewEName("");
   }
-
   function confirmAddExercise(linkedIds) {
     if (!mergePrompt) return;
     const { newExo, groupId } = mergePrompt;
-    // If user chose to link, set canonicalId on new exo = first linked exo's canonical (or its own id)
     let finalExo = { ...newExo };
     if (linkedIds.length > 0) {
-      // Find canonical of first linked
       const firstLinked = linkedIds[0];
       let canon = firstLinked;
-      db.groups.forEach(g => g.exercises.forEach(e => {
-        if (e.id === firstLinked && e.canonicalId) canon = e.canonicalId;
-      }));
+      db.groups.forEach(g => g.exercises.forEach(e => { if (e.id === firstLinked && e.canonicalId) canon = e.canonicalId; }));
       finalExo.canonicalId = canon;
     }
     saveDb({ ...db, groups: db.groups.map(g => g.id === groupId ? { ...g, exercises: [...g.exercises, finalExo] } : g) });
@@ -504,45 +623,33 @@ export default function App() {
   }
   function deleteSession(sid) {
     saveDb({ ...db, sessions: db.sessions.filter(s => s.id !== sid) });
-    setSelSessionId(null); setView("history");
+    navigate("history", () => setSelSessionId(null));
   }
-
   function startDoSession() {
     const name = `Séance ${calDate.toLocaleDateString("fr-FR", { weekday: "short", day: "numeric", month: "short" })}`;
     setActiveSession({ id: uid(), name, date: calDate.toISOString(), entries: [], step: "pickGroup" });
     setImportConfirm(null);
-    setView("doSession");
+    navigate("doSession");
   }
-
-  // Importer tout un groupe → file d'attente à valider un par un
   function importGroup(gid) {
     const g = db.groups.find(x => x.id === gid);
     if (!g || g.exercises.length === 0) return;
-    // Construire la file : chaque exercice avec ses valeurs par défaut pré-remplies
     const queue = g.exercises.map(exo => {
       const perfs = perfsForExo(exo.id);
       const last = perfs[perfs.length - 1];
       return { exoId: exo.id, groupId: gid, form: makeDefaultForm(exo, last || null) };
     });
-    // On passe au premier exo de la file
     const first = queue[0];
     setLogForm(first.form);
-    setActiveSession(prev => ({
-      ...prev,
-      step: "logExo",
-      pickedGroup: gid,
-      pickedExo: first.exoId,
-      importQueue: queue.slice(1), // reste à valider
-    }));
+    setActiveSession(prev => ({ ...prev, step: "logExo", pickedGroup: gid, pickedExo: first.exoId, importQueue: queue.slice(1) }));
     setImportConfirm(null);
   }
-
   async function finishSession() {
     const sess = { id: activeSession.id, name: activeSession.name, date: activeSession.date, entries: activeSession.entries };
     await saveDb({ ...db, sessions: [sess, ...db.sessions] });
-    setActiveSession(null); setView("home");
+    setActiveSession(null);
+    navigate("home");
   }
-
   function logEntry() {
     const g = db.groups.find(grp => grp.exercises.some(e => e.id === activeSession.pickedExo));
     const exo = g?.exercises.find(e => e.id === activeSession.pickedExo);
@@ -560,11 +667,11 @@ export default function App() {
 
   const navBar = (cur) => (
     <div style={S.hdr}>
-      <span style={S.logo}>Iron<span style={S.logoAccent}>Log</span></span>
+      <Logo onClick={() => navigate("home")} />
       <div style={{ display: "flex", gap: 20 }}>
-        <button style={S.navBtn(cur === "home")} onClick={() => setView("home")}>Accueil</button>
-        <button style={S.navBtn(cur === "history")} onClick={() => setView("history")}>Historique</button>
-        <button style={S.navBtn(cur === "groups")} onClick={() => { setNewGName(""); setView("groups"); }}>Groupes</button>
+        <button style={S.navBtn(cur === "home")} onClick={() => navigate("home")}>Accueil</button>
+        <button style={S.navBtn(cur === "history")} onClick={() => navigate("history")}>Historique</button>
+        <button style={S.navBtn(cur === "groups")} onClick={() => { setNewGName(""); navigate("groups"); }}>Groupes</button>
       </div>
     </div>
   );
@@ -573,8 +680,8 @@ export default function App() {
   if (view === "home") return (
     <div style={S.app}>
       {navBar("home")}
-      <div style={S.body}>
-        <div style={{ fontSize: 12, color: C.accent, fontWeight: 600, marginBottom: 6, textTransform: "uppercase", letterSpacing: 1 }}>
+      <div style={S.body} className="page-enter" key={pageKey.current}>
+        <div style={{ fontSize: 11, color: C.accent, fontWeight: 600, marginBottom: 6, textTransform: "uppercase", letterSpacing: 1.5 }}>
           {calDate.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long" })}
         </div>
         <h1 style={S.h1}>Prêt à soulever ?</h1>
@@ -585,7 +692,7 @@ export default function App() {
         {showCal && <Calendar calDate={calDate} setCalDate={setCalDate} sessions={db.sessions} />}
         <div style={S.sec}>Que veux-tu faire ?</div>
         <button style={S.btn} onClick={startDoSession}>💪 Démarrer une séance</button>
-        <button style={S.ghost} onClick={() => { setNewGName(""); setView("groups"); }}>✏️ Gérer mes groupes & exercices</button>
+        <button style={S.ghost} onClick={() => { setNewGName(""); navigate("groups"); }}>✏️ Gérer mes groupes & exercices</button>
       </div>
     </div>
   );
@@ -594,7 +701,7 @@ export default function App() {
   if (view === "groups") return (
     <div style={S.app}>
       {navBar("groups")}
-      <div style={S.body}>
+      <div style={S.body} className="page-enter" key={pageKey.current}>
         <h1 style={S.h1}>Mes groupes</h1>
         <p style={S.sub}>Banque d'exercices permanente</p>
         <div style={S.sec}>Nouveau groupe</div>
@@ -603,17 +710,17 @@ export default function App() {
         <button style={{ ...S.btn, marginBottom: 24 }} onClick={addGroup}>+ Créer le groupe</button>
         <div style={S.sec}>Groupes existants</div>
         {db.groups.map(g => (
-          <Card key={g.id} onClick={() => { setSelGroupId(g.id); setNewEName(""); setView("group"); }}>
+          <Card key={g.id} onClick={() => { setSelGroupId(g.id); setNewEName(""); navigate("group"); }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <div>
-                <div style={{ fontSize: 16, fontWeight: 700 }}>{g.name}</div>
-                <div style={{ fontSize: 13, color: C.muted, marginTop: 2 }}>{g.exercises.length} exercice{g.exercises.length > 1 ? "s" : ""}</div>
+                <div style={{ fontSize: 15, fontWeight: 600 }}>{g.name}</div>
+                <div style={{ fontSize: 12, color: C.muted, marginTop: 2 }}>{g.exercises.length} exercice{g.exercises.length > 1 ? "s" : ""}</div>
               </div>
-              <span style={{ color: C.faint, fontSize: 20 }}>›</span>
+              <span style={{ color: C.faint, fontSize: 18 }}>›</span>
             </div>
           </Card>
         ))}
-        {db.groups.length === 0 && <p style={{ color: C.muted, fontSize: 14 }}>Aucun groupe. Crée-en un !</p>}
+        {db.groups.length === 0 && <p style={{ color: C.muted, fontSize: 13 }}>Aucun groupe. Crée-en un !</p>}
       </div>
     </div>
   );
@@ -622,48 +729,44 @@ export default function App() {
   if (view === "group" && selGroup) return (
     <div style={S.app}>
       {navBar("groups")}
-      <div style={S.body}>
-        <button style={S.back} onClick={() => setView("groups")}>← Groupes</button>
+      <div style={S.body} className="page-enter" key={pageKey.current}>
+        <button style={S.back} onClick={() => navigate("groups")}>← Groupes</button>
         <h1 style={S.h1}>{selGroup.name}</h1>
         <p style={S.sub}>{selGroup.exercises.length} exercice{selGroup.exercises.length > 1 ? "s" : ""}</p>
-
         <div style={S.sec}>Ajouter un exercice</div>
 
-        {/* Merge prompt */}
         {mergePrompt && mergePrompt.groupId === selGroupId && (
-          <div style={{ background: "#0d1a2e", border: `1px solid #1e3a5e`, borderRadius: 12, padding: 16, marginBottom: 16 }}>
-            <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 4 }}>Exercice similaire détecté</div>
-            <div style={{ fontSize: 13, color: C.muted, marginBottom: 14 }}>
+          <div style={{ background: C.accentDim, border: `1px solid ${C.accent}`, borderRadius: 12, padding: 16, marginBottom: 16 }} className="slide-in">
+            <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 4 }}>Exercice similaire détecté</div>
+            <div style={{ fontSize: 12, color: C.muted, marginBottom: 14 }}>
               <span style={{ color: C.text, fontWeight: 600 }}>"{mergePrompt.newExo.name}"</span> ressemble à :
             </div>
             {mergePrompt.matches.map(({ exo, group }) => {
               const isLinked = mergePrompt.linked.includes(exo.id);
               return (
-                <div key={exo.id} style={{ display: "flex", alignItems: "center", gap: 10, background: isLinked ? "#0a2000" : C.card, border: `1px solid ${isLinked ? "#1a4a00" : C.border}`, borderRadius: 10, padding: "10px 14px", marginBottom: 8, cursor: "pointer" }}
+                <div key={exo.id} style={{ display: "flex", alignItems: "center", gap: 10, background: isLinked ? C.greenDim : C.card, border: `1px solid ${isLinked ? C.green : C.border}`, borderRadius: 10, padding: "10px 14px", marginBottom: 8, cursor: "pointer", transition: "all 0.15s" }}
                   onClick={() => {
                     const linked = isLinked ? mergePrompt.linked.filter(id => id !== exo.id) : [...mergePrompt.linked, exo.id];
                     setMergePrompt({ ...mergePrompt, linked });
                   }}>
-                  <div style={{ width: 22, height: 22, borderRadius: 6, border: `2px solid ${isLinked ? C.green : C.border}`, background: isLinked ? C.green : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    {isLinked && <span style={{ color: "#000", fontSize: 14, fontWeight: 800 }}>✓</span>}
+                  <div style={{ width: 20, height: 20, borderRadius: 5, border: `2px solid ${isLinked ? C.green : C.border}`, background: isLinked ? C.green : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, transition: "all 0.15s" }}>
+                    {isLinked && <span style={{ color: "#0a1410", fontSize: 12, fontWeight: 800 }}>✓</span>}
                   </div>
                   <div>
-                    <div style={{ fontSize: 14, fontWeight: 600 }}>{exo.name}</div>
-                    <div style={{ fontSize: 12, color: C.muted }}>{group.name}</div>
+                    <div style={{ fontSize: 13, fontWeight: 600 }}>{exo.name}</div>
+                    <div style={{ fontSize: 11, color: C.muted }}>{group.name}</div>
                   </div>
                 </div>
               );
             })}
-            <div style={{ fontSize: 12, color: C.muted, marginBottom: 14 }}>
-              {mergePrompt.linked.length > 0
-                ? "✓ Coché = même puit de données (historique et graphiques partagés)"
-                : "Coche les exercices identiques pour partager les données"}
+            <div style={{ fontSize: 11, color: C.muted, marginBottom: 14 }}>
+              {mergePrompt.linked.length > 0 ? "✓ Coché = historique & graphiques partagés" : "Coche les exercices identiques pour partager les données"}
             </div>
             <div style={{ display: "flex", gap: 8 }}>
-              <button onClick={() => confirmAddExercise(mergePrompt.linked)} style={{ flex: 1, background: C.green, color: "#000", border: "none", borderRadius: 8, padding: "11px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: C.font }}>
+              <button onClick={() => confirmAddExercise(mergePrompt.linked)} style={{ flex: 1, background: C.green, color: "#0a1410", border: "none", borderRadius: 8, padding: "11px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: C.font }}>
                 {mergePrompt.linked.length > 0 ? "✓ Lier & ajouter" : "Ajouter sans lier"}
               </button>
-              <button onClick={() => setMergePrompt(null)} style={{ background: C.surface, color: C.muted, border: `1px solid ${C.border}`, borderRadius: 8, padding: "11px 16px", fontSize: 14, cursor: "pointer", fontFamily: C.font }}>Annuler</button>
+              <button onClick={() => setMergePrompt(null)} style={{ background: C.surface, color: C.muted, border: `1px solid ${C.border}`, borderRadius: 8, padding: "11px 16px", fontSize: 13, cursor: "pointer", fontFamily: C.font }}>Annuler</button>
             </div>
           </div>
         )}
@@ -675,19 +778,16 @@ export default function App() {
             <button style={{ ...S.btn, marginBottom: 24 }} onClick={() => addExercise()}>+ Ajouter</button>
           </>
         )}
-        {mergePrompt && mergePrompt.groupId === selGroupId && <div style={{ height: 8 }} />}
 
         <div style={S.sec}>Exercices</div>
         {selGroup.exercises.map(e => (
-          <ExoSettingsCard
-            key={e.id}
-            exo={e}
+          <ExoSettingsCard key={e.id} exo={e}
             onSave={(updated) => updateExercise(selGroup.id, updated)}
             onDelete={(eid) => deleteExercise(selGroup.id, eid)}
-            onNavigate={(eid) => { setSelExoId(eid); setView("exo"); }}
+            onNavigate={(eid) => { setSelExoId(eid); navigate("exo"); }}
           />
         ))}
-        {selGroup.exercises.length === 0 && <p style={{ color: C.muted, fontSize: 14 }}>Aucun exercice. Ajoute-en un !</p>}
+        {selGroup.exercises.length === 0 && <p style={{ color: C.muted, fontSize: 13 }}>Aucun exercice. Ajoute-en un !</p>}
         <button style={S.danger} onClick={() => deleteGroup(selGroup.id)}>Supprimer le groupe "{selGroup.name}"</button>
       </div>
     </div>
@@ -699,31 +799,48 @@ export default function App() {
     const exo = group?.exercises.find(e => e.id === selExoId);
     const perfs = perfsForExo(selExoId);
     const last = perfs[perfs.length - 1];
-    const chartData = perfs.map(p => ({
-      date: p.dateLabel,
-      kg: parseFloat(p.kg) || (p.leste ? parseFloat(p.leste) : 0),
-      reps: p.sets ? Math.round(p.sets.reduce((a, b) => a + b, 0) / p.sets.length) : (parseFloat(p.reps) || 0),
-      time: p.mode === "time" ? (parseInt(p.timeMin || 0) * 60 + parseInt(p.timeSec || 0)) : null,
-    }));
+    const chartData = perfs.map(p => {
+      let avgReps = 0, avgKg = 0;
+      if (p.sets && p.sets.length > 0) {
+        if (typeof p.sets[0] === "object") {
+          avgReps = Math.round(p.sets.reduce((a, s) => a + (s.reps || 0), 0) / p.sets.length);
+          avgKg = Math.round(p.sets.reduce((a, s) => a + (exo?.bodyweight ? (s.leste || 0) : (s.kg || 0)), 0) / p.sets.length * 10) / 10;
+        } else {
+          avgReps = Math.round(p.sets.reduce((a, b) => a + b, 0) / p.sets.length);
+          avgKg = parseFloat(p.kg) || 0;
+        }
+      }
+      return { date: p.dateLabel, kg: avgKg, reps: avgReps };
+    });
+
     return (
       <div style={S.app}>
         {navBar("groups")}
-        <div style={S.body}>
-          <button style={S.back} onClick={() => setView("group")}>← {group?.name}</button>
+        <div style={S.body} className="page-enter" key={pageKey.current}>
+          <button style={S.back} onClick={() => navigate("group")}>← {group?.name}</button>
           <h1 style={S.h1}>{exo?.name}</h1>
-          {exo?.bodyweight && <div style={{ background: "#0d1f00", border: `1px solid #1a3a00`, borderRadius: 8, padding: "8px 12px", fontSize: 13, color: C.green, fontWeight: 600, marginBottom: 12, display: "inline-block" }}>🧍 Poids du corps{exo.defaultLeste > 0 ? ` + leste ${exo.defaultLeste}kg` : ""}</div>}
+          {exo?.bodyweight && (
+            <div style={{ background: C.greenDim, border: `1px solid ${C.green}`, borderRadius: 8, padding: "7px 12px", fontSize: 12, color: C.greenText, fontWeight: 600, marginBottom: 12, display: "inline-block" }}>
+              🧍 Poids du corps{exo.defaultLeste > 0 ? ` + leste ${exo.defaultLeste}kg` : ""}
+            </div>
+          )}
           <p style={S.sub}>{perfs.length} enregistrement{perfs.length > 1 ? "s" : ""}</p>
 
           {last && (
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 10, marginBottom: 24 }}>
               <div style={S.statBox}><div style={S.statNum}>{last.series || "—"}</div><div style={S.statLabel}>SÉRIES</div></div>
               {last.mode === "time"
-                ? <div style={S.statBox}><div style={{ ...S.statNum, fontSize: 20 }}>{last.timeMin}:{String(last.timeSec || 0).padStart(2,"0")}</div><div style={S.statLabel}>TEMPS</div></div>
-                : <div style={S.statBox}><div style={{ ...S.statNum, fontSize: 16 }}>{last.sets ? last.sets.join("/") : last.reps || "—"}</div><div style={S.statLabel}>REPS</div></div>
+                ? <div style={S.statBox}><div style={{ ...S.statNum, fontSize: 18 }}>{last.timeMin}:{String(last.timeSec||0).padStart(2,"0")}</div><div style={S.statLabel}>TEMPS</div></div>
+                : <div style={S.statBox}>
+                    <div style={{ ...S.statNum, fontSize: 14 }}>
+                      {last.sets && typeof last.sets[0] === "object" ? last.sets.map(s => s.reps).join("/") : (last.sets ? last.sets.join("/") : last.reps || "—")}
+                    </div>
+                    <div style={S.statLabel}>REPS</div>
+                  </div>
               }
               <div style={S.statBox}>
                 {exo?.bodyweight
-                  ? <><div style={{ ...S.statNum, fontSize: 16, color: C.green }}>PDC{last.leste > 0 ? `+${last.leste}` : ""}</div><div style={S.statLabel}>POIDS</div></>
+                  ? <><div style={{ ...S.statNum, fontSize: 14, color: C.greenText }}>PDC{last.leste > 0 ? `+${last.leste}` : ""}</div><div style={S.statLabel}>POIDS</div></>
                   : <><div style={S.statNum}>{last.kg || "—"}</div><div style={S.statLabel}>KG</div></>
                 }
               </div>
@@ -734,14 +851,14 @@ export default function App() {
             <>
               {chartData.some(d => d.kg > 0) && (
                 <>
-                  <div style={S.sec}>{exo?.bodyweight ? "Progression leste (kg)" : "Progression poids (kg)"}</div>
+                  <div style={S.sec}>{exo?.bodyweight ? "Progression leste" : "Progression poids (kg)"}</div>
                   <Card style={{ marginBottom: 20, cursor: "default", padding: "16px 8px 8px" }}>
-                    <ResponsiveContainer width="100%" height={150}>
+                    <ResponsiveContainer width="100%" height={140}>
                       <LineChart data={chartData}>
-                        <XAxis dataKey="date" tick={{ fontSize: 10, fill: C.muted, fontFamily: C.font }} />
-                        <YAxis tick={{ fontSize: 10, fill: C.muted, fontFamily: C.font }} width={32} />
-                        <Tooltip contentStyle={{ background: C.card, border: `1px solid ${C.border}`, color: C.text, fontSize: 12, fontFamily: C.font, borderRadius: 8 }} />
-                        <Line type="monotone" dataKey="kg" stroke={C.accent} strokeWidth={2.5} dot={{ fill: C.accent, r: 4 }} />
+                        <XAxis dataKey="date" tick={{ fontSize: 9, fill: C.muted, fontFamily: C.font }} />
+                        <YAxis tick={{ fontSize: 9, fill: C.muted, fontFamily: C.font }} width={30} />
+                        <Tooltip contentStyle={{ background: C.card, border: `1px solid ${C.border}`, color: C.text, fontSize: 11, fontFamily: C.font, borderRadius: 8 }} />
+                        <Line type="monotone" dataKey="kg" stroke={C.accent} strokeWidth={2} dot={{ fill: C.accent, r: 3 }} />
                       </LineChart>
                     </ResponsiveContainer>
                   </Card>
@@ -751,12 +868,12 @@ export default function App() {
                 <>
                   <div style={S.sec}>Progression reps (moy/série)</div>
                   <Card style={{ marginBottom: 24, cursor: "default", padding: "16px 8px 8px" }}>
-                    <ResponsiveContainer width="100%" height={130}>
+                    <ResponsiveContainer width="100%" height={120}>
                       <LineChart data={chartData}>
-                        <XAxis dataKey="date" tick={{ fontSize: 10, fill: C.muted, fontFamily: C.font }} />
-                        <YAxis tick={{ fontSize: 10, fill: C.muted, fontFamily: C.font }} width={32} />
-                        <Tooltip contentStyle={{ background: C.card, border: `1px solid ${C.border}`, color: C.text, fontSize: 12, fontFamily: C.font, borderRadius: 8 }} />
-                        <Line type="monotone" dataKey="reps" stroke={C.blue} strokeWidth={2.5} dot={{ fill: C.blue, r: 4 }} />
+                        <XAxis dataKey="date" tick={{ fontSize: 9, fill: C.muted, fontFamily: C.font }} />
+                        <YAxis tick={{ fontSize: 9, fill: C.muted, fontFamily: C.font }} width={30} />
+                        <Tooltip contentStyle={{ background: C.card, border: `1px solid ${C.border}`, color: C.text, fontSize: 11, fontFamily: C.font, borderRadius: 8 }} />
+                        <Line type="monotone" dataKey="reps" stroke={C.green} strokeWidth={2} dot={{ fill: C.green, r: 3 }} />
                       </LineChart>
                     </ResponsiveContainer>
                   </Card>
@@ -764,21 +881,21 @@ export default function App() {
               )}
             </>
           )}
-          {chartData.length < 2 && <p style={{ color: C.muted, fontSize: 13, marginBottom: 20 }}>Encore {2 - chartData.length} séance{chartData.length === 0 ? "s" : ""} pour voir le graphique.</p>}
+          {chartData.length < 2 && <p style={{ color: C.muted, fontSize: 12, marginBottom: 20 }}>Encore {2 - chartData.length} séance{chartData.length === 0 ? "s" : ""} pour voir le graphique.</p>}
 
           {perfs.length > 0 && (
             <>
               <div style={S.sec}>Historique</div>
               {[...perfs].reverse().map((p, i) => (
                 <Card key={i} style={{ cursor: "default" }}>
-                  <div style={{ fontSize: 12, color: C.muted, marginBottom: 4, fontWeight: 500 }}>{p.dateLabel}</div>
-                  <PerfTags entry={p} />
+                  <div style={{ fontSize: 11, color: C.muted, marginBottom: 4, fontWeight: 500 }}>{p.dateLabel}</div>
+                  <PerfTags entry={p} isBodyweight={exo?.bodyweight} />
                 </Card>
               ))}
             </>
           )}
-          {perfs.length === 0 && <p style={{ color: C.muted, fontSize: 14 }}>Pas encore de données. Fais une séance !</p>}
-          <button style={S.danger} onClick={() => { deleteExercise(group?.id, selExoId); setView("group"); }}>Supprimer "{exo?.name}"</button>
+          {perfs.length === 0 && <p style={{ color: C.muted, fontSize: 13 }}>Pas encore de données. Fais une séance !</p>}
+          <button style={S.danger} onClick={() => { deleteExercise(group?.id, selExoId); navigate("group"); }}>Supprimer "{exo?.name}"</button>
         </div>
       </div>
     );
@@ -790,8 +907,8 @@ export default function App() {
 
     const SessionHeader = () => (
       <div style={S.hdr}>
-        <span style={S.logo}>Iron<span style={S.logoAccent}>Log</span></span>
-        <span style={{ fontSize: 12, color: C.accent, fontWeight: 700, background: "#1a0800", padding: "4px 10px", borderRadius: 20 }}>EN COURS</span>
+        <Logo onClick={() => navigate("home")} />
+        <span style={{ fontSize: 10, color: C.accentText, fontWeight: 700, background: C.accentDim, padding: "4px 10px", borderRadius: 20, letterSpacing: 1.5, textTransform: "uppercase" }}>En cours</span>
       </div>
     );
 
@@ -803,39 +920,36 @@ export default function App() {
           const exo = g?.exercises.find(x => x.id === e.exoId);
           return (
             <Card key={i} style={{ cursor: "default" }}>
-              <div style={{ fontSize: 11, color: C.muted, marginBottom: 2 }}>{g?.name}</div>
-              <div style={{ fontSize: 15, fontWeight: 600 }}>{exo?.name}</div>
-              <PerfTags entry={e} />
+              <div style={{ fontSize: 10, color: C.muted, marginBottom: 2 }}>{g?.name}</div>
+              <div style={{ fontSize: 14, fontWeight: 600 }}>{exo?.name}</div>
+              <PerfTags entry={e} isBodyweight={exo?.bodyweight} />
             </Card>
           );
         })}
       </div>
     ) : null;
 
-    // ── pickGroup
     if (step === "pickGroup") return (
       <div style={S.app}>
         <SessionHeader />
-        <div style={S.body}>
-          <div style={{ fontSize: 12, color: C.muted, fontWeight: 500, marginBottom: 4 }}>{fmt(activeSession.date)}</div>
+        <div style={S.body} className="page-enter">
+          <div style={{ fontSize: 11, color: C.muted, fontWeight: 500, marginBottom: 4 }}>{fmt(activeSession.date)}</div>
           <h1 style={{ ...S.h1, marginBottom: 4 }}>{activeSession.name}</h1>
           <p style={S.sub}>{activeSession.entries.length} exercice{activeSession.entries.length > 1 ? "s" : ""}</p>
           <EntriesSummary />
-
           <div style={S.sec}>Ajouter des exercices</div>
 
-          {/* Confirm import groupe */}
           {importConfirm && (
-            <div style={{ background: "#0a1f00", border: `1px solid #2a5000`, borderRadius: 12, padding: 16, marginBottom: 14 }}>
-              <div style={{ fontSize: 14, fontWeight: 700, marginBottom: 6 }}>
+            <div style={{ background: C.greenDim, border: `1px solid ${C.green}`, borderRadius: 12, padding: 16, marginBottom: 14 }} className="slide-in">
+              <div style={{ fontSize: 13, fontWeight: 700, marginBottom: 6 }}>
                 Importer tous les exos de {db.groups.find(g => g.id === importConfirm)?.name} ?
               </div>
-              <div style={{ fontSize: 13, color: C.muted, marginBottom: 14 }}>
-                {db.groups.find(g => g.id === importConfirm)?.exercises.length} exercice{db.groups.find(g => g.id === importConfirm)?.exercises.length > 1 ? "s" : ""} seront ajoutés avec leurs valeurs habituelles pré-remplies.
+              <div style={{ fontSize: 12, color: C.muted, marginBottom: 14 }}>
+                {db.groups.find(g => g.id === importConfirm)?.exercises.length} exercice(s) pré-remplis.
               </div>
               <div style={{ display: "flex", gap: 8 }}>
-                <button onClick={() => importGroup(importConfirm)} style={{ flex: 1, background: C.green, color: "#000", border: "none", borderRadius: 8, padding: "11px", fontSize: 14, fontWeight: 700, cursor: "pointer", fontFamily: C.font }}>✓ Importer</button>
-                <button onClick={() => setImportConfirm(null)} style={{ flex: 1, background: C.surface, color: C.muted, border: `1px solid ${C.border}`, borderRadius: 8, padding: "11px", fontSize: 14, cursor: "pointer", fontFamily: C.font }}>Annuler</button>
+                <button onClick={() => importGroup(importConfirm)} style={{ flex: 1, background: C.green, color: "#0a1410", border: "none", borderRadius: 8, padding: "11px", fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: C.font }}>✓ Importer</button>
+                <button onClick={() => setImportConfirm(null)} style={{ flex: 1, background: C.surface, color: C.muted, border: `1px solid ${C.border}`, borderRadius: 8, padding: "11px", fontSize: 13, cursor: "pointer", fontFamily: C.font }}>Annuler</button>
               </div>
             </div>
           )}
@@ -845,34 +959,33 @@ export default function App() {
               <div style={{ display: "flex", alignItems: "center" }}>
                 <div style={{ flex: 1, padding: "14px 16px", cursor: "pointer" }}
                   onClick={() => setActiveSession({ ...activeSession, step: "pickExo", pickedGroup: g.id })}>
-                  <div style={{ fontSize: 16, fontWeight: 700 }}>{g.name}</div>
-                  <div style={{ fontSize: 13, color: C.muted, marginTop: 2 }}>{g.exercises.length} exo{g.exercises.length > 1 ? "s" : ""}</div>
+                  <div style={{ fontSize: 15, fontWeight: 600 }}>{g.name}</div>
+                  <div style={{ fontSize: 12, color: C.muted, marginTop: 2 }}>{g.exercises.length} exo{g.exercises.length > 1 ? "s" : ""}</div>
                 </div>
                 <button
                   onClick={() => setImportConfirm(importConfirm === g.id ? null : g.id)}
-                  style={{ background: importConfirm === g.id ? C.green : "#0a2000", color: importConfirm === g.id ? "#000" : C.green, border: "none", borderLeft: `1px solid ${C.border}`, padding: "0 16px", height: "100%", minHeight: 60, fontSize: 13, fontWeight: 700, cursor: "pointer", fontFamily: C.font, whiteSpace: "nowrap" }}>
-                  ⚡ Tout importer
+                  style={{ background: importConfirm === g.id ? C.green : C.greenDim, color: importConfirm === g.id ? "#0a1410" : C.greenText, border: "none", borderLeft: `1px solid ${C.border}`, padding: "0 14px", height: "100%", minHeight: 56, fontSize: 12, fontWeight: 700, cursor: "pointer", fontFamily: C.font, whiteSpace: "nowrap", transition: "all 0.15s" }}>
+                  ⚡ Tout
                 </button>
               </div>
             </div>
           ))}
-          {db.groups.length === 0 && <p style={{ color: C.muted, fontSize: 14, marginBottom: 16 }}>Aucun groupe. Crée d'abord des groupes.</p>}
+          {db.groups.length === 0 && <p style={{ color: C.muted, fontSize: 13, marginBottom: 16 }}>Aucun groupe. Crée d'abord des groupes.</p>}
 
           <div style={{ marginTop: 16 }}>
             <button style={S.btnGreen} onClick={finishSession}>✓ Terminer & sauvegarder</button>
-            <button style={S.ghost} onClick={() => { setActiveSession(null); setView("home"); }}>Annuler la séance</button>
+            <button style={S.ghost} onClick={() => { setActiveSession(null); navigate("home"); }}>Annuler la séance</button>
           </div>
         </div>
       </div>
     );
 
-    // ── pickExo
     if (step === "pickExo") {
       const g = db.groups.find(x => x.id === activeSession.pickedGroup);
       return (
         <div style={S.app}>
           <SessionHeader />
-          <div style={S.body}>
+          <div style={S.body} className="page-enter">
             <button style={S.back} onClick={() => setActiveSession({ ...activeSession, step: "pickGroup" })}>← Groupes</button>
             <h1 style={S.h1}>{g?.name}</h1>
             <p style={S.sub}>Choisir un exercice</p>
@@ -886,15 +999,15 @@ export default function App() {
                 }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
                     <div>
-                      <div style={{ fontSize: 16, fontWeight: 600 }}>{e.name}</div>
-                      <div style={{ fontSize: 12, color: C.muted, marginTop: 2 }}>
-                        {e.bodyweight ? "Poids du corps" : (e.defaultKg > 0 ? `Poids habituel : ${e.defaultKg}kg` : "")}
+                      <div style={{ fontSize: 15, fontWeight: 600 }}>{e.name}</div>
+                      <div style={{ fontSize: 11, color: C.muted, marginTop: 2 }}>
+                        {e.bodyweight ? "Poids du corps" : (e.defaultKg > 0 ? `Habituel : ${e.defaultKg}kg` : "")}
                         {last ? ` · Dernière fois : ${fmt(last.date)}` : ""}
                       </div>
                     </div>
                     {last && (
-                      <div style={{ fontSize: 13, color: C.muted, textAlign: "right", flexShrink: 0 }}>
-                        {last.sets ? last.sets.join("/") : ""}<br />
+                      <div style={{ fontSize: 11, color: C.muted, textAlign: "right", flexShrink: 0 }}>
+                        {last.sets && typeof last.sets[0] === "object" ? last.sets.map(s => s.reps).join("/") : (last.sets ? last.sets.join("/") : "")}<br />
                         {e.bodyweight ? (last.leste > 0 ? `+${last.leste}kg` : "PDC") : (last.kg ? `${last.kg}kg` : "")}
                       </div>
                     )}
@@ -902,13 +1015,12 @@ export default function App() {
                 </Card>
               );
             })}
-            {g?.exercises.length === 0 && <p style={{ color: C.muted, fontSize: 14 }}>Aucun exercice dans ce groupe.</p>}
+            {g?.exercises.length === 0 && <p style={{ color: C.muted, fontSize: 13 }}>Aucun exercice dans ce groupe.</p>}
           </div>
         </div>
       );
     }
 
-    // ── logExo
     if (step === "logExo") {
       const g = db.groups.find(x => x.id === activeSession.pickedGroup);
       const exo = g?.exercises.find(x => x.id === activeSession.pickedExo);
@@ -924,26 +1036,26 @@ export default function App() {
       return (
         <div style={S.app}>
           <SessionHeader />
-          <div style={S.body}>
+          <div style={S.body} className="page-enter">
             <button style={S.back} onClick={() => setActiveSession({ ...activeSession, step: "pickGroup", importQueue: [] })}>← Retour</button>
             <h1 style={{ ...S.h1, marginBottom: 4 }}>{exo?.name}</h1>
 
             {showProgress && totalInGroup > 1 && (
               <div style={{ marginBottom: 14 }}>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                  <span style={{ fontSize: 12, color: C.muted }}>Import {g?.name}</span>
-                  <span style={{ fontSize: 12, color: C.muted, fontWeight: 600 }}>{doneInGroup + 1} / {totalInGroup}</span>
+                  <span style={{ fontSize: 11, color: C.muted }}>Import {g?.name}</span>
+                  <span style={{ fontSize: 11, color: C.muted, fontWeight: 600 }}>{doneInGroup + 1} / {totalInGroup}</span>
                 </div>
-                <div style={{ background: C.border, borderRadius: 4, height: 5 }}>
-                  <div style={{ background: C.accent, borderRadius: 4, height: 5, width: `${((doneInGroup + 1) / totalInGroup) * 100}%`, transition: "width 0.3s" }} />
+                <div style={{ background: C.border, borderRadius: 3, height: 3 }}>
+                  <div style={{ background: C.accent, borderRadius: 3, height: 3, width: `${((doneInGroup + 1) / totalInGroup) * 100}%`, transition: "width 0.3s" }} />
                 </div>
               </div>
             )}
 
             {last && (
-              <Card style={{ cursor: "default", marginBottom: 20, background: "#0a1800", borderColor: "#1a3000" }}>
-                <div style={{ fontSize: 12, color: C.green, fontWeight: 600, marginBottom: 4 }}>Dernière séance — {fmt(last.date)}</div>
-                <PerfTags entry={last} />
+              <Card style={{ cursor: "default", marginBottom: 20, background: C.greenDim, borderColor: C.green }}>
+                <div style={{ fontSize: 11, color: C.greenText, fontWeight: 600, marginBottom: 4 }}>Dernière séance — {fmt(last.date)}</div>
+                <PerfTags entry={last} isBodyweight={exo?.bodyweight} />
               </Card>
             )}
             <LogFormWidget logForm={logForm} setLogForm={setLogForm} exo={exo} />
@@ -964,20 +1076,20 @@ export default function App() {
   if (view === "history") return (
     <div style={S.app}>
       {navBar("history")}
-      <div style={S.body}>
+      <div style={S.body} className="page-enter" key={pageKey.current}>
         <h1 style={S.h1}>Historique</h1>
         <p style={S.sub}>{db.sessions.length} séance{db.sessions.length > 1 ? "s" : ""}</p>
-        {db.sessions.length === 0 && <p style={{ color: C.muted, fontSize: 14 }}>Aucune séance. Lance-toi !</p>}
+        {db.sessions.length === 0 && <p style={{ color: C.muted, fontSize: 13 }}>Aucune séance. Lance-toi !</p>}
         {[...db.sessions].sort((a, b) => new Date(b.date) - new Date(a.date)).map(s => (
-          <Card key={s.id} onClick={() => { setSelSessionId(s.id); setView("sessionDetail"); }}>
+          <Card key={s.id} onClick={() => { setSelSessionId(s.id); navigate("sessionDetail"); }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <div>
-                <div style={{ fontSize: 16, fontWeight: 700 }}>{s.name}</div>
-                <div style={{ fontSize: 13, color: C.muted, marginTop: 2 }}>{s.entries?.length || 0} exercice{(s.entries?.length || 0) > 1 ? "s" : ""}</div>
+                <div style={{ fontSize: 15, fontWeight: 600 }}>{s.name}</div>
+                <div style={{ fontSize: 12, color: C.muted, marginTop: 2 }}>{s.entries?.length || 0} exercice{(s.entries?.length || 0) > 1 ? "s" : ""}</div>
               </div>
               <div style={{ textAlign: "right" }}>
-                <div style={{ fontSize: 13, color: C.muted }}>{fmt(s.date)}</div>
-                <span style={{ color: C.faint, fontSize: 20 }}>›</span>
+                <div style={{ fontSize: 12, color: C.muted }}>{fmt(s.date)}</div>
+                <span style={{ color: C.faint, fontSize: 18 }}>›</span>
               </div>
             </div>
           </Card>
@@ -990,22 +1102,22 @@ export default function App() {
   if (view === "sessionDetail" && selSession) return (
     <div style={S.app}>
       {navBar("history")}
-      <div style={S.body}>
-        <button style={S.back} onClick={() => setView("history")}>← Historique</button>
-        <div style={{ fontSize: 12, color: C.muted, fontWeight: 500, marginBottom: 4 }}>{fmt(selSession.date)}</div>
+      <div style={S.body} className="page-enter" key={pageKey.current}>
+        <button style={S.back} onClick={() => navigate("history")}>← Historique</button>
+        <div style={{ fontSize: 11, color: C.muted, fontWeight: 500, marginBottom: 4 }}>{fmt(selSession.date)}</div>
         <h1 style={{ ...S.h1, marginBottom: 20 }}>{selSession.name}</h1>
         {(selSession.entries || []).map((e, i) => {
           const g = db.groups.find(g => g.exercises.some(x => x.id === e.exoId));
           const exo = g?.exercises.find(x => x.id === e.exoId);
           return (
             <Card key={i} style={{ cursor: "default" }}>
-              <div style={{ fontSize: 11, color: C.muted, marginBottom: 2 }}>{g?.name}</div>
-              <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 4 }}>{exo?.name || "Exercice supprimé"}</div>
-              <PerfTags entry={e} />
+              <div style={{ fontSize: 10, color: C.muted, marginBottom: 2 }}>{g?.name}</div>
+              <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 4 }}>{exo?.name || "Exercice supprimé"}</div>
+              <PerfTags entry={e} isBodyweight={exo?.bodyweight} />
             </Card>
           );
         })}
-        {(selSession.entries || []).length === 0 && <p style={{ color: C.muted, fontSize: 14 }}>Aucun exercice.</p>}
+        {(selSession.entries || []).length === 0 && <p style={{ color: C.muted, fontSize: 13 }}>Aucun exercice.</p>}
         <button style={S.danger} onClick={() => deleteSession(selSession.id)}>Supprimer cette séance</button>
       </div>
     </div>
