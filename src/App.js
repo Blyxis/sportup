@@ -497,7 +497,37 @@ export default function App() {
   const pageKey = useRef(0);
   const exoTopRef = useRef(null);
   const saveTimeout = useRef(null);
+  
+// ─── 1. Outils Supabase (Ajoutés pour que ça marche) ───
+  const loadFromCloud = async (uid) => {
+    try {
+      const { data, error } = await supabase
+        .from('user_data')
+        .select('data')
+        .eq('user_id', uid)
+        .maybeSingle();
+      if (error) throw error;
+      return data ? data.data : null;
+    } catch (e) {
+      console.error("Erreur chargement:", e);
+      return null;
+    }
+  };
 
+  const saveToCloud = async (uid, dataToSave) => {
+    try {
+      await supabase.from('user_data').upsert({
+        user_id: uid,
+        data: dataToSave,
+        updated_at: new Date().toISOString()
+      });
+    } catch (e) {
+      console.error("Erreur sauvegarde:", e);
+    }
+  };
+
+  // ─── 2. Tes Effets (Auth, CSS, etc.) ───
+  
   // Auth
   useEffect(() => {
     supabase.auth.getSession().then(({data:{session}}) => { setSession(session); setAuthLoading(false); });
@@ -555,6 +585,10 @@ export default function App() {
   // ── Sauvegarde cloud debouncée (300ms après chaque changement) ──
   const saveDb = useCallback((next) => {
     setDb(next);
+    // Sauvegarde locale de secours
+    try { localStorage.setItem("sportup_v1", JSON.stringify(next)); } catch {} 
+    
+    // Sauvegarde Cloud
     if(!session) return;
     if(saveTimeout.current) clearTimeout(saveTimeout.current);
     saveTimeout.current = setTimeout(() => {
@@ -562,6 +596,7 @@ export default function App() {
     }, 300);
   }, [session]);
 
+  
   function navigate(newView, fn) {
     pageKey.current += 1;
     if(fn) fn();
