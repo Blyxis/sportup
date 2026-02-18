@@ -172,6 +172,94 @@ function Logo() {
   );
 }
 
+// ── NOUVEAU : icône compte utilisateur ──────────────────────────────────────
+function AccountIcon({ session, onNav }) {
+  const [open, setOpen] = useState(false);
+
+  const email = session?.user?.email || "";
+  const createdAt = session?.user?.created_at
+    ? new Date(session.user.created_at)
+    : null;
+
+  function daysAgo(date) {
+    const diff = Math.floor((Date.now() - date.getTime()) / (1000 * 60 * 60 * 24));
+    if (diff === 0) return "aujourd'hui";
+    if (diff === 1) return "il y a 1 jour";
+    return `il y a ${diff} jours`;
+  }
+
+  async function handleLogout() {
+    await supabase.auth.signOut();
+    setOpen(false);
+  }
+
+  return (
+    <div style={{ position:"relative" }}>
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          background: open ? "#2a2a2a" : "transparent",
+          border: "1px solid " + (open ? "#444" : "#2a2a2a"),
+          borderRadius: 8,
+          width: 34, height: 34,
+          display: "flex", alignItems: "center", justifyContent: "center",
+          cursor: "pointer", color: open ? C.text : C.muted,
+          transition: "all 0.15s"
+        }}
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="8" r="4"/>
+          <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+        </svg>
+      </button>
+
+      {open && (
+        <div
+          className="fade-in"
+          style={{
+            position: "absolute", top: 42, right: 0,
+            background: "#1a1a1a", border: "1px solid #2a2a2a",
+            borderRadius: 11, padding: "14px 16px", minWidth: 220,
+            boxShadow: "0 8px 32px rgba(0,0,0,0.6)", zIndex: 200
+          }}
+        >
+          <div style={{ fontSize: 11, color: C.sub, fontWeight: 500, textTransform: "uppercase", letterSpacing: 1.5, marginBottom: 8 }}>
+            Mon compte
+          </div>
+          <div style={{ fontSize: 13, color: C.text, fontWeight: 500, marginBottom: 4, wordBreak: "break-all" }}>
+            {email}
+          </div>
+          {createdAt && (
+            <div style={{ fontSize: 11, color: C.muted, marginBottom: 16 }}>
+              Compte créé {daysAgo(createdAt)}
+            </div>
+          )}
+          <button
+            onClick={handleLogout}
+            style={{
+              width: "100%", background: "transparent",
+              border: "1px solid #2a1818", borderRadius: 7,
+              padding: "9px 12px", fontSize: 13, fontWeight: 500,
+              color: "#c47070", cursor: "pointer",
+              fontFamily: "'DM Sans', sans-serif", textAlign: "left"
+            }}
+          >
+            Se déconnecter
+          </button>
+        </div>
+      )}
+
+      {/* Overlay pour fermer */}
+      {open && (
+        <div
+          onClick={() => setOpen(false)}
+          style={{ position: "fixed", inset: 0, zIndex: 199 }}
+        />
+      )}
+    </div>
+  );
+}
+
 function Card({ onClick, children, style }) {
   const [hov, setHov] = useState(false);
   return (
@@ -631,19 +719,34 @@ export default function App() {
     }
   }
 
-  // HOME
+  // HOME ─────────────────────────────────────────────────────────────────────
   if(view==="home") return (
     <div style={S.app}>
-      <div style={S.hdr}><Logo/></div>
+      <div style={S.hdr}>
+        <Logo/>
+        {/* ── NOUVEAU : icône compte ── */}
+        <AccountIcon session={session} onNav={navTo}/>
+      </div>
       <div style={S.body} className="page-enter" key={pageKey.current}>
         <button onClick={()=>setShowCal(!showCal)} style={{ background:"none", border:"none", cursor:"pointer", padding:0, marginBottom:14, textAlign:"left", display:"block", fontFamily:"'DM Sans', sans-serif" }}>
           <div style={{ fontSize:11, color:C.sub, fontWeight:500, textTransform:"uppercase", letterSpacing:1.5, marginBottom:2 }}>{showCal?"Masquer le calendrier":"Date de la séance"}</div>
           <div style={{ fontSize:16, fontWeight:500, color:C.text }}>{fmtDateLong(calDate)}</div>
         </button>
         {showCal && <Calendar calDate={calDate} setCalDate={setCalDate} sessions={db.sessions}/>}
+
+        {/* ── NOUVEAU : titre de section percutant ── */}
+        <div style={{ marginBottom:14, marginTop:4 }}>
+          <span style={{
+            fontSize:17, fontWeight:700, color:C.text,
+            textTransform:"uppercase", letterSpacing:0.5,
+            whiteSpace:"nowrap"
+          }}>
+            On bosse quoi aujourd'hui ?
+          </span>
+        </div>
+
         {db.groups.length>0 && (
           <>
-            <div style={S.sec}>Démarrer une séance</div>
             {db.groups.map(g => (
               <Card key={g.id} onClick={()=>startSession(g.id)}>
                 <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
@@ -670,7 +773,7 @@ export default function App() {
     </div>
   );
 
-  // GROUPS
+  // GROUPS ───────────────────────────────────────────────────────────────────
   if(view==="groups") return (
     <div style={S.app}>
       <div style={S.hdr}><Logo/></div>
@@ -699,7 +802,7 @@ export default function App() {
     </div>
   );
 
-  // GROUP DETAIL
+  // GROUP DETAIL ─────────────────────────────────────────────────────────────
   if(view==="group" && selGroup) return (
     <div style={S.app}>
       <div style={S.hdr}>
@@ -774,7 +877,7 @@ export default function App() {
     </div>
   );
 
-  // EXO STATS
+  // EXO STATS ────────────────────────────────────────────────────────────────
   if(view==="exo") {
     const group = db.groups.find(g=>g.exercises.some(e=>e.id===selExoId));
     const exo = group?.exercises.find(e=>e.id===selExoId);
@@ -864,7 +967,7 @@ export default function App() {
     );
   }
 
-  // SESSION EN COURS
+  // SESSION EN COURS ─────────────────────────────────────────────────────────
   if(view==="doSession" && activeSession && activeSession.step==="logExo") {
     const g = db.groups.find(x=>x.id===activeSession.pickedGroup);
     const exo = g?.exercises.find(x=>x.id===activeSession.pickedExo);
@@ -914,14 +1017,25 @@ export default function App() {
           )}
           <LogFormWidget logForm={logForm} setLogForm={setLogForm} exo={exo}/>
           <div style={{ height:16 }}/>
-          <button style={S.btn} onClick={logEntry}>
-            {nextName ? "Valider → "+nextName : "Valider"}
+
+          {/* ── NOUVEAU : "Valider séance" toujours visible en premier ── */}
+          <button
+            style={{
+              ...S.ghost,
+              borderColor: C.accent,
+              color: C.accent,
+              fontWeight: 600,
+              marginBottom: 8
+            }}
+            onClick={() => finishAndSave(activeSession.entries)}
+          >
+            ✓ Valider la séance
           </button>
-          {activeSession.entries.length>0 && (
-            <button style={{ ...S.ghost, borderColor:C.accent, color:C.accent, marginBottom:6 }} onClick={()=>finishAndSave(activeSession.entries)}>
-              ✓ Terminer &amp; enregistrer la séance
-            </button>
-          )}
+
+          <button style={S.btn} onClick={logEntry}>
+            {nextName ? "Valider → " + nextName : "Valider cet exercice"}
+          </button>
+
           <button style={{ ...S.ghost, color:C.muted, borderColor:"#2a2a2a", marginBottom:6 }} onClick={skipEntry}>
             {nextName ? "Passer → "+nextName : "Passer sans enregistrer"}
           </button>
@@ -931,7 +1045,7 @@ export default function App() {
     );
   }
 
-  // HISTORY
+  // HISTORY ──────────────────────────────────────────────────────────────────
   if(view==="history") return (
     <div style={S.app}>
       <div style={S.hdr}><Logo/></div>
@@ -958,7 +1072,7 @@ export default function App() {
     </div>
   );
 
-  // SESSION DETAIL
+  // SESSION DETAIL ───────────────────────────────────────────────────────────
   if(view==="sessionDetail" && selSession) return (
     <div style={S.app}>
       <div style={S.hdr}><Logo/></div>
