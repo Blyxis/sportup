@@ -1,13 +1,11 @@
 import { createClient } from '@supabase/supabase-js';
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
-// 1. Initialisation Supabase
 const supabaseUrl = 'https://rnypcpzblmnpirwpregh.supabase.co';
-const supabaseKey = 'sb_publishable_URXAdXQihgYxTNwsOoOd3A_Qy7RR_D5'; // <--- N'OUBLIE PAS DE COLLER TA VRAIE CLÉ ICI
+const supabaseKey = 'sb_publishable_URXAdXQihgYxTNwsOoOd3A_Qy7RR_D5';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// 2. Composant Écran de Login
 const AuthForm = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -15,33 +13,28 @@ const AuthForm = () => {
 
   const handleAuth = async (type) => {
     setLoading(true);
-    const { error } = type === 'login' 
+    const { error } = type === 'login'
       ? await supabase.auth.signInWithPassword({ email, password })
       : await supabase.auth.signUp({ email, password });
-    
     if (error) alert(error.message);
     else if (type === 'signup') alert("Inscription réussie ! Connecte-toi maintenant.");
     setLoading(false);
   };
 
   return (
-    <div style={{ 
-      padding: '40px 20px', textAlign: 'center', background: '#111', color: 'white', 
-      height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', fontFamily: 'sans-serif' 
-    }}>
-      <h1 style={{ color: '#4CAF50', marginBottom: '30px' }}>SPORTUP</h1>
-      <div style={{ maxWidth: '300px', margin: '0 auto', width: '100%' }}>
-        <input type="email" placeholder="Email" onChange={e => setEmail(e.target.value)} 
-          style={{ width: '100%', padding: '12px', marginBottom: '10px', borderRadius: '8px', border: '1px solid #333', background: '#222', color: 'white' }} />
-        <input type="password" placeholder="Mot de passe" onChange={e => setPassword(e.target.value)} 
-          style={{ width: '100%', padding: '12px', marginBottom: '20px', borderRadius: '8px', border: '1px solid #333', background: '#222', color: 'white' }} />
-        
+    <div style={{ padding:'40px 20px', textAlign:'center', background:'#111', color:'white', height:'100vh', display:'flex', flexDirection:'column', justifyContent:'center', fontFamily:'sans-serif' }}>
+      <h1 style={{ color:'#4CAF50', marginBottom:'30px' }}>SPORTUP</h1>
+      <div style={{ maxWidth:'300px', margin:'0 auto', width:'100%' }}>
+        <input type="email" placeholder="Email" onChange={e => setEmail(e.target.value)}
+          style={{ width:'100%', padding:'12px', marginBottom:'10px', borderRadius:'8px', border:'1px solid #333', background:'#222', color:'white' }} />
+        <input type="password" placeholder="Mot de passe" onChange={e => setPassword(e.target.value)}
+          style={{ width:'100%', padding:'12px', marginBottom:'20px', borderRadius:'8px', border:'1px solid #333', background:'#222', color:'white' }} />
         <button onClick={() => handleAuth('login')} disabled={loading}
-          style={{ width: '100%', padding: '12px', marginBottom: '10px', background: '#4CAF50', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>
+          style={{ width:'100%', padding:'12px', marginBottom:'10px', background:'#4CAF50', color:'white', border:'none', borderRadius:'8px', fontWeight:'bold', cursor:'pointer' }}>
           {loading ? 'Chargement...' : 'Se connecter'}
         </button>
         <button onClick={() => handleAuth('signup')} disabled={loading}
-          style={{ width: '100%', padding: '12px', background: 'transparent', color: '#888', border: '1px solid #333', borderRadius: '8px', cursor: 'pointer' }}>
+          style={{ width:'100%', padding:'12px', background:'transparent', color:'#888', border:'1px solid #333', borderRadius:'8px', cursor:'pointer' }}>
           Créer un compte
         </button>
       </div>
@@ -49,53 +42,42 @@ const AuthForm = () => {
   );
 };
 
-// 3. Tes constantes et fonctions utilitaires existantes
 const SK = "sportup_v1";
 const seed = { groups: [], sessions: [] };
 const uid = () => Date.now() + Math.random();
 
 function fmt(iso) {
-  return new Date(iso).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" });
+  return new Date(iso).toLocaleDateString("fr-FR", { day:"2-digit", month:"short", year:"numeric" });
 }
 function fmtDateLong(date) {
-  return date.toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" });
+  return date.toLocaleDateString("fr-FR", { weekday:"long", day:"numeric", month:"long", year:"numeric" });
 }
 
-// ── Levenshtein ────────────────────────────────────────────────────────
 function normalize(s) { return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]/g,""); }
 function levenshtein(a, b) {
-  const m = a.length, n = b.length;
-  const dp = Array.from({length:m+1},(_,i)=>Array.from({length:n+1},(_,j)=>i===0?j:j===0?i:0));
+  const m=a.length,n=b.length;
+  const dp=Array.from({length:m+1},(_,i)=>Array.from({length:n+1},(_,j)=>i===0?j:j===0?i:0));
   for(let i=1;i<=m;i++) for(let j=1;j<=n;j++) dp[i][j]=a[i-1]===b[j-1]?dp[i-1][j-1]:1+Math.min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1]);
   return dp[m][n];
 }
-function isSimilar(a, b) {
-  const na=normalize(a), nb=normalize(b);
+function isSimilar(a,b) {
+  const na=normalize(a),nb=normalize(b);
   if(na===nb||na.includes(nb)||nb.includes(na)) return true;
-  return Math.max(na.length,nb.length)>0 && levenshtein(na,nb)/Math.max(na.length,nb.length)<0.35;
+  return Math.max(na.length,nb.length)>0&&levenshtein(na,nb)/Math.max(na.length,nb.length)<0.35;
 }
-function findSimilarExos(db, name, excludeExoId) {
-  const matches = [];
-  db.groups.forEach(g => g.exercises.forEach(e => {
-    if(e.id!==excludeExoId && isSimilar(e.name,name)) matches.push({exo:e,group:g});
+function findSimilarExos(db,name,excludeExoId) {
+  const matches=[];
+  db.groups.forEach(g=>g.exercises.forEach(e=>{
+    if(e.id!==excludeExoId&&isSimilar(e.name,name)) matches.push({exo:e,group:g});
   }));
   return matches;
 }
 
-// ── Couleurs — noir/gris/blanc uniquement (sauf logo) ──────────────────
 const C = {
-  bg:        "#0a0a0a",
-  surface:   "#141414",
-  card:      "#1c1c1c",
-  border:    "#2a2a2a",
-  borderHov: "#3a3a3a",
-  text:      "#efefef",
-  muted:     "#666",
-  faint:     "#383838",
-  sub:       "#999",
-  danger:    "#c47070",
-  dangerDim: "#2a1818",
-  font:      "'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif",
+  bg:"#0a0a0a", surface:"#141414", card:"#1c1c1c", border:"#2a2a2a", borderHov:"#3a3a3a",
+  text:"#efefef", muted:"#666", faint:"#383838", sub:"#999", danger:"#c47070", dangerDim:"#2a1818",
+  font:"'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif",
+  orange:"#e8924a",
 };
 
 const globalCss = `
@@ -118,38 +100,91 @@ const globalCss = `
   }
   .page-enter { animation:slideUp 0.15s ease both; }
   .fade-in    { animation:fadeIn 0.12s ease both; }
+  .drag-over  { border-color:#555 !important; background:#222 !important; }
 `;
 
 const S = {
-  app:      { minHeight:"100vh", background:C.bg, color:C.text, fontFamily:C.font, maxWidth:480, margin:"0 auto", paddingBottom:80 },
+  app:      { minHeight:"100vh", background:C.bg, color:C.text, fontFamily:C.font, maxWidth:480, margin:"0 auto", paddingBottom:90 },
   hdr:      { borderBottom:`1px solid ${C.border}`, padding:"13px 20px", display:"flex", justifyContent:"space-between", alignItems:"center", position:"sticky", top:0, background:C.bg, zIndex:10 },
   body:     { padding:"20px" },
   h1:       { fontSize:24, fontWeight:600, letterSpacing:-0.3, lineHeight:1.15, marginBottom:4, color:C.text },
   sub:      { fontSize:13, color:C.muted, marginBottom:20 },
   sec:      { fontSize:10, fontWeight:500, color:C.faint, textTransform:"uppercase", letterSpacing:2, marginBottom:10, marginTop:22 },
-  // Bouton primaire : gris clair sur fond sombre
   btn:      { background:"#e8e8e8", color:"#111", border:"none", borderRadius:9, padding:"13px 20px", fontSize:14, fontWeight:600, cursor:"pointer", fontFamily:C.font, width:"100%", marginBottom:10, display:"block" },
-  // Bouton secondaire : contour
   ghost:    { background:"transparent", color:C.text, border:`1px solid ${C.border}`, borderRadius:9, padding:"12px 20px", fontSize:14, fontWeight:400, cursor:"pointer", fontFamily:C.font, width:"100%", marginBottom:10, display:"block" },
-  // Bouton succès
   btnSave:  { background:"#2e2e2e", color:C.text, border:`1px solid ${C.border}`, borderRadius:8, padding:"10px 16px", fontSize:13, fontWeight:500, cursor:"pointer", fontFamily:C.font },
   danger:   { background:"none", color:C.danger, border:`1px solid ${C.dangerDim}`, borderRadius:8, padding:"11px 16px", fontSize:13, fontWeight:400, cursor:"pointer", fontFamily:C.font, width:"100%", marginTop:8 },
   input:    { background:C.surface, border:`1px solid ${C.border}`, borderRadius:8, color:C.text, padding:"12px 14px", fontSize:14, width:"100%", fontFamily:C.font, outline:"none", transition:"border-color 0.15s" },
   back:     { background:"none", border:"none", color:C.muted, fontSize:13, fontWeight:400, cursor:"pointer", fontFamily:C.font, padding:0, marginBottom:20 },
-  navBtn:   (active) => ({ background:"none", border:"none", color: active ? C.text : C.muted, fontSize:13, fontWeight: active ? 500 : 400, cursor:"pointer", fontFamily:C.font, paddingBottom:2, borderBottom: active ? `1.5px solid ${C.text}` : "1.5px solid transparent", transition:"color 0.12s" }),
   tag:      { background:C.card, border:`1px solid ${C.border}`, borderRadius:7, padding:"5px 10px", fontSize:12, color:C.muted, textAlign:"center", minWidth:48 },
   tagVal:   { fontSize:14, fontWeight:600, color:C.text, display:"block" },
   tagLabel: { fontSize:9, color:C.faint, display:"block", marginTop:1, textTransform:"uppercase", letterSpacing:1 },
   statBox:  { background:C.surface, border:`1px solid ${C.border}`, borderRadius:10, padding:"12px 8px", textAlign:"center" },
   statNum:  { fontSize:26, fontWeight:600, color:C.text, lineHeight:1 },
   statLabel:{ fontSize:9, color:C.faint, marginTop:3, textTransform:"uppercase", letterSpacing:1 },
-  toggle:   (active) => ({ flex:1, padding:"9px", borderRadius:7, fontSize:13, fontWeight: active ? 500 : 400, cursor:"pointer", fontFamily:C.font, background: active ? "#2a2a2a" : "transparent", color: active ? C.text : C.muted, border:`1px solid ${active ? "#444" : C.border}`, transition:"all 0.12s" }),
+  toggle:   (active) => ({ flex:1, padding:"9px", borderRadius:7, fontSize:13, fontWeight:active?500:400, cursor:"pointer", fontFamily:C.font, background:active?"#2a2a2a":"transparent", color:active?C.text:C.muted, border:`1px solid ${active?"#444":C.border}`, transition:"all 0.12s" }),
 };
 
-// ── Logo ───────────────────────────────────────────────────────────────
-function Logo({ onClick }) {
+// ── Bottom Nav Bar ─────────────────────────────────────────────────────
+function BottomNav({ current, onNavigate }) {
   return (
-    <div onClick={onClick} style={{ display:"flex", alignItems:"center", gap:7, cursor: onClick ? "pointer" : "default" }}>
+    <div style={{
+      position:"fixed", bottom:0, left:"50%", transform:"translateX(-50%)",
+      width:"100%", maxWidth:480, background:"#0d0d0d",
+      borderTop:`1px solid ${C.border}`, display:"flex", alignItems:"center",
+      justifyContent:"space-between", zIndex:100, height:72,
+      paddingBottom:"env(safe-area-inset-bottom,0px)",
+    }}>
+      {/* Left: Séances */}
+      <button onClick={() => onNavigate("groups")} style={{
+        flex:1, height:"100%", background:"none", border:"none", cursor:"pointer",
+        display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:4,
+        color: current === "groups" ? C.text : C.muted, fontFamily:C.font,
+      }}>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="4" width="18" height="18" rx="2"/>
+          <line x1="16" y1="2" x2="16" y2="6"/>
+          <line x1="8" y1="2" x2="8" y2="6"/>
+          <line x1="3" y1="10" x2="21" y2="10"/>
+        </svg>
+        <span style={{ fontSize:10, fontWeight: current==="groups" ? 600 : 400, letterSpacing:0.3 }}>Séances</span>
+      </button>
+
+      {/* Center: Home button — orange circle */}
+      <div style={{ position:"relative", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+        <button onClick={() => onNavigate("home")} style={{
+          width:58, height:58, borderRadius:"50%",
+          background:"linear-gradient(135deg,#e8924a 0%,#d07840 60%,#f0ece6 100%)",
+          border:"none", cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center",
+          boxShadow:"0 4px 20px rgba(232,146,74,0.35)",
+          marginBottom:12,
+          transition:"transform 0.15s, box-shadow 0.15s",
+        }}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
+            <path d="M10.55 2.533a2 2 0 0 1 2.9 0l7.752 8.4A2 2 0 0 1 19.752 14H17v5a2 2 0 0 1-2 2h-2v-4h-2v4H9a2 2 0 0 1-2-2v-5H4.248a2 2 0 0 1-1.45-3.067l7.752-8.4z"/>
+          </svg>
+        </button>
+      </div>
+
+      {/* Right: Historique */}
+      <button onClick={() => onNavigate("history")} style={{
+        flex:1, height:"100%", background:"none", border:"none", cursor:"pointer",
+        display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", gap:4,
+        color: current === "history" ? C.text : C.muted, fontFamily:C.font,
+      }}>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12 6 12 12 16 14"/>
+        </svg>
+        <span style={{ fontSize:10, fontWeight: current==="history" ? 600 : 400, letterSpacing:0.3 }}>Historique</span>
+      </button>
+    </div>
+  );
+}
+
+function Logo() {
+  return (
+    <div style={{ display:"flex", alignItems:"center", gap:7 }}>
       <svg width="26" height="26" viewBox="0 0 28 28" fill="none">
         <defs>
           <linearGradient id="dg" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -171,22 +206,20 @@ function Logo({ onClick }) {
   );
 }
 
-// ── Card ───────────────────────────────────────────────────────────────
 function Card({ onClick, children, style }) {
   const [hov, setHov] = useState(false);
   return (
-    <div style={{ background: hov && onClick ? "#202020" : C.card, border:`1px solid ${hov && onClick ? C.borderHov : C.border}`, borderRadius:11, padding:"13px 15px", marginBottom:9, cursor: onClick ? "pointer" : "default", transition:"background 0.1s, border-color 0.1s", ...style }}
+    <div style={{ background:hov&&onClick?"#202020":C.card, border:`1px solid ${hov&&onClick?C.borderHov:C.border}`, borderRadius:11, padding:"13px 15px", marginBottom:9, cursor:onClick?"pointer":"default", transition:"background 0.1s, border-color 0.1s", ...style }}
       onClick={onClick} onMouseEnter={()=>setHov(true)} onMouseLeave={()=>setHov(false)}>
       {children}
     </div>
   );
 }
 
-// ── Stepper ────────────────────────────────────────────────────────────
 function Stepper({ label, value, onChange, step=1, min=0, unit="" }) {
-  const dec = () => onChange(Math.max(min, Math.round((parseFloat(value||0)-step)*100)/100));
-  const inc = () => onChange(Math.round((parseFloat(value||0)+step)*100)/100);
-  const bS = { background:C.surface, border:`1px solid ${C.border}`, borderRadius:7, width:36, height:36, fontSize:18, fontWeight:300, color:C.text, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, fontFamily:C.font };
+  const dec=()=>onChange(Math.max(min,Math.round((parseFloat(value||0)-step)*100)/100));
+  const inc=()=>onChange(Math.round((parseFloat(value||0)+step)*100)/100);
+  const bS={ background:C.surface, border:`1px solid ${C.border}`, borderRadius:7, width:36, height:36, fontSize:18, fontWeight:300, color:C.text, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0, fontFamily:C.font };
   return (
     <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:5 }}>
       <div style={{ fontSize:10, color:C.faint, fontWeight:500, textTransform:"uppercase", letterSpacing:1.5 }}>{label}</div>
@@ -195,7 +228,7 @@ function Stepper({ label, value, onChange, step=1, min=0, unit="" }) {
         <div style={{ textAlign:"center" }}>
           <input type="number" value={value} onChange={e=>onChange(e.target.value===""?"":parseFloat(e.target.value))}
             style={{ ...S.input, textAlign:"center", fontSize:20, fontWeight:600, padding:"5px 4px", width:62, border:"none", background:"transparent" }} />
-          {unit && <div style={{ fontSize:10, color:C.faint, marginTop:-4 }}>{unit}</div>}
+          {unit&&<div style={{ fontSize:10, color:C.faint, marginTop:-4 }}>{unit}</div>}
         </div>
         <button style={bS} onClick={inc}>+</button>
       </div>
@@ -203,9 +236,8 @@ function Stepper({ label, value, onChange, step=1, min=0, unit="" }) {
   );
 }
 
-// ── Calendar ───────────────────────────────────────────────────────────
 function Calendar({ calDate, setCalDate, sessions }) {
-  const y=calDate.getFullYear(), m=calDate.getMonth();
+  const y=calDate.getFullYear(),m=calDate.getMonth();
   const first=new Date(y,m,1).getDay();
   const days=new Date(y,m+1,0).getDate();
   const today=new Date();
@@ -230,7 +262,7 @@ function Calendar({ calDate, setCalDate, sessions }) {
           const isSel=calDate.getDate()===d&&calDate.getMonth()===m&&calDate.getFullYear()===y;
           const hasSess=sessSet.has(iso);
           return (
-            <div key={i} onClick={()=>setCalDate(new Date(y,m,d))} style={{ height:30, display:"flex", alignItems:"center", justifyContent:"center", fontSize:12, fontWeight: isSel||isT?600:400, cursor:"pointer", borderRadius:6, background: isSel?"#e8e8e8":hasSess?"#282828":"transparent", color: isSel?"#111":isT?C.text:hasSess?"#aaa":C.muted, border: isT&&!isSel?`1px solid #555`:"1px solid transparent", transition:"background 0.1s" }}>
+            <div key={i} onClick={()=>setCalDate(new Date(y,m,d))} style={{ height:30, display:"flex", alignItems:"center", justifyContent:"center", fontSize:12, fontWeight:isSel||isT?600:400, cursor:"pointer", borderRadius:6, background:isSel?"#e8e8e8":hasSess?"#282828":"transparent", color:isSel?"#111":isT?C.text:hasSess?"#aaa":C.muted, border:isT&&!isSel?`1px solid #555`:"1px solid transparent", transition:"background 0.1s" }}>
               {d}
             </div>
           );
@@ -243,46 +275,44 @@ function Calendar({ calDate, setCalDate, sessions }) {
   );
 }
 
-// ── LogFormWidget — mode déterminé par l'exo, cascade poids ───────────
 function LogFormWidget({ logForm, setLogForm, exo }) {
-  const mode = exo?.mode || "reps";
-  const series = parseInt(logForm.series) || 1;
+  const mode=exo?.mode||"reps";
+  const series=parseInt(logForm.series)||1;
 
-  function buildSets(n, existing, defReps, defKg) {
+  function buildSets(n,existing,defReps,defKg) {
     return Array.from({length:n},(_,i)=>{
       const ex=existing&&existing[i];
       if(ex&&typeof ex==="object") return ex;
       const r=typeof ex==="number"?ex:(parseInt(defReps)||10);
-      return { reps:r, kg:parseFloat(defKg)||0 };
+      return {reps:r,kg:parseFloat(defKg)||0};
     });
   }
 
-  const sets = buildSets(series, logForm.sets, logForm.reps, logForm.kg);
+  const sets=buildSets(series,logForm.sets,logForm.reps,logForm.kg);
 
   function updateSeries(v) {
     const n=Math.max(1,parseInt(v)||1);
-    setLogForm({...logForm, series:n, sets:buildSets(n,sets,logForm.reps,logForm.kg)});
+    setLogForm({...logForm,series:n,sets:buildSets(n,sets,logForm.reps,logForm.kg)});
   }
 
-  function updateReps(idx, delta) {
+  function updateReps(idx,delta) {
     const s=sets.map((x,i)=>i===idx?{...x,reps:Math.max(0,(x.reps||0)+delta)}:x);
-    setLogForm({...logForm, sets:s});
+    setLogForm({...logForm,sets:s});
   }
 
-  // Cascade : série idx et toutes les suivantes
-  function updateWeight(idx, delta) {
+  function updateWeight(idx,delta) {
     const s=sets.map((x,i)=>{
       if(i<idx) return x;
-      return {...x, kg:Math.max(0,Math.round(((x.kg||0)+delta)*10)/10)};
+      return {...x,kg:Math.max(0,Math.round(((x.kg||0)+delta)*10)/10)};
     });
-    setLogForm({...logForm, sets:s});
+    setLogForm({...logForm,sets:s});
   }
 
-  const iBtn = { background:C.card, border:`1px solid ${C.border}`, borderRadius:6, width:28, height:28, color:C.text, cursor:"pointer", fontSize:15, display:"flex", alignItems:"center", justifyContent:"center", fontFamily:C.font };
+  const iBtn={ background:C.card, border:`1px solid ${C.border}`, borderRadius:6, width:28, height:28, color:C.text, cursor:"pointer", fontSize:15, display:"flex", alignItems:"center", justifyContent:"center", fontFamily:C.font };
 
   return (
     <div>
-      {mode==="reps" && (
+      {mode==="reps"&&(
         <>
           <div style={{ display:"flex", justifyContent:"center", marginBottom:18 }}>
             <Stepper label="Séries" value={logForm.series} onChange={updateSeries} step={1} min={1}/>
@@ -307,9 +337,7 @@ function LogFormWidget({ logForm, setLogForm, exo }) {
                   <div style={{ fontSize:9, color:C.faint, textTransform:"uppercase", letterSpacing:1, marginBottom:4 }}>Poids (kg)</div>
                   <div style={{ display:"flex", alignItems:"center", gap:5 }}>
                     <button onClick={()=>updateWeight(idx,-2.5)} style={iBtn}>−</button>
-                    <div style={{ fontSize:14, fontWeight:600, minWidth:40, textAlign:"center" }}>
-                      {s.kg||0}<span style={{ fontSize:9, color:C.faint, fontWeight:400 }}>kg</span>
-                    </div>
+                    <div style={{ fontSize:14, fontWeight:600, minWidth:40, textAlign:"center" }}>{s.kg||0}<span style={{ fontSize:9, color:C.faint, fontWeight:400 }}>kg</span></div>
                     <button onClick={()=>updateWeight(idx,2.5)} style={iBtn}>+</button>
                   </div>
                 </div>
@@ -318,15 +346,13 @@ function LogFormWidget({ logForm, setLogForm, exo }) {
           </div>
         </>
       )}
-
-      {mode==="time" && (
+      {mode==="time"&&(
         <div style={{ display:"flex", justifyContent:"space-around", marginBottom:20 }}>
           <Stepper label="Séries" value={logForm.series} onChange={v=>setLogForm({...logForm,series:Math.max(1,parseInt(v)||1)})} step={1} min={1}/>
           <Stepper label="Minutes" value={logForm.timeMin||0} onChange={v=>setLogForm({...logForm,timeMin:Math.max(0,parseInt(v)||0)})} step={1} min={0} unit="min"/>
           <Stepper label="Secondes" value={logForm.timeSec||0} onChange={v=>setLogForm({...logForm,timeSec:Math.min(59,Math.max(0,parseInt(v)||0))})} step={5} min={0} unit="sec"/>
         </div>
       )}
-
       <div style={{ marginBottom:4 }}>
         <div style={{ fontSize:10, color:C.faint, fontWeight:500, textTransform:"uppercase", letterSpacing:1.5, marginBottom:6 }}>Note</div>
         <input style={S.input} placeholder="Sensation, ressenti…" value={logForm.note||""} onChange={e=>setLogForm({...logForm,note:e.target.value})}/>
@@ -335,9 +361,8 @@ function LogFormWidget({ logForm, setLogForm, exo }) {
   );
 }
 
-// ── PerfTags ───────────────────────────────────────────────────────────
 function PerfTags({ entry }) {
-  const mode = entry.mode || "reps";
+  const mode=entry.mode||"reps";
   if(mode==="time") return (
     <div style={{ display:"flex", gap:7, flexWrap:"wrap", marginTop:7 }}>
       <div style={S.tag}><span style={S.tagVal}>{entry.series||"—"}</span><span style={S.tagLabel}>séries</span></div>
@@ -345,7 +370,6 @@ function PerfTags({ entry }) {
       {entry.note&&<div style={{ fontSize:11, color:C.muted, alignSelf:"center", fontStyle:"italic" }}>{entry.note}</div>}
     </div>
   );
-
   const sets=entry.sets||[];
   const isObj=sets.length>0&&typeof sets[0]==="object";
   if(isObj) {
@@ -382,45 +406,123 @@ function PerfTags({ entry }) {
   );
 }
 
-// ── ExoSettingsCard — mode (reps/temps) à la création, ouvert par défaut si nouveau ─
-function ExoSettingsCard({ exo, onSave, onDelete, onNavigate, defaultOpen=false }) {
+// ── Drag & Drop Hook (touch + mouse) ──────────────────────────────────
+function useDragList(items, onReorder) {
+  const dragIndex = useRef(null);
+  const dragOverIndex = useRef(null);
+  const [dragging, setDragging] = useState(null);
+  const touchStart = useRef(null);
+  const listRef = useRef(null);
+
+  // Mouse handlers
+  function onDragStart(i) {
+    dragIndex.current = i;
+    setDragging(i);
+  }
+  function onDragEnter(i) {
+    dragOverIndex.current = i;
+  }
+  function onDragEnd() {
+    if(dragIndex.current !== null && dragOverIndex.current !== null && dragIndex.current !== dragOverIndex.current) {
+      const arr = [...items];
+      const [moved] = arr.splice(dragIndex.current, 1);
+      arr.splice(dragOverIndex.current, 0, moved);
+      onReorder(arr);
+    }
+    dragIndex.current = null;
+    dragOverIndex.current = null;
+    setDragging(null);
+  }
+
+  // Touch handlers
+  function getTouchIndex(clientY) {
+    if(!listRef.current) return null;
+    const children = Array.from(listRef.current.children);
+    for(let i=0;i<children.length;i++) {
+      const rect = children[i].getBoundingClientRect();
+      if(clientY >= rect.top && clientY <= rect.bottom) return i;
+    }
+    return null;
+  }
+
+  function onTouchStart(i, e) {
+    dragIndex.current = i;
+    touchStart.current = e.touches[0].clientY;
+    setDragging(i);
+  }
+
+  function onTouchMove(e) {
+    e.preventDefault();
+    const clientY = e.touches[0].clientY;
+    const idx = getTouchIndex(clientY);
+    if(idx !== null) dragOverIndex.current = idx;
+  }
+
+  function onTouchEnd() {
+    onDragEnd();
+  }
+
+  return { listRef, dragging, onDragStart, onDragEnter, onDragEnd, onTouchStart, onTouchMove, onTouchEnd };
+}
+
+// ── ExoSettingsCard — click on band to toggle, "Performances" button ──
+function ExoSettingsCard({ exo, onSave, onDelete, onNavigate, defaultOpen=false, dragHandlers, isDragging }) {
   const [open, setOpen] = useState(defaultOpen);
-  const [mode, setMode] = useState(exo.mode || "reps");
-  const [kg, setKg] = useState(exo.defaultKg || 0);
+  const [mode, setMode] = useState(exo.mode||"reps");
+  const [kg, setKg] = useState(exo.defaultKg||0);
+
+  // When defaultOpen changes (new exo added), auto-open
+  useEffect(()=>{ if(defaultOpen) setOpen(true); },[defaultOpen]);
 
   function save() {
-    onSave({ ...exo, mode, defaultKg: kg });
+    onSave({...exo,mode,defaultKg:kg});
     setOpen(false);
   }
 
-  const modeLabel = exo.mode === "time" ? "Temps" : "Reps / KG";
+  const modeLabel=exo.mode==="time"?"Temps":"Reps / KG";
 
   return (
-    <div style={{ background:C.card, border:`1px solid ${C.border}`, borderRadius:11, marginBottom:9, overflow:"hidden" }}>
-      <div style={{ display:"flex", alignItems:"center", padding:"13px 15px", gap:10 }}>
-        <div style={{ flex:1, cursor:"pointer" }} onClick={()=>onNavigate(exo.id)}>
+    <div style={{ background:C.card, border:`1px solid ${isDragging?C.borderHov:C.border}`, borderRadius:11, marginBottom:9, overflow:"hidden", opacity:isDragging?0.5:1, transition:"opacity 0.15s" }}
+      draggable
+      onDragStart={dragHandlers?.onDragStart}
+      onDragEnter={dragHandlers?.onDragEnter}
+      onDragEnd={dragHandlers?.onDragEnd}
+      onDragOver={e=>e.preventDefault()}
+      onTouchStart={dragHandlers?.onTouchStart}
+      onTouchMove={dragHandlers?.onTouchMove}
+      onTouchEnd={dragHandlers?.onTouchEnd}
+    >
+      {/* Clickable band — toggles open/closed */}
+      <div style={{ display:"flex", alignItems:"center", padding:"13px 15px", gap:10, cursor:"pointer" }}
+        onClick={()=>setOpen(o=>!o)}>
+        {/* Drag handle */}
+        <div style={{ color:C.faint, fontSize:13, cursor:"grab", flexShrink:0, touchAction:"none", padding:"0 4px" }}
+          onClick={e=>e.stopPropagation()}>
+          ⋮⋮
+        </div>
+        <div style={{ flex:1 }}>
           <div style={{ fontSize:14, fontWeight:500 }}>{exo.name}</div>
           <div style={{ fontSize:11, color:C.muted, marginTop:2 }}>
-            {modeLabel}{exo.defaultKg>0&&exo.mode!=="time" ? ` · ${exo.defaultKg}kg habituel` : ""}
+            {modeLabel}{exo.defaultKg>0&&exo.mode!=="time"?` · ${exo.defaultKg}kg habituel`:""}
           </div>
           {exo.canonicalId&&<div style={{ fontSize:10, color:C.sub, marginTop:2 }}>données partagées</div>}
         </div>
-        <button onClick={()=>setOpen(!open)} style={{ background: open?"#2a2a2a":"transparent", border:`1px solid ${open?"#444":C.border}`, borderRadius:7, padding:"5px 11px", color:C.muted, fontSize:12, cursor:"pointer", fontFamily:C.font, fontWeight:400, transition:"all 0.12s" }}>
-          {open?"Fermer":"Régler"}
+        {/* Performances button */}
+        <button onClick={e=>{e.stopPropagation();onNavigate(exo.id);}} style={{ background:"transparent", border:`1px solid ${C.border}`, borderRadius:7, padding:"5px 10px", color:C.muted, fontSize:11, cursor:"pointer", fontFamily:C.font, fontWeight:400, transition:"all 0.12s", flexShrink:0 }}>
+          Performances
         </button>
-        <span style={{ color:C.faint, fontSize:17, cursor:"pointer" }} onClick={()=>onNavigate(exo.id)}>›</span>
+        <span style={{ color:C.faint, fontSize:13, transition:"transform 0.2s", transform:open?"rotate(90deg)":"rotate(0deg)", display:"inline-block" }}>›</span>
       </div>
 
-      {open && (
+      {open&&(
         <div style={{ padding:"0 15px 15px", borderTop:`1px solid ${C.border}` }} className="fade-in">
           <div style={{ paddingTop:13 }}>
-            {/* Mode : Reps/KG ou Temps */}
             <div style={{ fontSize:10, color:C.faint, fontWeight:500, textTransform:"uppercase", letterSpacing:1.5, marginBottom:8 }}>Type d'exercice</div>
             <div style={{ display:"flex", gap:7, marginBottom:16 }}>
               <button style={S.toggle(mode==="reps")} onClick={()=>setMode("reps")}>Répétitions / KG</button>
               <button style={S.toggle(mode==="time")} onClick={()=>setMode("time")}>Temps</button>
             </div>
-            {mode==="reps" && (
+            {mode==="reps"&&(
               <div style={{ marginBottom:16 }}>
                 <div style={{ fontSize:10, color:C.faint, fontWeight:500, textTransform:"uppercase", letterSpacing:1.5, marginBottom:8 }}>Poids habituel</div>
                 <div style={{ display:"flex", alignItems:"center", gap:8 }}>
@@ -442,13 +544,38 @@ function ExoSettingsCard({ exo, onSave, onDelete, onNavigate, defaultOpen=false 
   );
 }
 
+// ── Draggable Group Card (home) ────────────────────────────────────────
+function DraggableGroupCard({ group, onStart, onNavigate, isDragging, onDragEnter, onDragEnd, onTouchStart, onTouchMove, onTouchEnd }) {
+  return (
+    <div
+      draggable
+      onDragStart={onStart}
+      onDragEnter={onDragEnter}
+      onDragEnd={onDragEnd}
+      onDragOver={e=>e.preventDefault()}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+      style={{ background:C.card, border:`1px solid ${isDragging?C.borderHov:C.border}`, borderRadius:11, padding:"13px 15px", marginBottom:9, opacity:isDragging?0.45:1, transition:"opacity 0.15s, border-color 0.15s", cursor:"grab" }}
+    >
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
+        <div style={{ display:"flex", alignItems:"center", gap:10, flex:1 }} onClick={()=>onNavigate(group.id)}>
+          <span style={{ color:C.faint, fontSize:13, cursor:"grab", flexShrink:0, touchAction:"none" }}>⋮⋮</span>
+          <div>
+            <div style={{ fontSize:15, fontWeight:500 }}>{group.name}</div>
+            <div style={{ fontSize:12, color:C.muted, marginTop:2 }}>{group.exercises.length} exercice{group.exercises.length>1?"s":""}</div>
+          </div>
+        </div>
+        <span style={{ color:C.faint, fontSize:17 }}>›</span>
+      </div>
+    </div>
+  );
+}
+
 // ── Main App ───────────────────────────────────────────────────────────
 export default function App() {
-  // --- 1. ÉTATS POUR L'AUTHENTIFICATION ---
   const [session, setSession] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
-
-  // --- 2. TES ÉTATS EXISTANTS ---
   const [db, setDb] = useState(null);
   const [view, setView] = useState("home");
   const [selGroupId, setSelGroupId] = useState(null);
@@ -464,121 +591,101 @@ export default function App() {
   const [mergePrompt, setMergePrompt] = useState(null);
   const pageKey = useRef(0);
 
-  // --- 3. GESTION DE LA CONNEXION (VIGILE) ---
-  useEffect(() => {
-    // Vérifie si déjà connecté
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setAuthLoading(false);
+  // Refs for scroll to top of new exo
+  const newExoRef = useRef(null);
+
+  useEffect(()=>{
+    supabase.auth.getSession().then(({data:{session}})=>{
+      setSession(session); setAuthLoading(false);
     });
+    const {data:{subscription}}=supabase.auth.onAuthStateChange((_event,session)=>setSession(session));
+    return ()=>subscription.unsubscribe();
+  },[]);
 
-    // Écoute les changements (Login/Logout)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  // Injection du CSS global
-  useEffect(() => {
-    const s = document.createElement("style"); 
-    s.textContent = globalCss; 
+  useEffect(()=>{
+    const s=document.createElement("style");
+    s.textContent=globalCss;
     document.head.appendChild(s);
-    return () => document.head.removeChild(s);
-  }, []);
+    return ()=>document.head.removeChild(s);
+  },[]);
 
-  // Chargement des données (LocalStorage pour l'instant)
-  useEffect(() => {
-    if (session) { // On ne charge la DB que si l'utilisateur est loggé
-      try { 
-        const s = localStorage.getItem(SK); 
-        setDb(s ? JSON.parse(s) : seed); 
-      } catch { 
-        setDb(seed); 
-      }
+  useEffect(()=>{
+    if(session){
+      try { const s=localStorage.getItem(SK); setDb(s?JSON.parse(s):seed); }
+      catch { setDb(seed); }
     }
-  }, [session]);
+  },[session]);
 
-  // --- 4. FONCTIONS DE SAUVEGARDE ET NAVIGATION ---
+  // Scroll new exo into view
+  useEffect(()=>{
+    if(lastAddedExoId&&newExoRef.current){
+      setTimeout(()=>newExoRef.current?.scrollIntoView({behavior:"smooth",block:"start"}),80);
+    }
+  },[lastAddedExoId]);
+
   function saveDb(next) {
     setDb(next);
-    try { localStorage.setItem(SK, JSON.stringify(next)); } catch {}
-    // Note : Plus tard, on ajoutera ici l'envoi vers Supabase !
+    try { localStorage.setItem(SK,JSON.stringify(next)); } catch {}
   }
 
-  function navigate(newView, fn) {
-    pageKey.current += 1;
-    if (fn) fn();
+  function navigate(newView,fn) {
+    pageKey.current+=1;
+    if(fn) fn();
     setView(newView);
+    window.scrollTo({top:0,behavior:"smooth"});
   }
 
-  // --- 5. LOGIQUE D'AFFICHAGE ---
-  
-  // A. Pendant que Supabase vérifie la session
-  if (authLoading) {
-    return <div style={{ background: '#111', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#888' }}>Vérification...</div>;
-  }
+  if(authLoading) return <div style={{ background:'#111', height:'100vh', display:'flex', alignItems:'center', justifyContent:'center', color:'#888' }}>Vérification...</div>;
+  if(!session) return <AuthForm/>;
+  if(!db) return <div style={{ padding:40, color:'#888', fontSize:14, background:'#111', height:'100vh' }}>Chargement des données…</div>;
 
-  // B. Si personne n'est connecté -> Écran de Login
-  if (!session) {
-    return <AuthForm />;
-  }
-
-  // C. Si la base n'est pas encore prête
-  if (!db) {
-    return <div style={{ padding: 40, color: '#888', fontSize: 14, background: '#111', height: '100vh' }}>Chargement des données…</div>;
-  }
-
-  // --- 6. TES CALCULS EXISTANTS ---
-  const selGroup = db.groups.find(g => g.id === selGroupId) || null;
-  const selSession = db.sessions.find(s => s.id === selSessionId) || null;
+  const selGroup=db.groups.find(g=>g.id===selGroupId)||null;
+  const selSession=db.sessions.find(s=>s.id===selSessionId)||null;
 
   function getAllLinkedIds(exoId) {
-    let canon = exoId;
-    db.groups.forEach(g => g.exercises.forEach(e => { if (e.id === exoId && e.canonicalId) canon = e.canonicalId; }));
-    const ids = new Set([exoId]);
-    db.groups.forEach(g => g.exercises.forEach(e => { if (e.id === exoId || e.canonicalId === canon || e.id === canon) ids.add(e.id); }));
+    let canon=exoId;
+    db.groups.forEach(g=>g.exercises.forEach(e=>{if(e.id===exoId&&e.canonicalId) canon=e.canonicalId;}));
+    const ids=new Set([exoId]);
+    db.groups.forEach(g=>g.exercises.forEach(e=>{if(e.id===exoId||e.canonicalId===canon||e.id===canon) ids.add(e.id);}));
     return ids;
   }
 
   function perfsForExo(exoId) {
-    const ids = getAllLinkedIds(exoId), res = [];
-    db.sessions.forEach(s => (s.entries || []).forEach(e => { if (ids.has(e.exoId)) res.push({ date: s.date, dateLabel: fmt(s.date), ...e }); }));
-    return res.sort((a, b) => new Date(a.date) - new Date(b.date));
+    const ids=getAllLinkedIds(exoId),res=[];
+    db.sessions.forEach(s=>(s.entries||[]).forEach(e=>{if(ids.has(e.exoId)) res.push({date:s.date,dateLabel:fmt(s.date),...e});}));
+    return res.sort((a,b)=>new Date(a.date)-new Date(b.date));
   }
 
-  function makeDefaultForm(exo, lastPerf) {
+  function makeDefaultForm(exo,lastPerf) {
     const mode=exo?.mode||"reps";
     const series=lastPerf?(parseInt(lastPerf.series)||4):4;
     const reps=lastPerf?(parseInt(lastPerf.reps)||10):10;
     const kg=lastPerf?(lastPerf.kg!==undefined?lastPerf.kg:(exo?.defaultKg||0)):(exo?.defaultKg||0);
     let sets;
-    if(lastPerf&&lastPerf.sets&&lastPerf.sets.length>0) {
+    if(lastPerf&&lastPerf.sets&&lastPerf.sets.length>0){
       sets=lastPerf.sets.map(s=>typeof s==="object"?s:{reps:s,kg});
       while(sets.length<series) sets.push(sets[sets.length-1]||{reps,kg});
       sets=sets.slice(0,series);
     } else {
       sets=Array(series).fill(null).map(()=>({reps,kg}));
     }
-    return { series, reps, kg, sets, mode, timeMin:lastPerf?.timeMin||1, timeSec:lastPerf?.timeSec||0, note:"" };
+    return {series,reps,kg,sets,mode,timeMin:lastPerf?.timeMin||1,timeSec:lastPerf?.timeSec||0,note:""};
   }
 
   // ── CRUD ──────────────────────────────────────────────────────────────
   function addGroup() {
     if(!newGName.trim()) return;
     const newId=uid();
-    const newGroup={ id:newId, name:newGName.trim().toUpperCase(), exercises:[] };
-    saveDb({...db, groups:[...db.groups, newGroup]});
+    const newGroup={id:newId,name:newGName.trim().toUpperCase(),exercises:[]};
+    saveDb({...db,groups:[...db.groups,newGroup]});
     setNewGName("");
-    // Rediriger directement vers la page d'ajout d'exercices
     setSelGroupId(newId);
     setNewEName("");
     navigate("group");
   }
 
   function deleteGroup(gid) {
-    saveDb({...db, groups:db.groups.filter(g=>g.id!==gid)});
+    saveDb({...db,groups:db.groups.filter(g=>g.id!==gid)});
     navigate("groups",()=>setSelGroupId(null));
   }
 
@@ -586,47 +693,54 @@ export default function App() {
     const name=(forceName||newEName).trim();
     if(!name||!selGroupId) return;
     const newExoId=uid();
-    const newExo={ id:newExoId, name, defaultKg:0, mode:"reps" };
+    const newExo={id:newExoId,name,defaultKg:0,mode:"reps"};
     const similar=findSimilarExos(db,name,null);
-    if(similar.length>0) {
+    if(similar.length>0){
       setMergePrompt({newExo,groupId:selGroupId,matches:similar,linked:[]});
       setNewEName(""); return;
     }
-    saveDb({...db, groups:db.groups.map(g=>g.id===selGroupId?{...g,exercises:[...g.exercises,newExo]}:g)});
+    saveDb({...db,groups:db.groups.map(g=>g.id===selGroupId?{...g,exercises:[newExo,...g.exercises]}:g)});
     setNewEName("");
-    setLastAddedExoId(newExoId); // ouvre les settings automatiquement
+    setLastAddedExoId(newExoId);
   }
 
   function confirmAddExercise(linkedIds) {
     if(!mergePrompt) return;
     const {newExo,groupId}=mergePrompt;
     let finalExo={...newExo};
-    if(linkedIds.length>0) {
+    if(linkedIds.length>0){
       let canon=linkedIds[0];
       db.groups.forEach(g=>g.exercises.forEach(e=>{if(e.id===linkedIds[0]&&e.canonicalId) canon=e.canonicalId;}));
       finalExo.canonicalId=canon;
     }
-    saveDb({...db, groups:db.groups.map(g=>g.id===groupId?{...g,exercises:[...g.exercises,finalExo]}:g)});
+    saveDb({...db,groups:db.groups.map(g=>g.id===groupId?{...g,exercises:[finalExo,...g.exercises]}:g)});
     setLastAddedExoId(finalExo.id);
     setMergePrompt(null);
   }
 
-  function updateExercise(gid, updatedExo) {
+  function updateExercise(gid,updatedExo) {
     if(updatedExo.id===lastAddedExoId) setLastAddedExoId(null);
-    saveDb({...db, groups:db.groups.map(g=>g.id===gid?{...g,exercises:g.exercises.map(e=>e.id===updatedExo.id?updatedExo:e)}:g)});
+    saveDb({...db,groups:db.groups.map(g=>g.id===gid?{...g,exercises:g.exercises.map(e=>e.id===updatedExo.id?updatedExo:e)}:g)});
   }
 
-  function deleteExercise(gid, eid) {
-    saveDb({...db, groups:db.groups.map(g=>g.id===gid?{...g,exercises:g.exercises.filter(e=>e.id!==eid)}:g)});
+  function deleteExercise(gid,eid) {
+    saveDb({...db,groups:db.groups.map(g=>g.id===gid?{...g,exercises:g.exercises.filter(e=>e.id!==eid)}:g)});
   }
 
   function deleteSession(sid) {
-    saveDb({...db, sessions:db.sessions.filter(s=>s.id!==sid)});
+    saveDb({...db,sessions:db.sessions.filter(s=>s.id!==sid)});
     navigate("history",()=>setSelSessionId(null));
   }
 
-  // ── SESSION ────────────────────────────────────────────────────────────
-  // Démarrer directement depuis une séance (groupe) — sans confirmation
+  function reorderGroups(newGroups) {
+    saveDb({...db,groups:newGroups});
+  }
+
+  function reorderExercises(gid,newExos) {
+    saveDb({...db,groups:db.groups.map(g=>g.id===gid?{...g,exercises:newExos}:g)});
+  }
+
+  // ── SESSION ───────────────────────────────────────────────────────────
   function startSession(gid) {
     const g=db.groups.find(x=>x.id===gid);
     if(!g||g.exercises.length===0) return;
@@ -637,18 +751,11 @@ export default function App() {
       return {exoId:exo.id,groupId:gid,form:makeDefaultForm(exo,last||null)};
     });
     const first=queue[0];
-    const sess={ id:uid(), name, date:calDate.toISOString(), entries:[], step:"logExo",
-      pickedGroup:gid, pickedExo:first.exoId, importQueue:queue.slice(1) };
+    const sess={id:uid(),name,date:calDate.toISOString(),entries:[],step:"logExo",
+      pickedGroup:gid,pickedExo:first.exoId,importQueue:queue.slice(1)};
     setActiveSession(sess);
     setLogForm(first.form);
     navigate("doSession");
-  }
-
-  function finishSession() {
-    const sess={id:activeSession.id,name:activeSession.name,date:activeSession.date,entries:activeSession.entries};
-    saveDb({...db, sessions:[sess,...db.sessions]});
-    setActiveSession(null);
-    navigate("home");
   }
 
   function logEntry() {
@@ -659,18 +766,17 @@ export default function App() {
   }
 
   function skipEntry() {
-    // Ne pas enregistrer, passer au suivant
     advanceQueue(activeSession.entries);
   }
 
   function advanceQueue(newEntries) {
     const queue=activeSession.importQueue||[];
-    if(queue.length>0) {
+    if(queue.length>0){
       const next=queue[0];
       setLogForm(next.form);
       setActiveSession({...activeSession,entries:newEntries,step:"logExo",pickedGroup:next.groupId,pickedExo:next.exoId,importQueue:queue.slice(1)});
+      window.scrollTo({top:0,behavior:"smooth"});
     } else {
-      // Fin de la file → terminer directement
       const sess={id:activeSession.id,name:activeSession.name,date:activeSession.date,entries:newEntries};
       saveDb({...db,sessions:[sess,...db.sessions]});
       setActiveSession(null);
@@ -678,53 +784,123 @@ export default function App() {
     }
   }
 
-  // ── NavBar ─────────────────────────────────────────────────────────────
-  const navBar = (cur) => (
+  // ── Drag & Drop for groups (home) ─────────────────────────────────────
+  const groupDragIndex = useRef(null);
+  const groupDragOver = useRef(null);
+  const [groupDragging, setGroupDragging] = useState(null);
+  const groupListRef = useRef(null);
+
+  function groupDragStart(i) { groupDragIndex.current=i; setGroupDragging(i); }
+  function groupDragEnter(i) { groupDragOver.current=i; }
+  function groupDragEnd() {
+    if(groupDragIndex.current!==null&&groupDragOver.current!==null&&groupDragIndex.current!==groupDragOver.current){
+      const arr=[...db.groups];
+      const [moved]=arr.splice(groupDragIndex.current,1);
+      arr.splice(groupDragOver.current,0,moved);
+      reorderGroups(arr);
+    }
+    groupDragIndex.current=null; groupDragOver.current=null; setGroupDragging(null);
+  }
+
+  // Touch for group list
+  function getGroupTouchIndex(clientY) {
+    if(!groupListRef.current) return null;
+    const children=Array.from(groupListRef.current.children);
+    for(let i=0;i<children.length;i++){
+      const rect=children[i].getBoundingClientRect();
+      if(clientY>=rect.top&&clientY<=rect.bottom) return i;
+    }
+    return null;
+  }
+  function groupTouchStart(i,e) { groupDragIndex.current=i; setGroupDragging(i); }
+  function groupTouchMove(e) {
+    e.preventDefault();
+    const idx=getGroupTouchIndex(e.touches[0].clientY);
+    if(idx!==null) groupDragOver.current=idx;
+  }
+  function groupTouchEnd() { groupDragEnd(); }
+
+  // ── Drag & Drop for exercises ─────────────────────────────────────────
+  const exoDragIndex = useRef(null);
+  const exoDragOver = useRef(null);
+  const [exoDragging, setExoDragging] = useState(null);
+  const exoListRef = useRef(null);
+
+  function exoDragStart(i) { exoDragIndex.current=i; setExoDragging(i); }
+  function exoDragEnter(i) { exoDragOver.current=i; }
+  function exoDragEnd() {
+    if(exoDragIndex.current!==null&&exoDragOver.current!==null&&exoDragIndex.current!==exoDragOver.current&&selGroup){
+      const arr=[...selGroup.exercises];
+      const [moved]=arr.splice(exoDragIndex.current,1);
+      arr.splice(exoDragOver.current,0,moved);
+      reorderExercises(selGroup.id,arr);
+    }
+    exoDragIndex.current=null; exoDragOver.current=null; setExoDragging(null);
+  }
+
+  function getExoTouchIndex(clientY) {
+    if(!exoListRef.current) return null;
+    const children=Array.from(exoListRef.current.children);
+    for(let i=0;i<children.length;i++){
+      const rect=children[i].getBoundingClientRect();
+      if(clientY>=rect.top&&clientY<=rect.bottom) return i;
+    }
+    return null;
+  }
+  function exoTouchStart(i,e) { exoDragIndex.current=i; setExoDragging(i); }
+  function exoTouchMove(e) {
+    e.preventDefault();
+    const idx=getExoTouchIndex(e.touches[0].clientY);
+    if(idx!==null) exoDragOver.current=idx;
+  }
+  function exoTouchEnd() { exoDragEnd(); }
+
+  // ── NavBar (top, logo only) ────────────────────────────────────────────
+  const topBar = (
     <div style={S.hdr}>
-      <Logo onClick={()=>navigate("home")}/>
-      <div style={{ display:"flex", gap:18 }}>
-        <button style={S.navBtn(cur==="home")} onClick={()=>navigate("home")}>Accueil</button>
-        <button style={S.navBtn(cur==="history")} onClick={()=>navigate("history")}>Historique</button>
-        <button style={S.navBtn(cur==="groups")} onClick={()=>{setNewGName("");navigate("groups");}}>Séances</button>
-      </div>
+      <Logo/>
     </div>
   );
 
   // ── HOME ──────────────────────────────────────────────────────────────
   if(view==="home") return (
     <div style={S.app}>
-      {navBar("home")}
+      {topBar}
       <div style={S.body} className="page-enter" key={pageKey.current}>
-        {/* Date cliquable ouvre le calendrier */}
         <button onClick={()=>setShowCal(!showCal)} style={{ background:"none", border:"none", cursor:"pointer", fontFamily:C.font, padding:0, marginBottom:14, textAlign:"left", display:"block" }}>
           <div style={{ fontSize:11, color:C.sub, fontWeight:500, textTransform:"uppercase", letterSpacing:1.5, marginBottom:2 }}>
             {showCal?"Masquer le calendrier":"Date de la séance"}
           </div>
-          <div style={{ fontSize:16, fontWeight:500, color:C.text }}>
-            {fmtDateLong(calDate)}
-          </div>
+          <div style={{ fontSize:16, fontWeight:500, color:C.text }}>{fmtDateLong(calDate)}</div>
         </button>
-        {showCal && <Calendar calDate={calDate} setCalDate={setCalDate} sessions={db.sessions}/>}
+        {showCal&&<Calendar calDate={calDate} setCalDate={setCalDate} sessions={db.sessions}/>}
 
-        {/* Séances disponibles */}
-        {db.groups.length > 0 && (
+        {db.groups.length>0&&(
           <>
-            <div style={S.sec}>Démarrer une séance</div>
-            {db.groups.map(g=>(
-              <Card key={g.id} onClick={()=>startSession(g.id)}>
-                <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-                  <div>
-                    <div style={{ fontSize:15, fontWeight:500 }}>{g.name}</div>
-                    <div style={{ fontSize:12, color:C.muted, marginTop:2 }}>{g.exercises.length} exercice{g.exercises.length>1?"s":""}</div>
-                  </div>
-                  <span style={{ color:C.faint, fontSize:17 }}>›</span>
-                </div>
-              </Card>
-            ))}
+            <div style={{ ...S.sec, display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+              <span>Démarrer une séance</span>
+              <span style={{ fontSize:9, color:C.faint, fontStyle:"normal" }}>maintenir pour réordonner</span>
+            </div>
+            <div ref={groupListRef}>
+              {db.groups.map((g,i)=>(
+                <DraggableGroupCard
+                  key={g.id}
+                  group={g}
+                  isDragging={groupDragging===i}
+                  onNavigate={(gid)=>startSession(gid)}
+                  onStart={()=>groupDragStart(i)}
+                  onDragEnter={()=>groupDragEnter(i)}
+                  onDragEnd={groupDragEnd}
+                  onTouchStart={(e)=>groupTouchStart(i,e)}
+                  onTouchMove={groupTouchMove}
+                  onTouchEnd={groupTouchEnd}
+                />
+              ))}
+            </div>
           </>
         )}
 
-        {db.groups.length === 0 && (
+        {db.groups.length===0&&(
           <div style={{ background:C.surface, border:`1px solid ${C.border}`, borderRadius:11, padding:"20px 16px", textAlign:"center", marginTop:10 }}>
             <div style={{ fontSize:14, color:C.muted, marginBottom:12 }}>Aucune séance créée</div>
             <button style={{ ...S.btn, width:"auto", padding:"10px 20px", margin:0, display:"inline-block" }}
@@ -732,46 +908,57 @@ export default function App() {
           </div>
         )}
 
-        <div style={{ marginTop:20 }}>
-          <button style={S.ghost} onClick={()=>{setNewGName("");navigate("groups");}}>Gérer mes séances</button>
-        </div>
+        {db.groups.length>0&&(
+          <div style={{ marginTop:8 }}>
+            <button style={S.ghost} onClick={()=>{setNewGName("");navigate("groups");}}>Gérer mes séances</button>
+          </div>
+        )}
       </div>
+      <BottomNav current="home" onNavigate={(v)=>{if(v==="groups"){setNewGName("");} navigate(v);}}/>
     </div>
   );
 
-  // ── GROUPS (liste) ─────────────────────────────────────────────────────
+  // ── GROUPS ────────────────────────────────────────────────────────────
   if(view==="groups") return (
     <div style={S.app}>
-      {navBar("groups")}
+      {topBar}
       <div style={S.body} className="page-enter" key={pageKey.current}>
         <h1 style={S.h1}>Mes séances</h1>
-        <p style={{ ...S.sub }}>Crée tes types de séances et leurs exercices</p>
+        <p style={S.sub}>Crée tes types de séances et leurs exercices</p>
         <div style={S.sec}>Nouvelle séance</div>
         <input style={{ ...S.input, marginBottom:9 }} placeholder="ex : DOS, BRAS, FULL BODY…" value={newGName}
           onChange={e=>setNewGName(e.target.value)} onKeyDown={e=>e.key==="Enter"&&addGroup()}/>
-        {/* addGroup redirige directement vers la page exos */}
         <button style={{ ...S.btn, marginBottom:22 }} onClick={addGroup}>Créer la séance</button>
-        <div style={S.sec}>Séances existantes</div>
-        {db.groups.map(g=>(
-          <Card key={g.id} onClick={()=>{setSelGroupId(g.id);setNewEName("");navigate("group");}}>
-            <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
-              <div>
-                <div style={{ fontSize:14, fontWeight:500 }}>{g.name}</div>
-                <div style={{ fontSize:12, color:C.muted, marginTop:2 }}>{g.exercises.length} exercice{g.exercises.length>1?"s":""}</div>
-              </div>
-              <span style={{ color:C.faint, fontSize:17 }}>›</span>
-            </div>
-          </Card>
-        ))}
-        {db.groups.length===0&&<p style={{ color:C.muted, fontSize:13 }}>Aucune séance. Crée-en une !</p>}
+        <div style={{ ...S.sec, display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+          <span>Séances existantes</span>
+          {db.groups.length>1&&<span style={{ fontSize:9, color:C.faint }}>maintenir pour réordonner</span>}
+        </div>
+        <div ref={groupListRef}>
+          {db.groups.map((g,i)=>(
+            <DraggableGroupCard
+              key={g.id}
+              group={g}
+              isDragging={groupDragging===i}
+              onNavigate={(gid)=>{setSelGroupId(gid);setNewEName("");navigate("group");}}
+              onStart={()=>groupDragStart(i)}
+              onDragEnter={()=>groupDragEnter(i)}
+              onDragEnd={groupDragEnd}
+              onTouchStart={(e)=>groupTouchStart(i,e)}
+              onTouchMove={groupTouchMove}
+              onTouchEnd={groupTouchEnd}
+            />
+          ))}
+        </div>
+        {db.groups.length===0&&<p style={{ color:C.muted,fontSize:13 }}>Aucune séance. Crée-en une !</p>}
       </div>
+      <BottomNav current="groups" onNavigate={(v)=>{if(v==="groups"){setNewGName("");} navigate(v);}}/>
     </div>
   );
 
-  // ── GROUP DETAIL (exercices) ───────────────────────────────────────────
+  // ── GROUP DETAIL ───────────────────────────────────────────────────────
   if(view==="group"&&selGroup) return (
     <div style={S.app}>
-      {navBar("groups")}
+      {topBar}
       <div style={S.body} className="page-enter" key={pageKey.current}>
         <button style={S.back} onClick={()=>navigate("groups")}>← Séances</button>
         <h1 style={S.h1}>{selGroup.name}</h1>
@@ -787,7 +974,7 @@ export default function App() {
             {mergePrompt.matches.map(({exo,group})=>{
               const isLinked=mergePrompt.linked.includes(exo.id);
               return (
-                <div key={exo.id} style={{ display:"flex", alignItems:"center", gap:9, background: isLinked?"#1e2a1e":C.card, border:`1px solid ${isLinked?"#3a5a3a":C.border}`, borderRadius:9, padding:"9px 13px", marginBottom:7, cursor:"pointer", transition:"all 0.12s" }}
+                <div key={exo.id} style={{ display:"flex", alignItems:"center", gap:9, background:isLinked?"#1e2a1e":C.card, border:`1px solid ${isLinked?"#3a5a3a":C.border}`, borderRadius:9, padding:"9px 13px", marginBottom:7, cursor:"pointer", transition:"all 0.12s" }}
                   onClick={()=>{
                     const linked=isLinked?mergePrompt.linked.filter(id=>id!==exo.id):[...mergePrompt.linked,exo.id];
                     setMergePrompt({...mergePrompt,linked});
@@ -818,22 +1005,43 @@ export default function App() {
           <>
             <input style={{ ...S.input, marginBottom:9 }} placeholder="ex : Tractions, Développé couché…" value={newEName}
               onChange={e=>setNewEName(e.target.value)} onKeyDown={e=>e.key==="Enter"&&addExercise()}/>
-            <button style={{ ...S.btn, marginBottom:22 }} onClick={()=>addExercise()}>Ajouter l'exercice</button>
+            <button style={{ ...S.btn, marginBottom:16 }} onClick={()=>addExercise()}>Ajouter l'exercice</button>
           </>
         )}
 
-        <div style={S.sec}>Exercices</div>
-        {selGroup.exercises.map(e=>(
-          <ExoSettingsCard key={e.id} exo={e}
-            defaultOpen={e.id===lastAddedExoId}
-            onSave={(updated)=>updateExercise(selGroup.id,updated)}
-            onDelete={(eid)=>deleteExercise(selGroup.id,eid)}
-            onNavigate={(eid)=>{setSelExoId(eid);navigate("exo");}}
-          />
-        ))}
+        {selGroup.exercises.length>0&&(
+          <>
+            <div style={{ ...S.sec, display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+              <span>Exercices</span>
+              {selGroup.exercises.length>1&&<span style={{ fontSize:9, color:C.faint }}>maintenir pour réordonner</span>}
+            </div>
+            {/* New exo anchor */}
+            <div ref={newExoRef}/>
+            <div ref={exoListRef}>
+              {selGroup.exercises.map((e,i)=>(
+                <ExoSettingsCard key={e.id} exo={e}
+                  defaultOpen={e.id===lastAddedExoId}
+                  isDragging={exoDragging===i}
+                  onSave={(updated)=>updateExercise(selGroup.id,updated)}
+                  onDelete={(eid)=>deleteExercise(selGroup.id,eid)}
+                  onNavigate={(eid)=>{setSelExoId(eid);navigate("exo");}}
+                  dragHandlers={{
+                    onDragStart:()=>exoDragStart(i),
+                    onDragEnter:()=>exoDragEnter(i),
+                    onDragEnd:exoDragEnd,
+                    onTouchStart:(ev)=>exoTouchStart(i,ev),
+                    onTouchMove:exoTouchMove,
+                    onTouchEnd:exoTouchEnd,
+                  }}
+                />
+              ))}
+            </div>
+          </>
+        )}
         {selGroup.exercises.length===0&&<p style={{ color:C.muted,fontSize:13 }}>Aucun exercice. Ajoute-en un !</p>}
         <button style={S.danger} onClick={()=>deleteGroup(selGroup.id)}>Supprimer la séance "{selGroup.name}"</button>
       </div>
+      <BottomNav current="groups" onNavigate={(v)=>{if(v==="groups"){setNewGName("");} navigate(v);}}/>
     </div>
   );
 
@@ -845,8 +1053,8 @@ export default function App() {
     const last=perfs[perfs.length-1];
     const chartData=perfs.map(p=>{
       let avgReps=0,avgKg=0;
-      if(p.sets&&p.sets.length>0) {
-        if(typeof p.sets[0]==="object") {
+      if(p.sets&&p.sets.length>0){
+        if(typeof p.sets[0]==="object"){
           avgReps=Math.round(p.sets.reduce((a,s)=>a+(s.reps||0),0)/p.sets.length);
           avgKg=Math.round(p.sets.reduce((a,s)=>a+(s.kg||0),0)/p.sets.length*10)/10;
         } else {
@@ -858,7 +1066,7 @@ export default function App() {
     });
     return (
       <div style={S.app}>
-        {navBar("groups")}
+        {topBar}
         <div style={S.body} className="page-enter" key={pageKey.current}>
           <button style={S.back} onClick={()=>navigate("group")}>← {group?.name}</button>
           <h1 style={S.h1}>{exo?.name}</h1>
@@ -922,6 +1130,7 @@ export default function App() {
           {perfs.length===0&&<p style={{ color:C.muted,fontSize:13 }}>Pas encore de données.</p>}
           <button style={S.danger} onClick={()=>{deleteExercise(group?.id,selExoId);navigate("group");}}>Supprimer "{exo?.name}"</button>
         </div>
+        <BottomNav current="groups" onNavigate={(v)=>{if(v==="groups"){setNewGName("");} navigate(v);}}/>
       </div>
     );
   }
@@ -931,7 +1140,7 @@ export default function App() {
     const step=activeSession.step;
     const SessionHeader=()=>(
       <div style={S.hdr}>
-        <Logo onClick={()=>navigate("home")}/>
+        <Logo/>
         <span style={{ fontSize:10,color:C.sub,fontWeight:500,background:"#222",padding:"4px 10px",borderRadius:20,letterSpacing:1.5,textTransform:"uppercase" }}>En cours</span>
       </div>
     );
@@ -952,7 +1161,6 @@ export default function App() {
         <div style={S.app}>
           <SessionHeader/>
           <div style={S.body} className="page-enter">
-            {/* Barre de progression */}
             {total>1&&(
               <div style={{ marginBottom:14 }}>
                 <div style={{ display:"flex", justifyContent:"space-between", marginBottom:5 }}>
@@ -973,7 +1181,6 @@ export default function App() {
               </Card>
             )}
 
-            {/* Résumé des exos déjà faits */}
             {activeSession.entries.length>0&&(
               <div style={{ marginBottom:14 }}>
                 <div style={S.sec}>Déjà enregistré</div>
@@ -988,10 +1195,10 @@ export default function App() {
             <LogFormWidget logForm={logForm} setLogForm={setLogForm} exo={exo}/>
             <div style={{ height:16 }}/>
 
+            {/* Valider button */}
             <button style={S.btn} onClick={logEntry}>
-              {nextName?`Valider → ${nextName}`:"Terminer & enregistrer"}
+              {nextName ? `Valider → ${nextName}` : "Valider & terminer la séance"}
             </button>
-            {/* Skip : passer sans enregistrer */}
             <button style={{ ...S.ghost, color:C.muted, borderColor:C.border, marginBottom:6 }} onClick={skipEntry}>
               {nextName?`Passer cet exo → ${nextName}`:"Passer sans enregistrer"}
             </button>
@@ -1000,14 +1207,13 @@ export default function App() {
         </div>
       );
     }
-    // Fallback si step inconnu
     return null;
   }
 
   // ── HISTORY ───────────────────────────────────────────────────────────
   if(view==="history") return (
     <div style={S.app}>
-      {navBar("history")}
+      {topBar}
       <div style={S.body} className="page-enter" key={pageKey.current}>
         <h1 style={S.h1}>Historique</h1>
         <p style={S.sub}>{db.sessions.length} séance{db.sessions.length>1?"s":""}</p>
@@ -1027,13 +1233,14 @@ export default function App() {
           </Card>
         ))}
       </div>
+      <BottomNav current="history" onNavigate={(v)=>{if(v==="groups"){setNewGName("");} navigate(v);}}/>
     </div>
   );
 
   // ── SESSION DETAIL ────────────────────────────────────────────────────
   if(view==="sessionDetail"&&selSession) return (
     <div style={S.app}>
-      {navBar("history")}
+      {topBar}
       <div style={S.body} className="page-enter" key={pageKey.current}>
         <button style={S.back} onClick={()=>navigate("history")}>← Historique</button>
         <div style={{ fontSize:11,color:C.muted,fontWeight:400,marginBottom:3 }}>{fmt(selSession.date)}</div>
@@ -1051,6 +1258,7 @@ export default function App() {
         {(selSession.entries||[]).length===0&&<p style={{ color:C.muted,fontSize:13 }}>Aucun exercice enregistré.</p>}
         <button style={S.danger} onClick={()=>deleteSession(selSession.id)}>Supprimer cette séance</button>
       </div>
+      <BottomNav current="history" onNavigate={(v)=>{if(v==="groups"){setNewGName("");} navigate(v);}}/>
     </div>
   );
 
