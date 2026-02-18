@@ -444,6 +444,11 @@ function ExoSettingsCard({ exo, onSave, onDelete, onNavigate, defaultOpen=false 
 
 // ── Main App ───────────────────────────────────────────────────────────
 export default function App() {
+  // --- 1. ÉTATS POUR L'AUTHENTIFICATION ---
+  const [session, setSession] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+
+  // --- 2. TES ÉTATS EXISTANTS ---
   const [db, setDb] = useState(null);
   const [view, setView] = useState("home");
   const [selGroupId, setSelGroupId] = useState(null);
@@ -459,44 +464,88 @@ export default function App() {
   const [mergePrompt, setMergePrompt] = useState(null);
   const pageKey = useRef(0);
 
+  // --- 3. GESTION DE LA CONNEXION (VIGILE) ---
   useEffect(() => {
-    const s=document.createElement("style"); s.textContent=globalCss; document.head.appendChild(s);
-    return ()=>document.head.removeChild(s);
+    // Vérifie si déjà connecté
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setAuthLoading(false);
+    });
+
+    // Écoute les changements (Login/Logout)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
+  // Injection du CSS global
   useEffect(() => {
-    try { const s=localStorage.getItem(SK); setDb(s?JSON.parse(s):seed); }
-    catch { setDb(seed); }
+    const s = document.createElement("style"); 
+    s.textContent = globalCss; 
+    document.head.appendChild(s);
+    return () => document.head.removeChild(s);
   }, []);
 
+  // Chargement des données (LocalStorage pour l'instant)
+  useEffect(() => {
+    if (session) { // On ne charge la DB que si l'utilisateur est loggé
+      try { 
+        const s = localStorage.getItem(SK); 
+        setDb(s ? JSON.parse(s) : seed); 
+      } catch { 
+        setDb(seed); 
+      }
+    }
+  }, [session]);
+
+  // --- 4. FONCTIONS DE SAUVEGARDE ET NAVIGATION ---
   function saveDb(next) {
     setDb(next);
-    try { localStorage.setItem(SK,JSON.stringify(next)); } catch {}
+    try { localStorage.setItem(SK, JSON.stringify(next)); } catch {}
+    // Note : Plus tard, on ajoutera ici l'envoi vers Supabase !
   }
 
   function navigate(newView, fn) {
-    pageKey.current+=1;
-    if(fn) fn();
+    pageKey.current += 1;
+    if (fn) fn();
     setView(newView);
   }
 
-  if(!db) return <div style={{ ...S.app, padding:40, color:C.muted, fontSize:14 }}>Chargement…</div>;
+  // --- 5. LOGIQUE D'AFFICHAGE ---
+  
+  // A. Pendant que Supabase vérifie la session
+  if (authLoading) {
+    return <div style={{ background: '#111', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#888' }}>Vérification...</div>;
+  }
 
-  const selGroup = db.groups.find(g=>g.id===selGroupId)||null;
-  const selSession = db.sessions.find(s=>s.id===selSessionId)||null;
+  // B. Si personne n'est connecté -> Écran de Login
+  if (!session) {
+    return <AuthForm />;
+  }
+
+  // C. Si la base n'est pas encore prête
+  if (!db) {
+    return <div style={{ padding: 40, color: '#888', fontSize: 14, background: '#111', height: '100vh' }}>Chargement des données…</div>;
+  }
+
+  // --- 6. TES CALCULS EXISTANTS ---
+  const selGroup = db.groups.find(g => g.id === selGroupId) || null;
+  const selSession = db.sessions.find(s => s.id === selSessionId) || null;
 
   function getAllLinkedIds(exoId) {
-    let canon=exoId;
-    db.groups.forEach(g=>g.exercises.forEach(e=>{if(e.id===exoId&&e.canonicalId) canon=e.canonicalId;}));
-    const ids=new Set([exoId]);
-    db.groups.forEach(g=>g.exercises.forEach(e=>{if(e.id===exoId||e.canonicalId===canon||e.id===canon) ids.add(e.id);}));
+    let canon = exoId;
+    db.groups.forEach(g => g.exercises.forEach(e => { if (e.id === exoId && e.canonicalId) canon = e.canonicalId; }));
+    const ids = new Set([exoId]);
+    db.groups.forEach(g => g.exercises.forEach(e => { if (e.id === exoId || e.canonicalId === canon || e.id === canon) ids.add(e.id); }));
     return ids;
   }
 
   function perfsForExo(exoId) {
-    const ids=getAllLinkedIds(exoId), res=[];
-    db.sessions.forEach(s=>(s.entries||[]).forEach(e=>{if(ids.has(e.exoId)) res.push({date:s.date,dateLabel:fmt(s.date),...e});}));
-    return res.sort((a,b)=>new Date(a.date)-new Date(b.date));
+    const ids = getAllLinkedIds(exoId), res = [];
+    db.sessions.forEach(s => (s.entries || []).forEach(e => { if (ids.has(e.exoId)) res.push({ date: s.date, dateLabel: fmt(s.date), ...e }); }));
+    return res.sort((a, b) => new Date(a.date) - new Date(b.date));
   }
 
   function makeDefaultForm(exo, lastPerf) {
