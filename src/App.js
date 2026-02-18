@@ -511,17 +511,17 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    (async () => {
-      try {
-        const r = await window.storage.get(SK);
-        setDb(r ? JSON.parse(r.value) : seed);
-      } catch { setDb(seed); }
-    })();
+    try {
+      const saved = localStorage.getItem(SK);
+      setDb(saved ? JSON.parse(saved) : seed);
+    } catch {
+      setDb(seed);
+    }
   }, []);
 
-  async function saveDb(next) {
+  function saveDb(next) {
     setDb(next);
-    try { await window.storage.set(SK, JSON.stringify(next)); } catch {}
+    try { localStorage.setItem(SK, JSON.stringify(next)); } catch {}
   }
 
   function navigate(newView, fn) {
@@ -646,7 +646,7 @@ export default function App() {
   }
   async function finishSession() {
     const sess = { id: activeSession.id, name: activeSession.name, date: activeSession.date, entries: activeSession.entries };
-    await saveDb({ ...db, sessions: [sess, ...db.sessions] });
+    saveDb({ ...db, sessions: [sess, ...db.sessions] });
     setActiveSession(null);
     navigate("home");
   }
