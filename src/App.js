@@ -4,7 +4,7 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "rec
 
 // 1. Initialisation Supabase
 const supabaseUrl = 'https://rnypcpzblmnpirwpregh.supabase.co';
-const supabaseKey = 'TA_CLE_SB_PUBLISHABLE_COPIEE'; // <--- N'OUBLIE PAS DE COLLER TA VRAIE CLÉ ICI
+const supabaseKey = 'sb_publishable_URXAdXQihgYxTNwsOoOd3A_Qy7RR_D5'; // <--- N'OUBLIE PAS DE COLLER TA VRAIE CLÉ ICI
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 // 2. Composant Écran de Login
