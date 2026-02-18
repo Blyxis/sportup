@@ -514,17 +514,24 @@ export default function App() {
     }
   };
 
-  const saveToCloud = async (uid, dataToSave) => {
-    try {
-      await supabase.from('user_data').upsert({
+const saveToCloud = async (uid, dataToSave) => {
+  try {
+    const { error } = await supabase.from('user_data').upsert(
+      {
         user_id: uid,
         data: dataToSave,
         updated_at: new Date().toISOString()
-      });
-    } catch (e) {
-      console.error("Erreur sauvegarde:", e);
+      }, 
+      { onConflict: 'user_id' } 
+    );
+
+    if (error) {
+      alert("Erreur Supabase : " + error.message);
     }
-  };
+  } catch (e) {
+    console.error("Erreur sauvegarde:", e);
+  }
+};
 
   // ─── 2. Tes Effets (Auth, CSS, etc.) ───
   
