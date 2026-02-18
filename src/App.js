@@ -1,6 +1,55 @@
-import { useState, useEffect, useRef } from "react";
+import { createClient } from '@supabase/supabase-js';
+import React, { useState, useEffect, useRef } from "react";
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
+// 1. Initialisation Supabase
+const supabaseUrl = 'https://rnypcpzblmnpirwpregh.supabase.co';
+const supabaseKey = 'TA_CLE_SB_PUBLISHABLE_COPIEE'; // <--- N'OUBLIE PAS DE COLLER TA VRAIE CLÉ ICI
+const supabase = createClient(supabaseUrl, supabaseKey);
+
+// 2. Composant Écran de Login
+const AuthForm = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleAuth = async (type) => {
+    setLoading(true);
+    const { error } = type === 'login' 
+      ? await supabase.auth.signInWithPassword({ email, password })
+      : await supabase.auth.signUp({ email, password });
+    
+    if (error) alert(error.message);
+    else if (type === 'signup') alert("Inscription réussie ! Connecte-toi maintenant.");
+    setLoading(false);
+  };
+
+  return (
+    <div style={{ 
+      padding: '40px 20px', textAlign: 'center', background: '#111', color: 'white', 
+      height: '100vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', fontFamily: 'sans-serif' 
+    }}>
+      <h1 style={{ color: '#4CAF50', marginBottom: '30px' }}>SPORTUP</h1>
+      <div style={{ maxWidth: '300px', margin: '0 auto', width: '100%' }}>
+        <input type="email" placeholder="Email" onChange={e => setEmail(e.target.value)} 
+          style={{ width: '100%', padding: '12px', marginBottom: '10px', borderRadius: '8px', border: '1px solid #333', background: '#222', color: 'white' }} />
+        <input type="password" placeholder="Mot de passe" onChange={e => setPassword(e.target.value)} 
+          style={{ width: '100%', padding: '12px', marginBottom: '20px', borderRadius: '8px', border: '1px solid #333', background: '#222', color: 'white' }} />
+        
+        <button onClick={() => handleAuth('login')} disabled={loading}
+          style={{ width: '100%', padding: '12px', marginBottom: '10px', background: '#4CAF50', color: 'white', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>
+          {loading ? 'Chargement...' : 'Se connecter'}
+        </button>
+        <button onClick={() => handleAuth('signup')} disabled={loading}
+          style={{ width: '100%', padding: '12px', background: 'transparent', color: '#888', border: '1px solid #333', borderRadius: '8px', cursor: 'pointer' }}>
+          Créer un compte
+        </button>
+      </div>
+    </div>
+  );
+};
+
+// 3. Tes constantes et fonctions utilitaires existantes
 const SK = "sportup_v1";
 const seed = { groups: [], sessions: [] };
 const uid = () => Date.now() + Math.random();
