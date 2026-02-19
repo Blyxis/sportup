@@ -55,7 +55,7 @@ const THEMES = {
 // ─── Premium Themes ───────────────────────────────────────────────────────────
 const PREMIUM_THEMES = {
 
-  // ── 1. AURORA — Lisibilité renforcée, fond plus sombre, texte blanc pur ──
+  // ── 1. AURORA ──
   'aurora': {
     name: 'Aurora Borealis',
     tagline: 'Lumières du Nord',
@@ -89,7 +89,7 @@ const PREMIUM_THEMES = {
     textGradient: 'linear-gradient(135deg,#5effc8,#a78bfa)',
   },
 
-  // ── 2. VELVET — Fond encore plus sombre, accent violacé plus lumineux ──
+  // ── 2. VELVET ──
   'velvet': {
     name: 'Velvet Noir',
     tagline: 'Luxe & Profondeur',
@@ -123,7 +123,7 @@ const PREMIUM_THEMES = {
     textGradient: 'linear-gradient(135deg,#c084fc,#f0abfc)',
   },
 
-  // ── 3. TITANIUM — Monospaced sombre, muted plus lisible, accents plus chauds ──
+  // ── 3. TITANIUM ──
   'titanium': {
     name: 'Titanium Pro',
     tagline: 'Précision industrielle',
@@ -157,7 +157,7 @@ const PREMIUM_THEMES = {
     textGradient: 'linear-gradient(135deg,#a8c4d8,#d0e4f0)',
   },
 
-  // ── 4. EMBER — Encore plus poussé : fond quasi noir charbonneux, braises intenses ──
+  // ── 4. EMBER ──
   'ember': {
     name: 'Ember Forge',
     tagline: 'Feu & Puissance',
@@ -192,7 +192,7 @@ const PREMIUM_THEMES = {
     textGradient: 'linear-gradient(135deg,#ff7040,#ffaa00)',
   },
 
-  // ── 5. GLACIER — Converti en dark bleu glacé au lieu de blanc (bien plus lisible) ──
+  // ── 5. GLACIER ──
   'glacier': {
     name: 'Glacier Ice',
     tagline: 'Clarté cristalline',
@@ -226,7 +226,7 @@ const PREMIUM_THEMES = {
     textGradient: 'linear-gradient(135deg,#60c8f0,#b0e8ff)',
   },
 
-  // ── 6. MIDNIGHT — Muted beaucoup plus lisible, texte plus contrasté ──
+  // ── 6. MIDNIGHT ──
   'midnight': {
     name: 'Minuit Circuit',
     tagline: 'Néon & Data',
@@ -261,7 +261,7 @@ const PREMIUM_THEMES = {
     textGradient: 'linear-gradient(135deg,#00f090,#00d4ff)',
   },
 
-  // ── 7. DESERT SAND — Encore plus poussé : ambiance manuscrite, papyrus profond ──
+  // ── 7. DESERT SAND ──
   'sand': {
     name: 'Desert Sand',
     tagline: 'Dune & Sérénité',
@@ -301,7 +301,7 @@ const PREMIUM_THEMES = {
     textGradient: 'linear-gradient(135deg,#c8963c,#e8c070)',
   },
 
-  // ── 8. COBALT — Muted bien plus lisible, texte clair net ──
+  // ── 8. COBALT ──
   'cobalt': {
     name: 'Cobalt Deep',
     tagline: 'Abyssal & Précis',
@@ -335,7 +335,7 @@ const PREMIUM_THEMES = {
     textGradient: 'linear-gradient(135deg,#5aaeff,#90ccff)',
   },
 
-  // ── 9. SAKURA — Converti en dark rosé profond (fini le fond blanc illisible) ──
+  // ── 9. SAKURA ──
   'sakura': {
     name: 'Sakura Studio',
     tagline: 'Zen & Raffinement',
@@ -369,7 +369,7 @@ const PREMIUM_THEMES = {
     textGradient: 'linear-gradient(135deg,#f080a0,#ffc0d8)',
   },
 
-  // ── 10. ABYSS — Poussé encore plus loin : micro-texture, hiérarchie muted plus visible ──
+  // ── 10. ABYSS ──
   'abyss': {
     name: 'Abyss Matter',
     tagline: 'Graphite & Vide',
@@ -512,6 +512,26 @@ async function saveToCloud(userId, db) {
   if (error) console.error('Cloud save error:', error);
 }
 
+// ─── Timer helpers ────────────────────────────────────────────────────────────
+// Converts total seconds to { min, sec }
+function secsToMinSec(totalSecs) {
+  const s = Math.max(0, totalSecs);
+  return { min: Math.floor(s / 60), sec: s % 60 };
+}
+// Converts { min, sec } to total seconds
+function minSecToSecs(min, sec) {
+  return (parseInt(min) || 0) * 60 + (parseInt(sec) || 0);
+}
+// Formats total seconds to a readable string: "50 sec", "1 min", "1 min 10 sec", etc.
+function formatDuration(totalSecs) {
+  const s = Math.max(0, totalSecs);
+  const m = Math.floor(s / 60);
+  const sec = s % 60;
+  if (m === 0) return `${sec} sec`;
+  if (sec === 0) return `${m} min`;
+  return `${m} min ${sec} sec`;
+}
+
 // ─── BottomNav ────────────────────────────────────────────────────────────────
 function BottomNav({ cur, onNav }) {
   const t = CURRENT_PREMIUM || CURRENT_THEME;
@@ -624,6 +644,26 @@ function Stepper({ label, value, onChange, step=1, min=0, unit="" }) {
   );
 }
 
+// ─── TimerStepper — displays total seconds with smart formatting ──────────────
+function TimerStepper({ label, totalSecs, onChange }) {
+  const dec = () => onChange(Math.max(0, totalSecs - 10));
+  const inc = () => onChange(totalSecs + 10);
+  const bS = { background:C.surface, border:"1px solid "+C.border, borderRadius:8, width:42, height:42, fontSize:20, fontWeight:300, color:C.text, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 };
+  return (
+    <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:8 }}>
+      <div style={{ fontSize:11, color:S._isLight?"#999":"#444", fontWeight:600, textTransform:"uppercase", letterSpacing:1.5 }}>{label}</div>
+      <div style={{ display:"flex", alignItems:"center", gap:10 }}>
+        <button style={bS} onClick={dec}>−</button>
+        <div style={{ textAlign:"center", minWidth:90 }}>
+          <div style={{ fontSize:22, fontWeight:700, color:S._text, lineHeight:1.1 }}>{formatDuration(totalSecs)}</div>
+          <div style={{ fontSize:10, color:S._isLight?"#aaa":"#444", marginTop:3, letterSpacing:1, textTransform:"uppercase" }}>par séance</div>
+        </div>
+        <button style={bS} onClick={inc}>+</button>
+      </div>
+    </div>
+  );
+}
+
 // ─── Calendar ─────────────────────────────────────────────────────────────────
 function Calendar({ calDate, setCalDate, sessions }) {
   const y=calDate.getFullYear(), m=calDate.getMonth();
@@ -670,15 +710,17 @@ function Calendar({ calDate, setCalDate, sessions }) {
 function LogFormWidget({ logForm, setLogForm, exo }) {
   const mode = exo?.mode || "reps";
   const series = parseInt(logForm.series) || 1;
+
   function buildSets(n, existing, defReps, defKg) {
     return Array.from({length:n}, (_,i) => {
       const ex = existing && existing[i];
       if(ex && typeof ex === "object") return ex;
-      const r = typeof ex === "number" ? ex : (parseInt(defReps)||10);
+      const r = typeof ex === "number" ? ex : (parseInt(defReps)||12);
       return { reps:r, kg:parseFloat(defKg)||0 };
     });
   }
   const sets = buildSets(series, logForm.sets, logForm.reps, logForm.kg);
+
   function updateSeries(v) {
     const n = Math.max(1, parseInt(v)||1);
     setLogForm({...logForm, series:n, sets:buildSets(n, sets, logForm.reps, logForm.kg)});
@@ -691,6 +733,10 @@ function LogFormWidget({ logForm, setLogForm, exo }) {
     const s = sets.map((x,i) => i<idx ? x : {...x, kg:Math.max(0,Math.round(((x.kg||0)+delta)*10)/10)});
     setLogForm({...logForm, sets:s});
   }
+
+  // Timer: totalSecs stored in logForm.timeTotalSecs (default 60 = 1 min)
+  const timeTotalSecs = logForm.timeTotalSecs !== undefined ? logForm.timeTotalSecs : 60;
+
   const iBtn = { background:C.card, border:"1px solid "+C.border, borderRadius:7, width:30, height:30, color:C.text, cursor:"pointer", fontSize:16, display:"flex", alignItems:"center", justifyContent:"center" };
   return (
     <div>
@@ -727,10 +773,15 @@ function LogFormWidget({ logForm, setLogForm, exo }) {
         </>
       )}
       {mode==="time" && (
-        <div style={{ display:"flex", justifyContent:"space-around", marginBottom:22 }}>
-          <Stepper label="Séries" value={logForm.series} onChange={v=>setLogForm({...logForm,series:Math.max(1,parseInt(v)||1)})} step={1} min={1}/>
-          <Stepper label="Minutes" value={logForm.timeMin||0} onChange={v=>setLogForm({...logForm,timeMin:Math.max(0,parseInt(v)||0)})} step={1} min={0} unit="min"/>
-          <Stepper label="Secondes" value={logForm.timeSec||0} onChange={v=>setLogForm({...logForm,timeSec:Math.min(59,Math.max(0,parseInt(v)||0))})} step={5} min={0} unit="sec"/>
+        <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:22, marginBottom:22 }}>
+          <div style={{ display:"flex", justifyContent:"space-around", width:"100%", gap:16 }}>
+            <Stepper label="Séries" value={logForm.series} onChange={v=>setLogForm({...logForm,series:Math.max(1,parseInt(v)||1)})} step={1} min={1}/>
+          </div>
+          <TimerStepper
+            label="Durée"
+            totalSecs={timeTotalSecs}
+            onChange={secs => setLogForm({...logForm, timeTotalSecs: secs})}
+          />
         </div>
       )}
       <div style={{ marginBottom:4 }}>
@@ -744,13 +795,19 @@ function LogFormWidget({ logForm, setLogForm, exo }) {
 // ─── PerfTags ─────────────────────────────────────────────────────────────────
 function PerfTags({ entry }) {
   const mode = entry.mode || "reps";
-  if(mode==="time") return (
-    <div style={{ display:"flex", gap:7, flexWrap:"wrap", marginTop:8 }}>
-      <div style={S.tag}><span style={S.tagVal}>{entry.series||"—"}</span><span style={S.tagLabel}>séries</span></div>
-      <div style={S.tag}><span style={S.tagVal}>{entry.timeMin||0}:{String(entry.timeSec||0).padStart(2,"0")}</span><span style={S.tagLabel}>temps</span></div>
-      {entry.note && <div style={{ fontSize:12, color:S._muted, alignSelf:"center", fontStyle:"italic" }}>{entry.note}</div>}
-    </div>
-  );
+  if(mode==="time") {
+    // Support both old (timeMin/timeSec) and new (timeTotalSecs) format
+    const totalSecs = entry.timeTotalSecs !== undefined
+      ? entry.timeTotalSecs
+      : minSecToSecs(entry.timeMin || 0, entry.timeSec || 0);
+    return (
+      <div style={{ display:"flex", gap:7, flexWrap:"wrap", marginTop:8 }}>
+        <div style={S.tag}><span style={S.tagVal}>{entry.series||"—"}</span><span style={S.tagLabel}>séries</span></div>
+        <div style={S.tag}><span style={S.tagVal}>{formatDuration(totalSecs)}</span><span style={S.tagLabel}>durée</span></div>
+        {entry.note && <div style={{ fontSize:12, color:S._muted, alignSelf:"center", fontStyle:"italic" }}>{entry.note}</div>}
+      </div>
+    );
+  }
   const sets = entry.sets || [];
   const isObj = sets.length > 0 && typeof sets[0] === "object";
   if(isObj) {
@@ -787,16 +844,32 @@ function ExoSettingsCard({ exo, onSave, onDelete, onNavigate, defaultOpen, force
   const [open, setOpen] = useState(defaultOpen ? true : false);
   const [mode, setMode] = useState(exo.mode || "reps");
   const [kg, setKg] = useState(exo.defaultKg || 0);
+  // Default reps: stored in exo.defaultReps, fallback 12
+  const [defaultReps, setDefaultReps] = useState(exo.defaultReps !== undefined ? exo.defaultReps : 12);
+  // Default series: stored in exo.defaultSeries, fallback 4
+  const [defaultSeries, setDefaultSeries] = useState(exo.defaultSeries !== undefined ? exo.defaultSeries : 4);
+  // Default time in total seconds: stored in exo.defaultTimeSecs, fallback 60
+  const [defaultTimeSecs, setDefaultTimeSecs] = useState(exo.defaultTimeSecs !== undefined ? exo.defaultTimeSecs : 60);
+
   useEffect(() => { if(forceCollapse) setOpen(false); }, [forceCollapse]);
   useEffect(() => { if(defaultOpen) setOpen(true); }, [defaultOpen]);
-  function save() { onSave({...exo, mode, defaultKg:kg}); setOpen(false); }
+
+  function save() {
+    onSave({...exo, mode, defaultKg:kg, defaultReps, defaultSeries, defaultTimeSecs});
+    setOpen(false);
+  }
+
+  const iBtn = { background:C.surface, border:"1px solid "+C.border, borderRadius:8, width:38, height:38, fontSize:18, color:C.text, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" };
+
   return (
     <div style={{ background:S._cardBg, border:S._cardBorder, borderRadius:12, marginBottom:10, overflow:"hidden" }}>
       <div onClick={() => setOpen(o => !o)} style={{ display:"flex", alignItems:"center", padding:"14px 16px", gap:10, cursor:"pointer" }}>
         <div style={{ flex:1 }}>
           <div style={{ fontSize:15, fontWeight:500 }}>{exo.name}</div>
           <div style={{ fontSize:12, color:S._muted, marginTop:3 }}>
-            {exo.mode==="time"?"Temps":"Reps / KG"}{exo.defaultKg>0&&exo.mode!=="time" ? " · "+exo.defaultKg+"kg habituel" : ""}
+            {exo.mode==="time"
+              ? `Temps · ${formatDuration(exo.defaultTimeSecs !== undefined ? exo.defaultTimeSecs : 60)}`
+              : `Reps / KG${exo.defaultKg>0 ? " · "+exo.defaultKg+"kg" : ""}${exo.defaultReps ? " · "+exo.defaultReps+" reps" : ""}`}
           </div>
           {exo.canonicalId && <div style={{ fontSize:11, color:S._sub, marginTop:2 }}>données partagées</div>}
         </div>
@@ -808,22 +881,71 @@ function ExoSettingsCard({ exo, onSave, onDelete, onNavigate, defaultOpen, force
       {open && (
         <div style={{ padding:"0 16px 16px", borderTop:S._cardBorder }} className="fade-in">
           <div style={{ paddingTop:14 }}>
+            {/* Type toggle */}
             <div style={{ fontSize:11, color:S._isLight?"#999":"#444", fontWeight:600, textTransform:"uppercase", letterSpacing:1.5, marginBottom:9 }}>Type d'exercice</div>
-            <div style={{ display:"flex", gap:7, marginBottom:18 }}>
+            <div style={{ display:"flex", gap:7, marginBottom:20 }}>
               <button style={S.toggle(mode==="reps")} onClick={()=>setMode("reps")}>Répétitions / KG</button>
               <button style={S.toggle(mode==="time")} onClick={()=>setMode("time")}>Temps</button>
             </div>
+
             {mode==="reps" && (
-              <div style={{ marginBottom:18 }}>
+              <>
+                {/* Series + Reps defaults */}
+                <div style={{ fontSize:11, color:S._isLight?"#999":"#444", fontWeight:600, textTransform:"uppercase", letterSpacing:1.5, marginBottom:12 }}>Valeurs par défaut</div>
+                <div style={{ display:"flex", gap:12, marginBottom:20, justifyContent:"space-around" }}>
+                  {/* Series stepper */}
+                  <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:6 }}>
+                    <div style={{ fontSize:10, color:S._isLight?"#aaa":"#444", textTransform:"uppercase", letterSpacing:1.5, fontWeight:600 }}>Séries</div>
+                    <div style={{ display:"flex", alignItems:"center", gap:6 }}>
+                      <button onClick={()=>setDefaultSeries(v=>Math.max(1,v-1))} style={iBtn}>−</button>
+                      <div style={{ fontSize:20, fontWeight:700, minWidth:32, textAlign:"center", color:S._text }}>{defaultSeries}</div>
+                      <button onClick={()=>setDefaultSeries(v=>v+1)} style={iBtn}>+</button>
+                    </div>
+                  </div>
+                  {/* Reps stepper */}
+                  <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:6 }}>
+                    <div style={{ fontSize:10, color:S._isLight?"#aaa":"#444", textTransform:"uppercase", letterSpacing:1.5, fontWeight:600 }}>Reps</div>
+                    <div style={{ display:"flex", alignItems:"center", gap:6 }}>
+                      <button onClick={()=>setDefaultReps(v=>Math.max(1,v-1))} style={iBtn}>−</button>
+                      <div style={{ fontSize:20, fontWeight:700, minWidth:32, textAlign:"center", color:S._text }}>{defaultReps}</div>
+                      <button onClick={()=>setDefaultReps(v=>v+1)} style={iBtn}>+</button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Default weight */}
                 <div style={{ fontSize:11, color:S._isLight?"#999":"#444", fontWeight:600, textTransform:"uppercase", letterSpacing:1.5, marginBottom:9 }}>Poids habituel</div>
-                <div style={{ display:"flex", alignItems:"center", gap:9 }}>
-                  <button onClick={()=>setKg(v=>Math.max(0,Math.round((v-2.5)*10)/10))} style={{ background:S._surface, border:S._cardBorder, borderRadius:8, width:38, height:38, fontSize:18, color:S._text, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>−</button>
+                <div style={{ display:"flex", alignItems:"center", gap:9, marginBottom:20 }}>
+                  <button onClick={()=>setKg(v=>Math.max(0,Math.round((v-2.5)*10)/10))} style={iBtn}>−</button>
                   <input type="number" value={kg} onChange={e=>setKg(parseFloat(e.target.value)||0)} style={{ ...S.input, textAlign:"center", fontSize:18, fontWeight:700, width:90 }}/>
                   <span style={{ color:S._muted, fontSize:14 }}>kg</span>
-                  <button onClick={()=>setKg(v=>Math.round((v+2.5)*10)/10)} style={{ background:S._surface, border:S._cardBorder, borderRadius:8, width:38, height:38, fontSize:18, color:S._text, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>+</button>
+                  <button onClick={()=>setKg(v=>Math.round((v+2.5)*10)/10)} style={iBtn}>+</button>
                 </div>
-              </div>
+              </>
             )}
+
+            {mode==="time" && (
+              <>
+                {/* Series default */}
+                <div style={{ fontSize:11, color:S._isLight?"#999":"#444", fontWeight:600, textTransform:"uppercase", letterSpacing:1.5, marginBottom:12 }}>Valeurs par défaut</div>
+                <div style={{ display:"flex", gap:16, marginBottom:20, justifyContent:"space-around", alignItems:"flex-start" }}>
+                  <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:6 }}>
+                    <div style={{ fontSize:10, color:S._isLight?"#aaa":"#444", textTransform:"uppercase", letterSpacing:1.5, fontWeight:600 }}>Séries</div>
+                    <div style={{ display:"flex", alignItems:"center", gap:6 }}>
+                      <button onClick={()=>setDefaultSeries(v=>Math.max(1,v-1))} style={iBtn}>−</button>
+                      <div style={{ fontSize:20, fontWeight:700, minWidth:32, textAlign:"center", color:S._text }}>{defaultSeries}</div>
+                      <button onClick={()=>setDefaultSeries(v=>v+1)} style={iBtn}>+</button>
+                    </div>
+                  </div>
+                  <TimerStepper
+                    label="Durée"
+                    totalSecs={defaultTimeSecs}
+                    onChange={secs => setDefaultTimeSecs(secs)}
+                  />
+                </div>
+              </>
+            )}
+
             <div style={{ display:"flex", gap:7 }}>
               <button onClick={save} style={{ ...S.btnSave, flex:1, padding:"11px" }}>Enregistrer</button>
               <button onClick={()=>onDelete(exo.id)} style={{ background:"none", color:"#c47070", border:"1px solid #2a1818", borderRadius:9, padding:"11px 15px", fontSize:14, cursor:"pointer" }}>Supprimer</button>
@@ -858,7 +980,6 @@ function PremiumThemeCard({ id, t, isActive, onSelect }) {
         boxShadow: isActive ? `0 0 30px ${t.accent}20, inset 0 0 30px ${t.accent}05` : "none",
       }}
     >
-      {/* Theme preview swatch */}
       <div style={{ position: "relative", flexShrink: 0 }}>
         <div style={{
           width: 48,
@@ -869,7 +990,6 @@ function PremiumThemeCard({ id, t, isActive, onSelect }) {
           transition: "box-shadow 0.2s",
           overflow: "hidden",
         }}>
-          {/* Font preview strip */}
           <div style={{
             position: "absolute",
             bottom: 0,
@@ -884,7 +1004,6 @@ function PremiumThemeCard({ id, t, isActive, onSelect }) {
             <span style={{ fontSize: 8, color: t.text, fontFamily: t.fontFamily, fontWeight: 600, letterSpacing: 0.5 }}>Aa</span>
           </div>
         </div>
-        {/* Light/dark indicator */}
         <div style={{
           position: "absolute",
           top: -3,
@@ -896,8 +1015,6 @@ function PremiumThemeCard({ id, t, isActive, onSelect }) {
           border: "2px solid rgba(255,255,255,0.15)",
         }}/>
       </div>
-
-      {/* Info */}
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{
           fontSize: 14,
@@ -916,7 +1033,6 @@ function PremiumThemeCard({ id, t, isActive, onSelect }) {
         }}>
           {t.tagline}
         </div>
-        {/* Font family preview */}
         <div style={{
           fontSize: 10,
           color: "rgba(255,255,255,0.2)",
@@ -928,8 +1044,6 @@ function PremiumThemeCard({ id, t, isActive, onSelect }) {
           {t.fontFamily.split(",")[0].replace(/'/g, "")}
         </div>
       </div>
-
-      {/* Checkmark / Premium badge */}
       <div style={{ flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 5 }}>
         {isActive ? (
           <div style={{
@@ -990,7 +1104,7 @@ export default function App() {
   const [newEName, setNewEName] = useState("");
   const [lastAddedExoId, setLastAddedExoId] = useState(null);
   const [collapseVersion, setCollapseVersion] = useState(0);
-  const [logForm, setLogForm] = useState({ series:4, reps:10, kg:0, sets:[], timeMin:1, timeSec:0, note:"" });
+  const [logForm, setLogForm] = useState({ series:4, reps:12, kg:0, sets:[], timeTotalSecs:60, note:"" });
   const [mergePrompt, setMergePrompt] = useState(null);
   const [popup, setPopup] = useState(null);
   const [popupVisible, setPopupVisible] = useState(false);
@@ -1068,11 +1182,10 @@ export default function App() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // ─── Fetch popup config (public, no auth needed) ───
+  // ─── Fetch popup config ───
   useEffect(() => {
     supabase.from('app_popup').select('*').eq('id', 1).maybeSingle().then(({ data }) => {
       if (data && data.active && data.image_url) {
-        // Only show if user hasn't dismissed it this session
         const dismissed = sessionStorage.getItem('sportup_popup_dismissed_' + data.updated_at);
         if (!dismissed) {
           setPopup(data);
@@ -1189,16 +1302,20 @@ export default function App() {
   }
   function makeDefaultForm(exo, lastPerf) {
     const mode=exo?.mode||"reps";
-    const series=lastPerf?(parseInt(lastPerf.series)||4):4;
-    const reps=lastPerf?(parseInt(lastPerf.reps)||10):10;
+    const series=lastPerf?(parseInt(lastPerf.series)||4):(exo?.defaultSeries||4);
+    const reps=lastPerf?(parseInt(lastPerf.reps)||12):(exo?.defaultReps||12);
     const kg=lastPerf?(lastPerf.kg!==undefined?lastPerf.kg:(exo?.defaultKg||0)):(exo?.defaultKg||0);
+    // Time: use last perf's timeTotalSecs, or exo default, or 60s
+    const timeTotalSecs = lastPerf
+      ? (lastPerf.timeTotalSecs !== undefined ? lastPerf.timeTotalSecs : minSecToSecs(lastPerf.timeMin||0, lastPerf.timeSec||0))
+      : (exo?.defaultTimeSecs || 60);
     let sets;
     if(lastPerf&&lastPerf.sets&&lastPerf.sets.length>0) {
       sets=lastPerf.sets.map(s=>typeof s==="object"?s:{reps:s,kg});
       while(sets.length<series) sets.push(sets[sets.length-1]||{reps,kg});
       sets=sets.slice(0,series);
     } else { sets=Array(series).fill(null).map(()=>({reps,kg})); }
-    return {series,reps,kg,sets,mode,timeMin:lastPerf?.timeMin||1,timeSec:lastPerf?.timeSec||0,note:""};
+    return {series, reps, kg, sets, mode, timeTotalSecs, note:""};
   }
   function addGroup() {
     if(!newGName.trim()) return;
@@ -1214,7 +1331,7 @@ export default function App() {
     const name = (forceName||newEName).trim();
     if(!name||!selGroupId) return;
     const newExoId = uid();
-    const newExo = {id:newExoId, name, defaultKg:0, mode:"reps"};
+    const newExo = {id:newExoId, name, defaultKg:0, defaultReps:12, defaultSeries:4, defaultTimeSecs:60, mode:"reps"};
     const similar = findSimilarExos(db, name, null);
     if(similar.length>0) { setMergePrompt({newExo, groupId:selGroupId, matches:similar, linked:[]}); setNewEName(""); return; }
     setCollapseVersion(v => v+1); setLastAddedExoId(newExoId);
@@ -1327,9 +1444,7 @@ export default function App() {
     </div>
   );
 
-  // ═══════════════════════════════════════════════════════════════════════════
   // THEMES
-  // ═══════════════════════════════════════════════════════════════════════════
   if(view==="themes") return (
     <div style={S.app}>
       <div style={S.hdr}><Logo/></div>
@@ -1338,7 +1453,6 @@ export default function App() {
         <h1 style={S.h1}>Choisir le visuel</h1>
         <p style={{ fontSize:14, color:S._muted, marginBottom:24 }}>Sélectionne le thème de couleur de l'application</p>
 
-        {/* Standard themes */}
         <div style={{ display:"flex", flexDirection:"column", gap:9, marginBottom:32 }}>
           {Object.entries(THEMES).map(([id, t]) => {
             const isActive = !premiumThemeId && themeId === id;
@@ -1362,7 +1476,6 @@ export default function App() {
           })}
         </div>
 
-        {/* Premium themes section */}
         <div style={{ marginBottom: 12 }}>
           <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:4 }}>
             <div style={{ fontSize:11, fontWeight:700, color:"#c8a840", textTransform:"uppercase", letterSpacing:2.5 }}>
@@ -1377,13 +1490,7 @@ export default function App() {
 
         <div style={{ display:"flex", flexDirection:"column", gap:0 }}>
           {Object.entries(PREMIUM_THEMES).map(([id, t]) => (
-            <PremiumThemeCard
-              key={id}
-              id={id}
-              t={t}
-              isActive={premiumThemeId === id}
-              onSelect={applyPremiumTheme}
-            />
+            <PremiumThemeCard key={id} id={id} t={t} isActive={premiumThemeId === id} onSelect={applyPremiumTheme}/>
           ))}
         </div>
 
@@ -1393,9 +1500,7 @@ export default function App() {
     </div>
   );
 
-  // ═══════════════════════════════════════════════════════════════════════════
   // HOME
-  // ═══════════════════════════════════════════════════════════════════════════
   if(view==="home") return (
     <div style={S.app}>
       <div style={S.hdr}>
@@ -1438,9 +1543,7 @@ export default function App() {
     </div>
   );
 
-  // ═══════════════════════════════════════════════════════════════════════════
   // GROUPS
-  // ═══════════════════════════════════════════════════════════════════════════
   if(view==="groups") return (
     <div style={S.app}>
       <div style={S.hdr}>
@@ -1472,9 +1575,7 @@ export default function App() {
     </div>
   );
 
-  // ═══════════════════════════════════════════════════════════════════════════
   // GROUP DETAIL
-  // ═══════════════════════════════════════════════════════════════════════════
   if(view==="group" && selGroup) return (
     <div style={S.app}>
       <div style={S.hdr}><Logo/><button style={S.back} onClick={()=>navigate("groups")}>← Séances</button></div>
@@ -1537,9 +1638,7 @@ export default function App() {
     </div>
   );
 
-  // ═══════════════════════════════════════════════════════════════════════════
   // EXO STATS
-  // ═══════════════════════════════════════════════════════════════════════════
   if(view==="exo") {
     const group = db.groups.find(g=>g.exercises.some(e=>e.id===selExoId));
     const exo = group?.exercises.find(e=>e.id===selExoId);
@@ -1566,7 +1665,7 @@ export default function App() {
             <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:10, marginBottom:24 }}>
               <div style={S.statBox}><div style={S.statNum}>{last.series||"—"}</div><div style={S.statLabel}>séries</div></div>
               {last.mode==="time"
-                ? <div style={S.statBox}><div style={{ ...S.statNum, fontSize:19 }}>{last.timeMin}:{String(last.timeSec||0).padStart(2,"0")}</div><div style={S.statLabel}>temps</div></div>
+                ? <div style={S.statBox}><div style={{ ...S.statNum, fontSize:16 }}>{formatDuration(last.timeTotalSecs !== undefined ? last.timeTotalSecs : minSecToSecs(last.timeMin||0, last.timeSec||0))}</div><div style={S.statLabel}>durée</div></div>
                 : <div style={S.statBox}><div style={{ ...S.statNum, fontSize:14 }}>{last.sets&&typeof last.sets[0]==="object"?last.sets.map(s=>s.reps).join("/"):(last.sets?last.sets.join("/"):last.reps||"—")}</div><div style={S.statLabel}>reps</div></div>
               }
               <div style={S.statBox}><div style={S.statNum}>{last.kg||"—"}</div><div style={S.statLabel}>kg</div></div>
@@ -1626,9 +1725,7 @@ export default function App() {
     );
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
   // SESSION EN COURS
-  // ═══════════════════════════════════════════════════════════════════════════
   if(view==="doSession" && activeSession && activeSession.step==="logExo") {
     const g = db.groups.find(x=>x.id===activeSession.pickedGroup);
     const exo = g?.exercises.find(x=>x.id===activeSession.pickedExo);
@@ -1684,9 +1781,7 @@ export default function App() {
     );
   }
 
-  // ═══════════════════════════════════════════════════════════════════════════
   // HISTORY
-  // ═══════════════════════════════════════════════════════════════════════════
   if(view==="history") return (
     <div style={S.app}>
       <div style={S.hdr}>
@@ -1716,9 +1811,7 @@ export default function App() {
     </div>
   );
 
-  // ═══════════════════════════════════════════════════════════════════════════
   // SESSION DETAIL
-  // ═══════════════════════════════════════════════════════════════════════════
   if(view==="sessionDetail" && selSession) return (
     <div style={S.app}>
       <div style={S.hdr}><Logo/></div>
@@ -1802,9 +1895,19 @@ export default function App() {
             <img src={popup.image_url} alt="Annonce" style={{ width:"100%", display:"block", maxHeight:520, objectFit:"cover" }} />
           )}
 
-          {/* Label optionnel en pied */}
+          {/* ── Label en pied — plus grand et plus impactant ── */}
           {popup.label && (
-            <div style={{ padding:"11px 16px", fontSize:12, color:"rgba(255,255,255,0.4)", textAlign:"center", background:"#0d0d0d", fontFamily:C.font }}>
+            <div style={{
+              padding: "16px 20px",
+              fontSize: 16,
+              fontWeight: 700,
+              color: "rgba(255,255,255,0.92)",
+              textAlign: "center",
+              background: "#0d0d0d",
+              fontFamily: "'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif",
+              letterSpacing: 0.2,
+              lineHeight: 1.4,
+            }}>
               {popup.label}
             </div>
           )}
