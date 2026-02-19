@@ -669,9 +669,7 @@ function Calendar({ calDate, setCalDate, sessions, planned, groups, onPlan, onUn
   const first=new Date(y,m,1).getDay();
   const days=new Date(y,m+1,0).getDate();
   const today=new Date();
-  const todayIso = today.getFullYear()+"-"+today.getMonth()+"-"+today.getDate();
   const sessSet=new Set(sessions.map(s=>{const d=new Date(s.date);return d.getFullYear()+"-"+d.getMonth()+"-"+d.getDate();}));
-  // Build a map: iso -> array of planned group names
   const plannedMap={};
   (planned||[]).forEach(p=>{
     const key=p.year+"-"+p.month+"-"+p.day;
@@ -682,102 +680,196 @@ function Calendar({ calDate, setCalDate, sessions, planned, groups, onPlan, onUn
   const off=(first+6)%7;
   for(let i=0;i<off;i++) cells.push(null);
   for(let d=1;d<=days;d++) cells.push(d);
-  const accent = S._accent;
-  const isLight = S._isLight;
-  const [planPopup, setPlanPopup] = useState(null); // {day, x, y}
-  const [planGroupId, setPlanGroupId] = useState("");
-  const calRef = useRef(null);
+  const accent=S._accent;
+  const isLight=S._isLight;
 
-  function handleDayClick(d, e) {
-    const clickedDate = new Date(y,m,d);
-    const isoParts = y+"-"+m+"-"+d;
-    // Always select the date
+  // planPanel: { day, iso } — shown below calendar when a future day is selected
+  const [planPanel, setPlanPanel] = useState(null);
+  // editing: null = view mode, or groupId string = pick mode
+  const [editMode, setEditMode] = useState(false);
+  const [hoverGroup, setHoverGroup] = useState(null);
+
+  function handleDayClick(d) {
+    const dayStart=new Date(y,m,d); dayStart.setHours(0,0,0,0);
+    const todayStart=new Date(); todayStart.setHours(0,0,0,0);
+    const iso=y+"-"+m+"-"+d;
     setCalDate(new Date(y,m,d));
-    // If future date, show planning popup
-    const dayStart = new Date(y,m,d); dayStart.setHours(0,0,0,0);
-    const todayStart = new Date(); todayStart.setHours(0,0,0,0);
     if(dayStart > todayStart && onPlan) {
-      const rect = e.currentTarget.getBoundingClientRect();
-      const calRect = calRef.current?.getBoundingClientRect() || {left:0,top:0};
-      setPlanPopup({day:d, iso:isoParts, relX: rect.right - calRect.left, relY: rect.top - calRect.top});
-      setPlanGroupId("");
+      if(planPanel?.iso===iso) {
+        // toggle off if same day
+        setPlanPanel(null); setEditMode(false);
+      } else {
+        setPlanPanel({day:d, iso});
+        // If nothing planned yet, go straight to edit mode
+        setEditMode(!(plannedMap[iso]?.length > 0));
+      }
     } else {
-      setPlanPopup(null);
+      setPlanPanel(null); setEditMode(false);
     }
   }
 
+  // Keep planPanel in sync when planned changes (after onPlan/onUnplan)
+  const planPanelIso = planPanel?.iso;
+  const panelPlanned = planPanelIso ? (plannedMap[planPanelIso]||[]) : [];
+
+  const panelDate = planPanel ? new Date(y,m,planPanel.day) : null;
+  const panelDateStr = panelDate ? panelDate.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"long"}) : "";
+
+  // text/bg colors always dark-safe for panel
+  const panelBg = isLight ? "#fff" : "#161616";
+  const panelBorder = isLight ? "#e0e0e0" : "#2a2a2a";
+  const panelText = isLight ? "#1a1a1a" : "#f0f0f0";
+  const panelMuted = isLight ? "#888" : "#666";
+  const planBlue = isLight ? "#2255cc" : "#6aacff";
+  const planBlueBg = isLight ? "rgba(34,85,204,0.08)" : "rgba(106,172,255,0.1)";
+  const planBlueBorder = isLight ? "rgba(34,85,204,0.25)" : "rgba(106,172,255,0.25)";
+
   return (
-    <Card style={{ marginBottom:18, cursor:"default", position:"relative" }}>
-      <div ref={calRef} style={{ position:"relative" }}>
+    <div>
+      <Card style={{ marginBottom: planPanel ? 0 : 18, borderRadius: planPanel ? "12px 12px 0 0" : 12, cursor:"default" }}>
         <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:13 }}>
-          <button onClick={()=>{setPlanPopup(null);setCalDate(new Date(y,m-1,1));}} style={S.back}>←</button>
-          <span style={{ fontSize:14, fontWeight:500 }}>{calDate.toLocaleDateString("fr-FR",{month:"long",year:"numeric"})}</span>
-          <button onClick={()=>{setPlanPopup(null);setCalDate(new Date(y,m+1,1));}} style={S.back}>→</button>
+          <button onClick={()=>{setPlanPanel(null);setEditMode(false);setCalDate(new Date(y,m-1,1));}} style={S.back}>←</button>
+          <span style={{ fontSize:14, fontWeight:600 }}>{calDate.toLocaleDateString("fr-FR",{month:"long",year:"numeric"})}</span>
+          <button onClick={()=>{setPlanPanel(null);setEditMode(false);setCalDate(new Date(y,m+1,1));}} style={S.back}>→</button>
         </div>
-        <div style={{ display:"grid", gridTemplateColumns:"repeat(7,1fr)", gap:2 }}>
-          {["L","M","M","J","V","S","D"].map((d,i)=><div key={i} style={{ fontSize:11, color:isLight?"#999":"#444", textAlign:"center", paddingBottom:6, fontWeight:600 }}>{d}</div>)}
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(7,1fr)", gap:3 }}>
+          {["L","M","M","J","V","S","D"].map((d,i)=><div key={i} style={{ fontSize:11, color:isLight?"#999":"#444", textAlign:"center", paddingBottom:7, fontWeight:700, letterSpacing:0.5 }}>{d}</div>)}
           {cells.map((d,i)=>{
             if(!d) return <div key={i}/>;
             const iso=y+"-"+m+"-"+d;
             const isT=today.getDate()===d&&today.getMonth()===m&&today.getFullYear()===y;
             const isSel=calDate.getDate()===d&&calDate.getMonth()===m&&calDate.getFullYear()===y;
+            const isPanelOpen=planPanel?.day===d;
             const hasSess=sessSet.has(iso);
             const hasPlanned=!!plannedMap[iso];
-            const dayStart=new Date(y,m,d); dayStart.setHours(0,0,0,0);
-            const todayStart=new Date(); todayStart.setHours(0,0,0,0);
-            const isFuture=dayStart>todayStart;
-            // Color priority: selected > has session > has planned > future > normal
             let bg="transparent", color=S._muted, border="1px solid transparent";
-            if(isSel) { bg=accent; color=isLight?"#fff":"#111"; }
+            if(isSel&&!isPanelOpen) { bg=accent; color=isLight?"#fff":"#111"; }
+            else if(isPanelOpen) { bg=planBlue; color="#fff"; }
             else if(hasSess) { bg=S._surface; color=S._text; }
-            else if(hasPlanned) { bg=isLight?"rgba(100,160,255,0.18)":"rgba(100,160,255,0.2)"; color=isLight?"#2255cc":"#80b8ff"; border="1px solid "+(isLight?"rgba(80,140,255,0.4)":"rgba(100,160,255,0.4)"); }
-            if(isT&&!isSel) { border=`1px solid ${accent}`; if(!hasPlanned&&!hasSess) color=S._text; }
+            else if(hasPlanned) { bg=planBlueBg; color=planBlue; border="1px solid "+planBlueBorder; }
+            if(isT&&!isSel&&!isPanelOpen) { border=`1px solid ${accent}`; if(!hasPlanned&&!hasSess) color=S._text; }
             return (
-              <div key={i} onClick={(e)=>handleDayClick(d,e)} style={{ height:32, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", fontSize:13, fontWeight:isSel||isT?600:400, cursor:"pointer", borderRadius:7, background:bg, color, border, position:"relative", transition:"background 0.1s" }}>
+              <div key={i} onClick={()=>handleDayClick(d)} style={{ height:34, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", fontSize:13, fontWeight:isSel||isT||isPanelOpen?700:400, cursor:"pointer", borderRadius:8, background:bg, color, border, position:"relative", transition:"all 0.12s" }}>
                 {d}
-                {hasPlanned&&!isSel&&<div style={{ position:"absolute", bottom:2, width:4, height:4, borderRadius:"50%", background:isLight?"#4488ff":"#80b8ff" }}/>}
+                {hasPlanned&&!isSel&&!isPanelOpen&&<div style={{ position:"absolute", bottom:3, width:4, height:4, borderRadius:"50%", background:planBlue }}/>}
               </div>
             );
           })}
         </div>
-        <div style={{ fontSize:12, color:S._muted, textAlign:"right", marginTop:9 }}>
-          Séance le <span style={{ color:S._text, fontWeight:600 }}>{calDate.toLocaleDateString("fr-FR")}</span>
+        <div style={{ fontSize:12, color:S._muted, textAlign:"right", marginTop:10 }}>
+          {planPanel
+            ? <span style={{ color:planBlue, fontWeight:600 }}>📅 {panelDateStr}</span>
+            : <>Séance le <span style={{ color:S._text, fontWeight:600 }}>{calDate.toLocaleDateString("fr-FR")}</span></>
+          }
         </div>
+      </Card>
 
-        {/* Planning popup */}
-        {planPopup && onPlan && (
-          <div style={{ position:"absolute", top: planPopup.relY - 10, left: Math.min(planPopup.relX, 260), zIndex:50, background:isLight?"#fff":"#1e1e1e", border:"1px solid "+(isLight?"#ddd":"#333"), borderRadius:12, padding:"13px 14px", boxShadow:"0 8px 32px rgba(0,0,0,0.35)", minWidth:200 }} onClick={e=>e.stopPropagation()}>
-            <div style={{ fontSize:12, fontWeight:700, color:S._text, marginBottom:10 }}>
-              📅 Planifier le {new Date(y,m,planPopup.day).toLocaleDateString("fr-FR",{day:"numeric",month:"short"})}
+      {/* ── Planning panel — connected below calendar ── */}
+      {planPanel && (
+        <div style={{ background:panelBg, border:"1px solid "+panelBorder, borderTop:"none", borderRadius:"0 0 14px 14px", padding:"16px 16px 18px", marginBottom:18, boxShadow:"0 8px 24px rgba(0,0,0,0.18)" }} className="fade-in">
+
+          {/* Header */}
+          <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:14 }}>
+            <div style={{ fontSize:13, fontWeight:700, color:panelText, display:"flex", alignItems:"center", gap:7 }}>
+              <span style={{ fontSize:18 }}>📅</span>
+              <span>{panelDateStr}</span>
             </div>
-            {/* Already planned for this day */}
-            {plannedMap[planPopup.iso]?.map((p,i)=>(
-              <div key={i} style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:6, background:isLight?"#f0f5ff":"rgba(100,160,255,0.1)", borderRadius:8, padding:"6px 9px" }}>
-                <span style={{ fontSize:12, color:isLight?"#2255cc":"#80b8ff", fontWeight:500 }}>{p.groupName}</span>
-                <button onClick={()=>{ onUnplan(p); setPlanPopup(null); }} style={{ background:"none", border:"none", color:"#c47070", fontSize:16, cursor:"pointer", padding:"0 2px", lineHeight:1 }}>×</button>
-              </div>
-            ))}
-            {(groups||[]).length>0 ? (
-              <>
-                <select value={planGroupId} onChange={e=>setPlanGroupId(e.target.value)} style={{ width:"100%", background:isLight?"#f5f5f5":"#2a2a2a", border:"1px solid "+(isLight?"#ccc":"#444"), borderRadius:8, color:S._text, padding:"8px 10px", fontSize:13, marginBottom:8, fontFamily:S._font, outline:"none" }}>
-                  <option value="">— Choisir une séance —</option>
-                  {(groups||[]).map(g=><option key={g.id} value={g.id}>{g.name}</option>)}
-                </select>
-                <button disabled={!planGroupId} onClick={()=>{
-                  const g=(groups||[]).find(x=>x.id===planGroupId);
-                  if(g) { onPlan({year:y,month:m,day:planPopup.day,groupId:g.id,groupName:g.name}); setPlanPopup(null); }
-                }} style={{ width:"100%", background:planGroupId?"#4488ff":"#2a2a2a", color:"#fff", border:"none", borderRadius:8, padding:"9px", fontSize:13, fontWeight:700, cursor:planGroupId?"pointer":"default", opacity:planGroupId?1:0.5, fontFamily:S._font }}>
-                  Planifier ✓
-                </button>
-              </>
-            ) : (
-              <div style={{ fontSize:12, color:S._muted }}>Crée d'abord une séance.</div>
-            )}
-            <button onClick={()=>setPlanPopup(null)} style={{ background:"none", border:"none", color:S._muted, fontSize:11, cursor:"pointer", marginTop:6, width:"100%", fontFamily:S._font }}>Annuler</button>
+            <button onClick={()=>{setPlanPanel(null);setEditMode(false);}} style={{ background:"none", border:"none", color:panelMuted, fontSize:20, cursor:"pointer", lineHeight:1, padding:"0 4px" }}>×</button>
           </div>
-        )}
-      </div>
-    </Card>
+
+          {/* Already-planned sessions for this day */}
+          {panelPlanned.length > 0 && !editMode && (
+            <div style={{ marginBottom:14 }}>
+              <div style={{ fontSize:11, fontWeight:700, color:panelMuted, textTransform:"uppercase", letterSpacing:1.5, marginBottom:8 }}>Séance planifiée</div>
+              {panelPlanned.map((p,i)=>(
+                <div key={i} style={{ display:"flex", alignItems:"center", justifyContent:"space-between", background:planBlueBg, border:"1px solid "+planBlueBorder, borderRadius:10, padding:"11px 14px", marginBottom:6 }}>
+                  <div>
+                    <div style={{ fontSize:14, fontWeight:700, color:planBlue }}>{p.groupName}</div>
+                  </div>
+                  <div style={{ display:"flex", gap:8, alignItems:"center" }}>
+                    <button onClick={()=>setEditMode(true)} style={{ background:"none", border:"1px solid "+planBlueBorder, color:planBlue, borderRadius:8, padding:"5px 11px", fontSize:12, fontWeight:600, cursor:"pointer", fontFamily:S._font }}>
+                      Modifier
+                    </button>
+                    <button onClick={()=>{ onUnplan(p); if(panelPlanned.length===1) setEditMode(true); }} style={{ background:"none", border:"none", color:"#c47070", fontSize:18, cursor:"pointer", lineHeight:1, padding:"0 2px" }}>×</button>
+                  </div>
+                </div>
+              ))}
+              <button onClick={()=>setEditMode(true)} style={{ width:"100%", background:"transparent", border:"1px dashed "+planBlueBorder, color:planBlue, borderRadius:10, padding:"9px", fontSize:13, cursor:"pointer", fontFamily:S._font, marginTop:4 }}>
+                + Ajouter une séance
+              </button>
+            </div>
+          )}
+
+          {/* Group picker — edit mode */}
+          {editMode && (
+            <div className="fade-in">
+              <div style={{ fontSize:11, fontWeight:700, color:panelMuted, textTransform:"uppercase", letterSpacing:1.5, marginBottom:10 }}>
+                {panelPlanned.length>0 ? "Choisir une autre séance" : "Choisir une séance"}
+              </div>
+              {(groups||[]).length===0 && (
+                <div style={{ fontSize:13, color:panelMuted, textAlign:"center", padding:"12px 0" }}>Crée d'abord une séance.</div>
+              )}
+              <div style={{ display:"flex", flexDirection:"column", gap:6 }}>
+                {(groups||[]).map(g=>{
+                  const alreadyPlanned=panelPlanned.some(p=>p.groupId===g.id);
+                  return (
+                    <button
+                      key={g.id}
+                      disabled={alreadyPlanned}
+                      onMouseEnter={()=>setHoverGroup(g.id)}
+                      onMouseLeave={()=>setHoverGroup(null)}
+                      onClick={()=>{
+                        onPlan({year:y,month:m,day:planPanel.day,groupId:g.id,groupName:g.name});
+                        setEditMode(false);
+                        // Don't close panel — show the "séance planifiée" view
+                      }}
+                      style={{
+                        background: alreadyPlanned ? (isLight?"#f5f5f5":"#1a1a1a") : hoverGroup===g.id ? planBlueBg : (isLight?"#f8f8f8":"#1e1e1e"),
+                        border: "1px solid " + (alreadyPlanned ? panelBorder : hoverGroup===g.id ? planBlueBorder : panelBorder),
+                        borderRadius:10,
+                        padding:"12px 15px",
+                        display:"flex",
+                        alignItems:"center",
+                        justifyContent:"space-between",
+                        cursor:alreadyPlanned?"default":"pointer",
+                        opacity:alreadyPlanned?0.5:1,
+                        transition:"all 0.1s",
+                        fontFamily:S._font,
+                        textAlign:"left",
+                      }}
+                    >
+                      <div>
+                        <div style={{ fontSize:14, fontWeight:600, color: hoverGroup===g.id&&!alreadyPlanned ? planBlue : panelText }}>{g.name}</div>
+                        <div style={{ fontSize:12, color:panelMuted, marginTop:2 }}>{g.exercises.length} exercice{g.exercises.length>1?"s":""}</div>
+                      </div>
+                      {alreadyPlanned
+                        ? <span style={{ fontSize:12, color:panelMuted }}>déjà planifié</span>
+                        : <span style={{ fontSize:18, color: hoverGroup===g.id ? planBlue : panelMuted }}>›</span>
+                      }
+                    </button>
+                  );
+                })}
+              </div>
+              {panelPlanned.length>0 && (
+                <button onClick={()=>setEditMode(false)} style={{ background:"none", border:"none", color:panelMuted, fontSize:12, cursor:"pointer", marginTop:10, width:"100%", fontFamily:S._font, textDecoration:"underline" }}>
+                  ← Retour
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* Empty state — no planned, no edit mode (shouldn't happen but safety) */}
+          {panelPlanned.length===0 && !editMode && (
+            <div style={{ textAlign:"center", padding:"8px 0 4px" }}>
+              <div style={{ fontSize:13, color:panelMuted, marginBottom:12 }}>Aucune séance planifiée ce jour.</div>
+              <button onClick={()=>setEditMode(true)} style={{ background:planBlue, color:"#fff", border:"none", borderRadius:10, padding:"10px 20px", fontSize:14, fontWeight:700, cursor:"pointer", fontFamily:S._font }}>
+                Planifier une séance
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -1234,15 +1326,25 @@ export default function App() {
   useEffect(() => {
     if(!session) return;
     setSyncing(true);
-    loadFromCloudInner(session.user.id).then(cloudData => {
+    const uid = session.user.id;
+    loadFromCloudInner(uid).then(cloudData => {
       if(cloudData) {
         setDb(cloudData);
+        // Keep cloud as source of truth — also cache locally under user-specific key
+        try { localStorage.setItem("sportup_v1_"+uid, JSON.stringify(cloudData)); } catch {}
       } else {
+        // Try user-specific local key first, then fall back to legacy generic key (migration)
         try {
-          const local = localStorage.getItem("sportup_v1");
-          const localData = local ? JSON.parse(local) : { groups: [], sessions: [] };
+          const localSpecific = localStorage.getItem("sportup_v1_"+uid);
+          const localLegacy = localStorage.getItem("sportup_v1");
+          const raw = localSpecific || localLegacy;
+          const localData = raw ? JSON.parse(raw) : { groups: [], sessions: [] };
           setDb(localData);
-          saveToCloudInner(session.user.id, localData);
+          saveToCloudInner(uid, localData);
+          // Migrate: write to user-specific key and clear generic key
+          if(!localSpecific && localLegacy) {
+            try { localStorage.setItem("sportup_v1_"+uid, localLegacy); localStorage.removeItem("sportup_v1"); } catch {}
+          }
         } catch { setDb({ groups: [], sessions: [] }); }
       }
       setSyncing(false);
@@ -1260,7 +1362,10 @@ export default function App() {
 
   const saveDb = useCallback((next) => {
     setDb(next);
-    try { localStorage.setItem("sportup_v1", JSON.stringify(next)); } catch {}
+    // Store under user-specific key to prevent data leaking between accounts on same device
+    if(session?.user?.id) {
+      try { localStorage.setItem("sportup_v1_"+session.user.id, JSON.stringify(next)); } catch {}
+    }
     if(!session) return;
     if(saveTimeout.current) clearTimeout(saveTimeout.current);
     saveTimeout.current = setTimeout(() => { saveToCloudInner(session.user.id, next); }, 300);
