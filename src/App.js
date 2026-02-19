@@ -8,23 +8,59 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 // ─── Themes ───────────────────────────────────────────────────────────────────
 const THEMES = {
-  '1':  { name: 'Dark Pro',   accent: '#e8924a', grad: 'linear-gradient(145deg,#f0a060,#e8924a,#d07840)', logoGrad: 'linear-gradient(135deg,#e8924a 0%,#d07840 40%,#f0ece6 100%)', stopA:'#e8924a', stopB:'#d07840', stopC:'#f2ede6' },
-  '2':  { name: 'Cobalt',     accent: '#4a8ee8', grad: 'linear-gradient(145deg,#60a8f8,#4a8ee8,#3070d0)', logoGrad: 'linear-gradient(135deg,#4a8ee8 0%,#3070d0 40%,#c8dcf8 100%)', stopA:'#4a8ee8', stopB:'#3070d0', stopC:'#c8dcf8' },
-  '5':  { name: 'Jungle',     accent: '#4ab86a', grad: 'linear-gradient(145deg,#60cc80,#4ab86a,#309050)', logoGrad: 'linear-gradient(135deg,#4ab86a 0%,#309050 40%,#c8ecd8 100%)', stopA:'#4ab86a', stopB:'#309050', stopC:'#c8ecd8' },
-  '6':  { name: 'Storm',      accent: '#9a5ae8', grad: 'linear-gradient(145deg,#b070f8,#9a5ae8,#7840d0)', logoGrad: 'linear-gradient(135deg,#9a5ae8 0%,#7840d0 40%,#e0ccf8 100%)', stopA:'#9a5ae8', stopB:'#7840d0', stopC:'#e0ccf8' },
-  '8':  { name: 'RED IMPACT', accent: '#e84a4a', grad: 'linear-gradient(145deg,#f06868,#e84a4a,#c83030)', logoGrad: 'linear-gradient(135deg,#e84a4a 0%,#c83030 40%,#f8cccc 100%)', stopA:'#e84a4a', stopB:'#c83030', stopC:'#f8cccc' },
-  '9':  { name: 'Arctic',     accent: '#4acce8', grad: 'linear-gradient(145deg,#60ddf8,#4acce8,#30a8cc)', logoGrad: 'linear-gradient(135deg,#4acce8 0%,#30a8cc 40%,#c8f0f8 100%)', stopA:'#4acce8', stopB:'#30a8cc', stopC:'#c8f0f8' },
-  '10': { name: 'Gold Rush',  accent: '#e8c84a', grad: 'linear-gradient(145deg,#f8dc60,#e8c84a,#c8a030)', logoGrad: 'linear-gradient(135deg,#e8c84a 0%,#c8a030 40%,#f8ecc8 100%)', stopA:'#e8c84a', stopB:'#c8a030', stopC:'#f8ecc8' },
+  'obsidian': {
+    name: 'Noir Obsidian',
+    accent: '#8ba5bf',
+    grad: 'linear-gradient(145deg,#9fb8d0,#7090aa,#4a6880)',
+    logoGrad: 'linear-gradient(135deg,#9fb8d0 0%,#6888a4 50%,#d0dce8 100%)',
+    stopA: '#9fb8d0', stopB: '#6888a4', stopC: '#d0dce8',
+  },
+  'editorial': {
+    name: 'Lumière Éditoriale',
+    accent: '#c8a96e',
+    grad: 'linear-gradient(145deg,#ddc080,#c8a96e,#a07840)',
+    logoGrad: 'linear-gradient(135deg,#ddc080 0%,#a87840 50%,#f0e0c0 100%)',
+    stopA: '#ddc080', stopB: '#a87840', stopC: '#f0e0c0',
+  },
+  'brutal': {
+    name: 'Brutalisme Raw',
+    accent: '#e8e020',
+    grad: 'linear-gradient(145deg,#f8f040,#e0d800,#a8a000)',
+    logoGrad: 'linear-gradient(135deg,#f0e830 0%,#b0a800 50%,#f8f4a0 100%)',
+    stopA: '#f0e830', stopB: '#b0a800', stopC: '#f8f4a0',
+  },
+  'pastel': {
+    name: 'Douceur Pastel',
+    accent: '#d890b8',
+    grad: 'linear-gradient(145deg,#eca8cc,#d880b0,#b05888)',
+    logoGrad: 'linear-gradient(135deg,#eca8cc 0%,#c06898 50%,#f8d0e8 100%)',
+    stopA: '#eca8cc', stopB: '#c06898', stopC: '#f8d0e8',
+  },
+  'carbone': {
+    name: 'Carbone & Chrome',
+    accent: '#a8b8c4',
+    grad: 'linear-gradient(145deg,#c0d0d8,#98aab8,#607080)',
+    logoGrad: 'linear-gradient(135deg,#c8d8e0 0%,#708090 50%,#e0e8ec 100%)',
+    stopA: '#c8d8e0', stopB: '#708090', stopC: '#e0e8ec',
+  },
+  'redimpact': {
+    name: 'Red Impact',
+    accent: '#e03030',
+    grad: 'linear-gradient(145deg,#f05050,#e03030,#b01818)',
+    logoGrad: 'linear-gradient(135deg,#f05050 0%,#b81818 50%,#f8b0b0 100%)',
+    stopA: '#f05050', stopB: '#b81818', stopC: '#f8b0b0',
+  },
 };
 
-// ─── Design tokens (mutable for theming) ──────────────────────────────────────
+// ─── Design tokens ────────────────────────────────────────────────────────────
 let C = {
   bg:"#0a0a0a", surface:"#141414", card:"#1c1c1c", border:"#2a2a2a",
   text:"#f0f0f0", muted:"#777", faint:"#3a3a3a", sub:"#999",
-  danger:"#c47070", accent:"#e8924a",
+  danger:"#c47070", accent:"#8ba5bf",
   font:"'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif",
 };
-let CURRENT_THEME = THEMES['1'];
+let CURRENT_THEME = THEMES['obsidian'];
+let CURRENT_THEME_ID = 'obsidian';
 
 const globalCss = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap');
@@ -78,6 +114,7 @@ async function saveToCloud(userId, db) {
 
 // ─── BottomNav ────────────────────────────────────────────────────────────────
 function BottomNav({ cur, onNav }) {
+  const t = CURRENT_THEME;
   return (
     <div style={{ position:"fixed", bottom:0, left:"50%", transform:"translateX(-50%)", width:"100%", maxWidth:480, background:C.bg, borderTop:"1px solid #222", display:"flex", alignItems:"center", justifyContent:"space-around", zIndex:100, paddingTop:10, paddingBottom:22 }}>
       <button onClick={() => onNav("groups")} style={{ background:"none", border:"none", color:cur==="groups"?C.text:C.muted, fontSize:11, fontWeight:cur==="groups"?600:400, cursor:"pointer", fontFamily:C.font, display:"flex", flexDirection:"column", alignItems:"center", gap:5, flex:1, padding:"4px 0" }}>
@@ -86,7 +123,7 @@ function BottomNav({ cur, onNav }) {
         </svg>
         Séances
       </button>
-      <button onClick={() => onNav("home")} style={{ background:CURRENT_THEME.grad, border:"none", borderRadius:"50%", width:56, height:56, display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", boxShadow:`0 4px 20px ${CURRENT_THEME.accent}70`, transform:"translateY(-10px)", flexShrink:0 }}>
+      <button onClick={() => onNav("home")} style={{ background:t.grad, border:"none", borderRadius:"50%", width:56, height:56, display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", boxShadow:`0 4px 20px ${t.accent}70`, transform:"translateY(-10px)", flexShrink:0 }}>
         <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
       </button>
       <button onClick={() => onNav("history")} style={{ background:"none", border:"none", color:cur==="history"?C.text:C.muted, fontSize:11, fontWeight:cur==="history"?600:400, cursor:"pointer", fontFamily:C.font, display:"flex", flexDirection:"column", alignItems:"center", gap:5, flex:1, padding:"4px 0" }}>
@@ -100,23 +137,27 @@ function BottomNav({ cur, onNav }) {
 }
 
 // ─── Logo ─────────────────────────────────────────────────────────────────────
+// Each render gets a unique gradient ID tied to the theme to prevent SVG caching issues
 function Logo() {
   const t = CURRENT_THEME;
+  const gradId = `logo-grad-${CURRENT_THEME_ID}`;
   return (
     <div style={{ display:"flex", alignItems:"center", gap:7 }}>
-      <svg width="26" height="26" viewBox="0 0 28 28" fill="none">
+      <svg width="26" height="26" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <linearGradient id="dg" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor={t.stopA}/><stop offset="55%" stopColor={t.stopB}/><stop offset="100%" stopColor={t.stopC}/>
+          <linearGradient id={gradId} x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor={t.stopA}/>
+            <stop offset="55%" stopColor={t.stopB}/>
+            <stop offset="100%" stopColor={t.stopC}/>
           </linearGradient>
         </defs>
-        <rect x="1" y="7" width="5.5" height="14" rx="2" fill="url(#dg)"/>
-        <rect x="6" y="9.5" width="3.5" height="9" rx="1.5" fill="url(#dg)"/>
-        <rect x="9.5" y="12" width="9" height="4" rx="1.5" fill="url(#dg)"/>
-        <rect x="18.5" y="9.5" width="3.5" height="9" rx="1.5" fill="url(#dg)"/>
-        <rect x="21.5" y="7" width="5.5" height="14" rx="2" fill="url(#dg)"/>
+        <rect x="1" y="7" width="5.5" height="14" rx="2" fill={`url(#${gradId})`}/>
+        <rect x="6" y="9.5" width="3.5" height="9" rx="1.5" fill={`url(#${gradId})`}/>
+        <rect x="9.5" y="12" width="9" height="4" rx="1.5" fill={`url(#${gradId})`}/>
+        <rect x="18.5" y="9.5" width="3.5" height="9" rx="1.5" fill={`url(#${gradId})`}/>
+        <rect x="21.5" y="7" width="5.5" height="14" rx="2" fill={`url(#${gradId})`}/>
       </svg>
-      <span style={{ fontSize:16, fontWeight:700, letterSpacing:-0.3, background:t.logoGrad, WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent" }}>
+      <span style={{ fontSize:16, fontWeight:700, letterSpacing:-0.3, background:t.logoGrad, WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text" }}>
         Sport'Up
       </span>
     </div>
@@ -126,7 +167,7 @@ function Logo() {
 // ─── SettingsIcon ─────────────────────────────────────────────────────────────
 function SettingsIcon({ onNavigate }) {
   return (
-    <button onClick={() => onNavigate("settings")} style={{ background:"transparent", border:"1px solid #2a2a2a", borderRadius:8, width:36, height:36, display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", color:C.muted }}>
+    <button onClick={() => onNavigate("settings")} style={{ background:"transparent", border:"1px solid #2a2a2a", borderRadius:8, width:36, height:36, display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", color:C.muted, flexShrink:0 }}>
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="12" r="3"/>
         <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
@@ -383,7 +424,7 @@ export default function App() {
   const [db, setDb] = useState(null);
   const [syncing, setSyncing] = useState(false);
   const [themeId, setThemeId] = useState(() => {
-    try { return localStorage.getItem("sportup_theme") || '1'; } catch { return '1'; }
+    try { return localStorage.getItem("sportup_theme") || 'obsidian'; } catch { return 'obsidian'; }
   });
 
   const [view, setView] = useState("home");
@@ -404,8 +445,9 @@ export default function App() {
   const saveTimeout = useRef(null);
 
   // ── Apply theme globally before render ──
-  const theme = THEMES[themeId] || THEMES['1'];
+  const theme = THEMES[themeId] || THEMES['obsidian'];
   CURRENT_THEME = theme;
+  CURRENT_THEME_ID = themeId;
   C.accent = theme.accent;
 
   function applyTheme(id) {
@@ -413,7 +455,7 @@ export default function App() {
     try { localStorage.setItem("sportup_theme", id); } catch {}
   }
 
-  // ─── Supabase in-component helpers ───
+  // ─── Supabase helpers ───
   const loadFromCloudInner = async (uid) => {
     try {
       const { data, error } = await supabase.from('user_data').select('data').eq('user_id', uid).maybeSingle();
@@ -681,7 +723,7 @@ export default function App() {
               <div key={id} onClick={() => applyTheme(id)} style={{ background: isActive ? "#1a1a1a" : C.card, border:`1px solid ${isActive ? t.accent : "#2a2a2a"}`, borderRadius:14, padding:"14px 16px", display:"flex", alignItems:"center", gap:14, cursor:"pointer", transition:"all 0.15s ease" }}>
                 <div style={{ width:42, height:42, borderRadius:11, background:t.grad, flexShrink:0, boxShadow: isActive ? `0 3px 16px ${t.accent}55` : "none", transition:"box-shadow 0.15s" }}/>
                 <div style={{ flex:1 }}>
-                  <div style={{ fontSize:15, fontWeight: isActive ? 700 : 500, color: isActive ? t.accent : C.text, letterSpacing: id==='8' ? 0.8 : 0 }}>
+                  <div style={{ fontSize:15, fontWeight: isActive ? 700 : 500, color: isActive ? t.accent : C.text }}>
                     {t.name}
                   </div>
                 </div>
@@ -751,7 +793,10 @@ export default function App() {
   // ═══════════════════════════════════════════════════════════════════════════
   if(view==="groups") return (
     <div style={S.app}>
-      <div style={S.hdr}><Logo/></div>
+      <div style={S.hdr}>
+        <Logo/>
+        <SettingsIcon onNavigate={navigate}/>
+      </div>
       <div style={S.body} className="page-enter" key={pageKey.current}>
         <h1 style={S.h1}>Mes séances</h1>
         <p style={S.sub}>Crée tes types de séances et leurs exercices</p>
@@ -994,7 +1039,10 @@ export default function App() {
   // ═══════════════════════════════════════════════════════════════════════════
   if(view==="history") return (
     <div style={S.app}>
-      <div style={S.hdr}><Logo/></div>
+      <div style={S.hdr}>
+        <Logo/>
+        <SettingsIcon onNavigate={navigate}/>
+      </div>
       <div style={S.body} className="page-enter" key={pageKey.current}>
         <h1 style={S.h1}>Historique</h1>
         <p style={S.sub}>{db.sessions.length} séance{db.sessions.length>1?"s":""}</p>
@@ -1048,7 +1096,7 @@ export default function App() {
   return null;
 }
 
-// ─── Auth Form (moved to bottom to avoid hoisting issues) ─────────────────────
+// ─── Auth Form ────────────────────────────────────────────────────────────────
 function AuthForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -1064,14 +1112,14 @@ function AuthForm() {
   };
   return (
     <div style={{ padding:'40px 20px', textAlign:'center', background:'#111', color:'white', height:'100vh', display:'flex', flexDirection:'column', justifyContent:'center', fontFamily:"'DM Sans', sans-serif" }}>
-      <h1 style={{ color:'#e8924a', marginBottom:'30px', fontSize:28, fontWeight:700, letterSpacing:-0.5 }}>SPORTUP</h1>
+      <h1 style={{ color:'#8ba5bf', marginBottom:'30px', fontSize:28, fontWeight:700, letterSpacing:-0.5 }}>SPORTUP</h1>
       <div style={{ maxWidth:'300px', margin:'0 auto', width:'100%' }}>
         <input type="email" placeholder="Email" onChange={e => setEmail(e.target.value)}
           style={{ width:'100%', padding:'13px', marginBottom:'10px', borderRadius:'9px', border:'1px solid #333', background:'#1a1a1a', color:'white', fontSize:15, fontFamily:"'DM Sans', sans-serif" }} />
         <input type="password" placeholder="Mot de passe" onChange={e => setPassword(e.target.value)}
           style={{ width:'100%', padding:'13px', marginBottom:'20px', borderRadius:'9px', border:'1px solid #333', background:'#1a1a1a', color:'white', fontSize:15, fontFamily:"'DM Sans', sans-serif" }} />
         <button onClick={() => handleAuth('login')} disabled={loading}
-          style={{ width:'100%', padding:'13px', marginBottom:'10px', background:'#e8924a', color:'white', border:'none', borderRadius:'9px', fontWeight:700, cursor:'pointer', fontSize:15, fontFamily:"'DM Sans', sans-serif" }}>
+          style={{ width:'100%', padding:'13px', marginBottom:'10px', background:'#8ba5bf', color:'white', border:'none', borderRadius:'9px', fontWeight:700, cursor:'pointer', fontSize:15, fontFamily:"'DM Sans', sans-serif" }}>
           {loading ? 'Chargement...' : 'Se connecter'}
         </button>
         <button onClick={() => handleAuth('signup')} disabled={loading}
