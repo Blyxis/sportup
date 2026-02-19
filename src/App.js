@@ -6,7 +6,7 @@ const supabaseUrl = 'https://rnypcpzblmnpirwpregh.supabase.co';
 const supabaseKey = 'sb_publishable_URXAdXQihgYxTNwsOoOd3A_Qy7RR_D5';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// ─── Themes ───────────────────────────────────────────────────────────────────
+// ─── Standard Themes ──────────────────────────────────────────────────────────
 const THEMES = {
   'obsidian': {
     name: 'Noir Obsidian',
@@ -52,7 +52,323 @@ const THEMES = {
   },
 };
 
-// ─── Design tokens ────────────────────────────────────────────────────────────
+// ─── Premium Themes ───────────────────────────────────────────────────────────
+const PREMIUM_THEMES = {
+  'aurora': {
+    name: 'Aurora Borealis',
+    tagline: 'Lumières du Nord',
+    accent: '#7fffd4',
+    grad: 'linear-gradient(135deg,#00c896,#7fffd4,#a78bfa)',
+    logoGrad: 'linear-gradient(135deg,#00c896 0%,#7fffd4 50%,#a78bfa 100%)',
+    stopA: '#00c896', stopB: '#7fffd4', stopC: '#a78bfa',
+    // Visual overrides
+    bg: '#050d14',
+    surface: '#0a1a24',
+    card: '#0d2030',
+    border: '#0f3040',
+    text: '#e8fff8',
+    muted: '#5a9a88',
+    faint: '#0f2a38',
+    sub: '#4a8877',
+    fontFamily: "'Space Grotesk', -apple-system, sans-serif",
+    fontImport: "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap",
+    // Special effects
+    bgEffect: `
+      background: #050d14;
+      background-image: 
+        radial-gradient(ellipse at 20% 50%, rgba(0,200,150,0.07) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 20%, rgba(167,139,250,0.07) 0%, transparent 50%);
+    `,
+    cardBg: 'linear-gradient(135deg, rgba(0,200,150,0.06) 0%, rgba(13,32,48,1) 100%)',
+    borderStyle: '1px solid rgba(0,200,150,0.15)',
+    navGlow: '0 -1px 30px rgba(0,200,150,0.1)',
+    btnGlow: '0 4px 24px rgba(127,255,212,0.4)',
+    headerBg: 'rgba(5,13,20,0.95)',
+    headerBorder: '1px solid rgba(0,200,150,0.1)',
+    textGradient: 'linear-gradient(135deg,#7fffd4,#a78bfa)',
+  },
+  'velvet': {
+    name: 'Velvet Noir',
+    tagline: 'Luxe & Profondeur',
+    accent: '#d4a8ff',
+    grad: 'linear-gradient(135deg,#8b5cf6,#d4a8ff,#f8b4d9)',
+    logoGrad: 'linear-gradient(135deg,#8b5cf6 0%,#d4a8ff 50%,#f8b4d9 100%)',
+    stopA: '#8b5cf6', stopB: '#d4a8ff', stopC: '#f8b4d9',
+    bg: '#0a0612',
+    surface: '#130e1f',
+    card: '#1a1228',
+    border: '#2a1a40',
+    text: '#f0e8ff',
+    muted: '#7a5a99',
+    faint: '#1e1530',
+    sub: '#6a4a88',
+    fontFamily: "'Cormorant Garamond', Georgia, serif",
+    fontImport: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&display=swap",
+    bgEffect: `
+      background: #0a0612;
+      background-image: 
+        radial-gradient(ellipse at 30% 30%, rgba(139,92,246,0.12) 0%, transparent 60%),
+        radial-gradient(ellipse at 70% 80%, rgba(212,168,255,0.06) 0%, transparent 50%);
+    `,
+    cardBg: 'linear-gradient(145deg, rgba(139,92,246,0.08) 0%, rgba(26,18,40,1) 100%)',
+    borderStyle: '1px solid rgba(139,92,246,0.2)',
+    navGlow: '0 -1px 40px rgba(139,92,246,0.15)',
+    btnGlow: '0 4px 28px rgba(212,168,255,0.45)',
+    headerBg: 'rgba(10,6,18,0.97)',
+    headerBorder: '1px solid rgba(139,92,246,0.15)',
+    textGradient: 'linear-gradient(135deg,#d4a8ff,#f8b4d9)',
+  },
+  'titanium': {
+    name: 'Titanium Pro',
+    tagline: 'Précision industrielle',
+    accent: '#c8d8e8',
+    grad: 'linear-gradient(135deg,#8090a0,#c8d8e8,#ffffff)',
+    logoGrad: 'linear-gradient(135deg,#8090a0 0%,#c8d8e8 50%,#ffffff 100%)',
+    stopA: '#8090a0', stopB: '#c8d8e8', stopC: '#ffffff',
+    bg: '#0c0d0f',
+    surface: '#141618',
+    card: '#1a1d20',
+    border: '#252a2e',
+    text: '#e8edf2',
+    muted: '#607080',
+    faint: '#1e2226',
+    sub: '#506070',
+    fontFamily: "'DM Mono', 'Courier New', monospace",
+    fontImport: "https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&display=swap",
+    bgEffect: `
+      background: #0c0d0f;
+      background-image: 
+        repeating-linear-gradient(0deg, transparent, transparent 40px, rgba(255,255,255,0.008) 40px, rgba(255,255,255,0.008) 41px),
+        repeating-linear-gradient(90deg, transparent, transparent 40px, rgba(255,255,255,0.008) 40px, rgba(255,255,255,0.008) 41px);
+    `,
+    cardBg: 'linear-gradient(145deg, rgba(200,216,232,0.04) 0%, rgba(26,29,32,1) 100%)',
+    borderStyle: '1px solid rgba(200,216,232,0.1)',
+    navGlow: '0 -1px 20px rgba(200,216,232,0.05)',
+    btnGlow: '0 4px 20px rgba(200,216,232,0.25)',
+    headerBg: 'rgba(12,13,15,0.98)',
+    headerBorder: '1px solid rgba(255,255,255,0.06)',
+    textGradient: 'linear-gradient(135deg,#c8d8e8,#ffffff)',
+  },
+  'ember': {
+    name: 'Ember Forge',
+    tagline: 'Feu & Puissance',
+    accent: '#ff6b35',
+    grad: 'linear-gradient(135deg,#ff3300,#ff6b35,#ffaa00)',
+    logoGrad: 'linear-gradient(135deg,#ff3300 0%,#ff6b35 50%,#ffaa00 100%)',
+    stopA: '#ff3300', stopB: '#ff6b35', stopC: '#ffaa00',
+    bg: '#0d0800',
+    surface: '#180f00',
+    card: '#201400',
+    border: '#2e1e00',
+    text: '#fff0e0',
+    muted: '#885530',
+    faint: '#241800',
+    sub: '#774422',
+    fontFamily: "'Bebas Neue', 'Impact', sans-serif",
+    fontImport: "https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap",
+    bgEffect: `
+      background: #0d0800;
+      background-image: 
+        radial-gradient(ellipse at 50% 100%, rgba(255,100,0,0.12) 0%, transparent 60%),
+        radial-gradient(ellipse at 50% 0%, rgba(255,50,0,0.05) 0%, transparent 40%);
+    `,
+    cardBg: 'linear-gradient(145deg, rgba(255,107,53,0.08) 0%, rgba(32,20,0,1) 100%)',
+    borderStyle: '1px solid rgba(255,107,53,0.15)',
+    navGlow: '0 -1px 40px rgba(255,100,0,0.15)',
+    btnGlow: '0 4px 28px rgba(255,107,53,0.5)',
+    headerBg: 'rgba(13,8,0,0.98)',
+    headerBorder: '1px solid rgba(255,107,53,0.12)',
+    textGradient: 'linear-gradient(135deg,#ff6b35,#ffaa00)',
+  },
+  'glacier': {
+    name: 'Glacier White',
+    tagline: 'Clarté absolue',
+    accent: '#2a6cb5',
+    grad: 'linear-gradient(135deg,#1a5aa0,#2a6cb5,#3a9fd4)',
+    logoGrad: 'linear-gradient(135deg,#1a5aa0 0%,#3a9fd4 50%,#a0d4f0 100%)',
+    stopA: '#1a5aa0', stopB: '#2a6cb5', stopC: '#3a9fd4',
+    bg: '#f8fafc',
+    surface: '#eef2f7',
+    card: '#ffffff',
+    border: '#dae2ec',
+    text: '#0a1825',
+    muted: '#6a8099',
+    faint: '#e4eaf2',
+    sub: '#7a90a8',
+    fontFamily: "'Plus Jakarta Sans', -apple-system, sans-serif",
+    fontImport: "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap",
+    bgEffect: `
+      background: #f8fafc;
+      background-image: 
+        radial-gradient(ellipse at 80% 0%, rgba(42,108,181,0.07) 0%, transparent 50%);
+    `,
+    cardBg: '#ffffff',
+    borderStyle: '1px solid rgba(42,108,181,0.15)',
+    navGlow: '0 -1px 20px rgba(42,108,181,0.08)',
+    btnGlow: '0 4px 20px rgba(42,108,181,0.3)',
+    headerBg: 'rgba(248,250,252,0.96)',
+    headerBorder: '1px solid rgba(42,108,181,0.12)',
+    textGradient: 'linear-gradient(135deg,#1a5aa0,#3a9fd4)',
+    isLight: true,
+  },
+  'midnight': {
+    name: 'Minuit Circuit',
+    tagline: 'Néon & Data',
+    accent: '#00ff9d',
+    grad: 'linear-gradient(135deg,#00cc7a,#00ff9d,#00ccff)',
+    logoGrad: 'linear-gradient(135deg,#00cc7a 0%,#00ff9d 50%,#00ccff 100%)',
+    stopA: '#00cc7a', stopB: '#00ff9d', stopC: '#00ccff',
+    bg: '#020409',
+    surface: '#04080f',
+    card: '#060d18',
+    border: '#0a1a2a',
+    text: '#c8ffe8',
+    muted: '#1a6644',
+    faint: '#081018',
+    sub: '#156040',
+    fontFamily: "'JetBrains Mono', 'Courier New', monospace",
+    fontImport: "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap",
+    bgEffect: `
+      background: #020409;
+      background-image: 
+        repeating-linear-gradient(0deg, transparent, transparent 60px, rgba(0,255,157,0.015) 60px, rgba(0,255,157,0.015) 61px),
+        radial-gradient(ellipse at 50% 0%, rgba(0,255,157,0.06) 0%, transparent 50%);
+    `,
+    cardBg: 'linear-gradient(145deg, rgba(0,255,157,0.04) 0%, rgba(6,13,24,1) 100%)',
+    borderStyle: '1px solid rgba(0,255,157,0.1)',
+    navGlow: '0 -1px 40px rgba(0,255,157,0.12)',
+    btnGlow: '0 0 28px rgba(0,255,157,0.45), 0 0 60px rgba(0,255,157,0.15)',
+    headerBg: 'rgba(2,4,9,0.98)',
+    headerBorder: '1px solid rgba(0,255,157,0.08)',
+    textGradient: 'linear-gradient(135deg,#00ff9d,#00ccff)',
+  },
+  'sand': {
+    name: 'Desert Sand',
+    tagline: 'Dune & Sérénité',
+    accent: '#d4a96a',
+    grad: 'linear-gradient(135deg,#b8843a,#d4a96a,#e8c898)',
+    logoGrad: 'linear-gradient(135deg,#b8843a 0%,#d4a96a 50%,#e8c898 100%)',
+    stopA: '#b8843a', stopB: '#d4a96a', stopC: '#e8c898',
+    bg: '#f5f0e8',
+    surface: '#ece4d4',
+    card: '#f8f4ec',
+    border: '#d8c8a8',
+    text: '#2a1e0a',
+    muted: '#9a7a4a',
+    faint: '#e0d4bc',
+    sub: '#8a6a3a',
+    fontFamily: "'Playfair Display', Georgia, serif",
+    fontImport: "https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&display=swap",
+    bgEffect: `
+      background: #f5f0e8;
+      background-image: 
+        url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    `,
+    cardBg: '#f8f4ec',
+    borderStyle: '1px solid rgba(184,132,58,0.2)',
+    navGlow: '0 -2px 20px rgba(212,169,106,0.1)',
+    btnGlow: '0 4px 20px rgba(212,169,106,0.35)',
+    headerBg: 'rgba(245,240,232,0.96)',
+    headerBorder: '1px solid rgba(184,132,58,0.15)',
+    textGradient: 'linear-gradient(135deg,#b8843a,#d4a96a)',
+    isLight: true,
+  },
+  'cobalt': {
+    name: 'Cobalt Deep',
+    tagline: 'Abyssal & Précis',
+    accent: '#4d9fff',
+    grad: 'linear-gradient(135deg,#1a4aaa,#4d9fff,#80c4ff)',
+    logoGrad: 'linear-gradient(135deg,#1a4aaa 0%,#4d9fff 50%,#80c4ff 100%)',
+    stopA: '#1a4aaa', stopB: '#4d9fff', stopC: '#80c4ff',
+    bg: '#02040a',
+    surface: '#040810',
+    card: '#060c1a',
+    border: '#0a1428',
+    text: '#d0e8ff',
+    muted: '#2a5080',
+    faint: '#080f20',
+    sub: '#1e4070',
+    fontFamily: "'Syne', -apple-system, sans-serif",
+    fontImport: "https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&display=swap",
+    bgEffect: `
+      background: #02040a;
+      background-image: 
+        radial-gradient(ellipse at 0% 100%, rgba(26,74,170,0.2) 0%, transparent 50%),
+        radial-gradient(ellipse at 100% 0%, rgba(77,159,255,0.08) 0%, transparent 50%);
+    `,
+    cardBg: 'linear-gradient(145deg, rgba(77,159,255,0.06) 0%, rgba(6,12,26,1) 100%)',
+    borderStyle: '1px solid rgba(77,159,255,0.12)',
+    navGlow: '0 -1px 40px rgba(26,74,170,0.2)',
+    btnGlow: '0 4px 28px rgba(77,159,255,0.4)',
+    headerBg: 'rgba(2,4,10,0.98)',
+    headerBorder: '1px solid rgba(77,159,255,0.1)',
+    textGradient: 'linear-gradient(135deg,#4d9fff,#80c4ff)',
+  },
+  'sakura': {
+    name: 'Sakura Studio',
+    tagline: 'Zen & Raffinement',
+    accent: '#e8708a',
+    grad: 'linear-gradient(135deg,#c8385a,#e8708a,#f4b8c8)',
+    logoGrad: 'linear-gradient(135deg,#c8385a 0%,#e8708a 50%,#f4b8c8 100%)',
+    stopA: '#c8385a', stopB: '#e8708a', stopC: '#f4b8c8',
+    bg: '#fdf8fa',
+    surface: '#f5eef2',
+    card: '#fdf5f8',
+    border: '#ecd8e0',
+    text: '#1a0812',
+    muted: '#9a6070',
+    faint: '#f0e4ea',
+    sub: '#8a5060',
+    fontFamily: "'Noto Serif JP', Georgia, serif",
+    fontImport: "https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;500;600;700&display=swap",
+    bgEffect: `
+      background: #fdf8fa;
+      background-image: 
+        radial-gradient(ellipse at 90% 10%, rgba(232,112,138,0.08) 0%, transparent 40%),
+        radial-gradient(ellipse at 10% 90%, rgba(200,56,90,0.05) 0%, transparent 40%);
+    `,
+    cardBg: '#fdf5f8',
+    borderStyle: '1px solid rgba(200,56,90,0.12)',
+    navGlow: '0 -2px 20px rgba(232,112,138,0.1)',
+    btnGlow: '0 4px 20px rgba(232,112,138,0.35)',
+    headerBg: 'rgba(253,248,250,0.96)',
+    headerBorder: '1px solid rgba(200,56,90,0.1)',
+    textGradient: 'linear-gradient(135deg,#c8385a,#e8708a)',
+    isLight: true,
+  },
+  'abyss': {
+    name: 'Abyss Matter',
+    tagline: 'Graphite & Vide',
+    accent: '#9a9a9a',
+    grad: 'linear-gradient(135deg,#5a5a5a,#9a9a9a,#e0e0e0)',
+    logoGrad: 'linear-gradient(135deg,#5a5a5a 0%,#9a9a9a 50%,#e0e0e0 100%)',
+    stopA: '#5a5a5a', stopB: '#9a9a9a', stopC: '#e0e0e0',
+    bg: '#080808',
+    surface: '#101010',
+    card: '#161616',
+    border: '#202020',
+    text: '#f0f0f0',
+    muted: '#505050',
+    faint: '#181818',
+    sub: '#404040',
+    fontFamily: "'Outfit', -apple-system, sans-serif",
+    fontImport: "https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&display=swap",
+    bgEffect: `
+      background: #080808;
+      background-image: 
+        radial-gradient(ellipse at 50% 50%, rgba(154,154,154,0.03) 0%, transparent 70%);
+    `,
+    cardBg: 'linear-gradient(145deg, rgba(255,255,255,0.025) 0%, rgba(22,22,22,1) 100%)',
+    borderStyle: '1px solid rgba(255,255,255,0.06)',
+    navGlow: '0 -1px 20px rgba(0,0,0,0.8)',
+    btnGlow: '0 4px 20px rgba(154,154,154,0.2)',
+    headerBg: 'rgba(8,8,8,0.99)',
+    headerBorder: '1px solid rgba(255,255,255,0.04)',
+    textGradient: 'linear-gradient(135deg,#9a9a9a,#e0e0e0)',
+  },
+};
+
+// ─── Design tokens (mutable) ──────────────────────────────────────────────────
 let C = {
   bg:"#0a0a0a", surface:"#141414", card:"#1c1c1c", border:"#2a2a2a",
   text:"#f0f0f0", muted:"#777", faint:"#3a3a3a", sub:"#999",
@@ -61,9 +377,23 @@ let C = {
 };
 let CURRENT_THEME = THEMES['obsidian'];
 let CURRENT_THEME_ID = 'obsidian';
+let CURRENT_PREMIUM = null;
+
+function applyPremiumToC(pt) {
+  if(!pt) return;
+  C.bg = pt.bg;
+  C.surface = pt.surface;
+  C.card = pt.card;
+  C.border = pt.border;
+  C.text = pt.text;
+  C.muted = pt.muted;
+  C.faint = pt.faint;
+  C.sub = pt.sub;
+  C.accent = pt.accent;
+  C.font = pt.fontFamily;
+}
 
 const globalCss = `
-  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap');
   * { box-sizing:border-box; margin:0; padding:0; }
   body { background:#0a0a0a; }
   input[type=number]::-webkit-inner-spin-button,
@@ -74,32 +404,65 @@ const globalCss = `
   input:focus { outline:none; border-color:#555 !important; }
   @keyframes slideUp { from{opacity:0;transform:translateY(9px)} to{opacity:1;transform:translateY(0)} }
   @keyframes fadeIn  { from{opacity:0} to{opacity:1} }
+  @keyframes shimmer { 0%{background-position:200% center} 100%{background-position:-200% center} }
   .page-enter { animation:slideUp 0.18s ease both; }
   .fade-in    { animation:fadeIn 0.14s ease both; }
   .date-btn:hover { background:#1a1a1a !important; border-color:#3a3a3a !important; }
 `;
 
-const S = {
-  app:      { minHeight:"100vh", background:C.bg, color:C.text, fontFamily:C.font, maxWidth:480, margin:"0 auto", paddingBottom:110 },
-  hdr:      { borderBottom:"1px solid #222", padding:"13px 20px", display:"flex", justifyContent:"space-between", alignItems:"center", position:"sticky", top:0, background:C.bg, zIndex:10 },
-  body:     { padding:"22px 20px" },
-  h1:       { fontSize:26, fontWeight:700, letterSpacing:-0.5, lineHeight:1.15, marginBottom:5, color:C.text },
-  sub:      { fontSize:14, color:C.muted, marginBottom:22 },
-  sec:      { fontSize:11, fontWeight:600, color:"#444", textTransform:"uppercase", letterSpacing:2, marginBottom:11, marginTop:24 },
-  btn:      { background:"#e8e8e8", color:"#111", border:"none", borderRadius:10, padding:"14px 20px", fontSize:15, fontWeight:700, cursor:"pointer", fontFamily:C.font, width:"100%", marginBottom:10, display:"block" },
-  ghost:    { background:"transparent", color:C.text, border:"1px solid #2a2a2a", borderRadius:10, padding:"13px 20px", fontSize:14, fontWeight:400, cursor:"pointer", fontFamily:C.font, width:"100%", marginBottom:10, display:"block" },
-  btnSave:  { background:"#2a2a2a", color:C.text, border:"1px solid #333", borderRadius:9, padding:"11px 16px", fontSize:14, fontWeight:500, cursor:"pointer", fontFamily:C.font },
-  danger:   { background:"none", color:"#c47070", border:"1px solid #2a1818", borderRadius:9, padding:"12px 16px", fontSize:14, fontWeight:400, cursor:"pointer", fontFamily:C.font, width:"100%", marginTop:8 },
-  input:    { background:C.surface, border:"1px solid #2a2a2a", borderRadius:9, color:C.text, padding:"13px 15px", fontSize:15, width:"100%", fontFamily:C.font, outline:"none" },
-  back:     { background:"none", border:"none", color:C.muted, fontSize:14, fontWeight:400, cursor:"pointer", fontFamily:C.font, padding:0, marginBottom:22 },
-  tag:      { background:C.card, border:"1px solid #2a2a2a", borderRadius:8, padding:"6px 11px", fontSize:13, color:C.muted, textAlign:"center", minWidth:50 },
-  tagVal:   { fontSize:15, fontWeight:600, color:C.text, display:"block" },
-  tagLabel: { fontSize:10, color:"#444", display:"block", marginTop:1, textTransform:"uppercase", letterSpacing:1 },
-  statBox:  { background:C.surface, border:"1px solid #2a2a2a", borderRadius:11, padding:"13px 8px", textAlign:"center" },
-  statNum:  { fontSize:28, fontWeight:700, color:C.text, lineHeight:1 },
-  statLabel:{ fontSize:10, color:"#444", marginTop:4, textTransform:"uppercase", letterSpacing:1 },
-  toggle:   (active) => ({ flex:1, padding:"10px", borderRadius:8, fontSize:14, fontWeight:active?600:400, cursor:"pointer", fontFamily:C.font, background:active?"#2a2a2a":"transparent", color:active?C.text:C.muted, border:"1px solid " + (active?"#444":"#2a2a2a") }),
-};
+function buildStyles(pt) {
+  const isLight = pt?.isLight;
+  const bg = pt?.bg || C.bg;
+  const surface = pt?.surface || C.surface;
+  const card = pt?.card || C.card;
+  const border = pt?.border || C.border;
+  const text = pt?.text || C.text;
+  const muted = pt?.muted || C.muted;
+  const sub = pt?.sub || C.sub;
+  const accent = pt?.accent || C.accent;
+  const font = pt?.fontFamily || C.font;
+  const cardBg = pt?.cardBg || card;
+  const cardBorder = pt?.borderStyle || `1px solid ${border}`;
+  const headerBg = pt?.headerBg || bg;
+  const headerBorder = pt?.headerBorder || `1px solid #222`;
+
+  return {
+    app:      { minHeight:"100vh", background:bg, color:text, fontFamily:font, maxWidth:480, margin:"0 auto", paddingBottom:110 },
+    hdr:      { borderBottom:headerBorder, padding:"13px 20px", display:"flex", justifyContent:"space-between", alignItems:"center", position:"sticky", top:0, background:headerBg, zIndex:10, backdropFilter:"blur(12px)" },
+    body:     { padding:"22px 20px" },
+    h1:       { fontSize:26, fontWeight:700, letterSpacing:-0.5, lineHeight:1.15, marginBottom:5, color:text },
+    sub:      { fontSize:14, color:muted, marginBottom:22 },
+    sec:      { fontSize:11, fontWeight:600, color:isLight?"#999":"#444", textTransform:"uppercase", letterSpacing:2, marginBottom:11, marginTop:24 },
+    btn:      { background:isLight?"#1a1a1a":"#e8e8e8", color:isLight?"#f0f0f0":"#111", border:"none", borderRadius:10, padding:"14px 20px", fontSize:15, fontWeight:700, cursor:"pointer", fontFamily:font, width:"100%", marginBottom:10, display:"block" },
+    ghost:    { background:"transparent", color:text, border:cardBorder, borderRadius:10, padding:"13px 20px", fontSize:14, fontWeight:400, cursor:"pointer", fontFamily:font, width:"100%", marginBottom:10, display:"block" },
+    btnSave:  { background:pt?"rgba(255,255,255,0.08)":"#2a2a2a", color:text, border:cardBorder, borderRadius:9, padding:"11px 16px", fontSize:14, fontWeight:500, cursor:"pointer", fontFamily:font },
+    danger:   { background:"none", color:"#c47070", border:"1px solid #2a1818", borderRadius:9, padding:"12px 16px", fontSize:14, fontWeight:400, cursor:"pointer", fontFamily:font, width:"100%", marginTop:8 },
+    input:    { background:surface, border:cardBorder, borderRadius:9, color:text, padding:"13px 15px", fontSize:15, width:"100%", fontFamily:font, outline:"none" },
+    back:     { background:"none", border:"none", color:muted, fontSize:14, fontWeight:400, cursor:"pointer", fontFamily:font, padding:0, marginBottom:22 },
+    tag:      { background:card, border:cardBorder, borderRadius:8, padding:"6px 11px", fontSize:13, color:muted, textAlign:"center", minWidth:50 },
+    tagVal:   { fontSize:15, fontWeight:600, color:text, display:"block" },
+    tagLabel: { fontSize:10, color:isLight?"#aaa":"#444", display:"block", marginTop:1, textTransform:"uppercase", letterSpacing:1 },
+    statBox:  { background:surface, border:cardBorder, borderRadius:11, padding:"13px 8px", textAlign:"center" },
+    statNum:  { fontSize:28, fontWeight:700, color:text, lineHeight:1 },
+    statLabel:{ fontSize:10, color:isLight?"#aaa":"#444", marginTop:4, textTransform:"uppercase", letterSpacing:1 },
+    toggle:   (active) => ({ flex:1, padding:"10px", borderRadius:8, fontSize:14, fontWeight:active?600:400, cursor:"pointer", fontFamily:font, background:active?(pt?"rgba(255,255,255,0.12)":"#2a2a2a"):"transparent", color:active?text:muted, border:`1px solid ${active?(pt?"rgba(255,255,255,0.2)":border):border}` }),
+    _cardBg: cardBg,
+    _cardBorder: cardBorder,
+    _accent: accent,
+    _text: text,
+    _muted: muted,
+    _surface: surface,
+    _bg: bg,
+    _isLight: isLight,
+    _font: font,
+    _btnGlow: pt?.btnGlow,
+    _navGlow: pt?.navGlow,
+    _headerBg: headerBg,
+    _sub: sub,
+  };
+}
+
+let S = buildStyles(null);
 
 // ─── Cloud sync helpers ───────────────────────────────────────────────────────
 async function loadFromCloud(userId) {
@@ -114,19 +477,23 @@ async function saveToCloud(userId, db) {
 
 // ─── BottomNav ────────────────────────────────────────────────────────────────
 function BottomNav({ cur, onNav }) {
-  const t = CURRENT_THEME;
+  const t = CURRENT_PREMIUM || CURRENT_THEME;
+  const bg = S._bg;
+  const text = S._text;
+  const muted = S._muted;
+  const font = S._font;
   return (
-    <div style={{ position:"fixed", bottom:0, left:"50%", transform:"translateX(-50%)", width:"100%", maxWidth:480, background:C.bg, borderTop:"1px solid #222", display:"flex", alignItems:"center", justifyContent:"space-around", zIndex:100, paddingTop:10, paddingBottom:22 }}>
-      <button onClick={() => onNav("groups")} style={{ background:"none", border:"none", color:cur==="groups"?C.text:C.muted, fontSize:11, fontWeight:cur==="groups"?600:400, cursor:"pointer", fontFamily:C.font, display:"flex", flexDirection:"column", alignItems:"center", gap:5, flex:1, padding:"4px 0" }}>
+    <div style={{ position:"fixed", bottom:0, left:"50%", transform:"translateX(-50%)", width:"100%", maxWidth:480, background:S._headerBg || bg, borderTop:CURRENT_PREMIUM?.headerBorder || "1px solid #222", display:"flex", alignItems:"center", justifyContent:"space-around", zIndex:100, paddingTop:10, paddingBottom:22, boxShadow:S._navGlow, backdropFilter:"blur(12px)" }}>
+      <button onClick={() => onNav("groups")} style={{ background:"none", border:"none", color:cur==="groups"?text:muted, fontSize:11, fontWeight:cur==="groups"?600:400, cursor:"pointer", fontFamily:font, display:"flex", flexDirection:"column", alignItems:"center", gap:5, flex:1, padding:"4px 0" }}>
         <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18"/><path d="M8 4V2M16 4V2"/>
         </svg>
         Séances
       </button>
-      <button onClick={() => onNav("home")} style={{ background:t.grad, border:"none", borderRadius:"50%", width:56, height:56, display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", boxShadow:`0 4px 20px ${t.accent}70`, transform:"translateY(-10px)", flexShrink:0 }}>
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+      <button onClick={() => onNav("home")} style={{ background:t.grad, border:"none", borderRadius:"50%", width:56, height:56, display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", boxShadow:S._btnGlow || `0 4px 20px ${t.accent}70`, transform:"translateY(-10px)", flexShrink:0 }}>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill={S._isLight?"#111":"white"}><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
       </button>
-      <button onClick={() => onNav("history")} style={{ background:"none", border:"none", color:cur==="history"?C.text:C.muted, fontSize:11, fontWeight:cur==="history"?600:400, cursor:"pointer", fontFamily:C.font, display:"flex", flexDirection:"column", alignItems:"center", gap:5, flex:1, padding:"4px 0" }}>
+      <button onClick={() => onNav("history")} style={{ background:"none", border:"none", color:cur==="history"?text:muted, fontSize:11, fontWeight:cur==="history"?600:400, cursor:"pointer", fontFamily:font, display:"flex", flexDirection:"column", alignItems:"center", gap:5, flex:1, padding:"4px 0" }}>
         <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/>
         </svg>
@@ -137,10 +504,12 @@ function BottomNav({ cur, onNav }) {
 }
 
 // ─── Logo ─────────────────────────────────────────────────────────────────────
-// Each render gets a unique gradient ID tied to the theme to prevent SVG caching issues
 function Logo() {
-  const t = CURRENT_THEME;
+  const t = CURRENT_PREMIUM || CURRENT_THEME;
   const gradId = `logo-grad-${CURRENT_THEME_ID}`;
+  const textStyle = CURRENT_PREMIUM
+    ? { fontSize:16, fontWeight:700, letterSpacing:-0.3, background:t.textGradient, WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text", fontFamily:CURRENT_PREMIUM.fontFamily }
+    : { fontSize:16, fontWeight:700, letterSpacing:-0.3, background:t.logoGrad, WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text" };
   return (
     <div style={{ display:"flex", alignItems:"center", gap:7 }}>
       <svg width="26" height="26" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -157,7 +526,7 @@ function Logo() {
         <rect x="18.5" y="9.5" width="3.5" height="9" rx="1.5" fill={`url(#${gradId})`}/>
         <rect x="21.5" y="7" width="5.5" height="14" rx="2" fill={`url(#${gradId})`}/>
       </svg>
-      <span style={{ fontSize:16, fontWeight:700, letterSpacing:-0.3, background:t.logoGrad, WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text" }}>
+      <span style={textStyle}>
         Sport'Up
       </span>
     </div>
@@ -167,7 +536,7 @@ function Logo() {
 // ─── SettingsIcon ─────────────────────────────────────────────────────────────
 function SettingsIcon({ onNavigate }) {
   return (
-    <button onClick={() => onNavigate("settings")} style={{ background:"transparent", border:"1px solid #2a2a2a", borderRadius:8, width:36, height:36, display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", color:C.muted, flexShrink:0 }}>
+    <button onClick={() => onNavigate("settings")} style={{ background:"transparent", border:S._cardBorder || "1px solid #2a2a2a", borderRadius:8, width:36, height:36, display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", color:S._muted, flexShrink:0 }}>
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="12" r="3"/>
         <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
@@ -179,28 +548,38 @@ function SettingsIcon({ onNavigate }) {
 // ─── Card ─────────────────────────────────────────────────────────────────────
 function Card({ onClick, children, style }) {
   const [hov, setHov] = useState(false);
+  const pt = CURRENT_PREMIUM;
+  const baseCard = pt ? pt.card : C.card;
+  const baseHover = pt?.isLight ? "#f0e8ea" : (pt ? pt.surface : "#202020");
+  const borderN = pt ? pt.borderStyle : "1px solid #2a2a2a";
+  const borderH = pt ? pt.borderStyle.replace(/rgba\([^)]+\)/, `rgba(${hexToRgb(pt.accent)},0.25)`) : "1px solid #3a3a3a";
   return (
-    <div style={{ background:hov&&onClick?"#202020":C.card, border:"1px solid "+(hov&&onClick?"#3a3a3a":"#2a2a2a"), borderRadius:12, padding:"14px 16px", marginBottom:10, cursor:onClick?"pointer":"default", transition:"background 0.12s, border-color 0.12s", ...style }}
+    <div style={{ background:hov&&onClick?baseHover:baseCard, border:hov&&onClick?borderH:borderN, borderRadius:12, padding:"14px 16px", marginBottom:10, cursor:onClick?"pointer":"default", transition:"background 0.12s, border-color 0.12s", ...style }}
       onClick={onClick} onMouseEnter={()=>setHov(true)} onMouseLeave={()=>setHov(false)}>
       {children}
     </div>
   );
 }
 
+function hexToRgb(hex) {
+  const r = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return r ? `${parseInt(r[1],16)},${parseInt(r[2],16)},${parseInt(r[3],16)}` : '255,255,255';
+}
+
 // ─── Stepper ──────────────────────────────────────────────────────────────────
 function Stepper({ label, value, onChange, step=1, min=0, unit="" }) {
   const dec = () => onChange(Math.max(min, Math.round((parseFloat(value||0)-step)*100)/100));
   const inc = () => onChange(Math.round((parseFloat(value||0)+step)*100)/100);
-  const bS = { background:C.surface, border:"1px solid #2a2a2a", borderRadius:8, width:38, height:38, fontSize:18, fontWeight:300, color:C.text, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 };
+  const bS = { background:C.surface, border:"1px solid "+C.border, borderRadius:8, width:38, height:38, fontSize:18, fontWeight:300, color:C.text, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 };
   return (
     <div style={{ display:"flex", flexDirection:"column", alignItems:"center", gap:6 }}>
-      <div style={{ fontSize:11, color:"#444", fontWeight:600, textTransform:"uppercase", letterSpacing:1.5 }}>{label}</div>
+      <div style={{ fontSize:11, color:S._isLight?"#999":"#444", fontWeight:600, textTransform:"uppercase", letterSpacing:1.5 }}>{label}</div>
       <div style={{ display:"flex", alignItems:"center", gap:6 }}>
         <button style={bS} onClick={dec}>−</button>
         <div style={{ textAlign:"center" }}>
           <input type="number" value={value} onChange={e=>onChange(e.target.value===""?"":parseFloat(e.target.value))}
             style={{ ...S.input, textAlign:"center", fontSize:22, fontWeight:700, padding:"5px 4px", width:66, border:"none", background:"transparent" }} />
-          {unit && <div style={{ fontSize:11, color:"#444", marginTop:-4 }}>{unit}</div>}
+          {unit && <div style={{ fontSize:11, color:S._isLight?"#aaa":"#444", marginTop:-4 }}>{unit}</div>}
         </div>
         <button style={bS} onClick={inc}>+</button>
       </div>
@@ -219,6 +598,8 @@ function Calendar({ calDate, setCalDate, sessions }) {
   const off=(first+6)%7;
   for(let i=0;i<off;i++) cells.push(null);
   for(let d=1;d<=days;d++) cells.push(d);
+  const accent = S._accent;
+  const isLight = S._isLight;
   return (
     <Card style={{ marginBottom:18, cursor:"default" }}>
       <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:13 }}>
@@ -227,7 +608,7 @@ function Calendar({ calDate, setCalDate, sessions }) {
         <button onClick={()=>setCalDate(new Date(y,m+1,1))} style={S.back}>→</button>
       </div>
       <div style={{ display:"grid", gridTemplateColumns:"repeat(7,1fr)", gap:2 }}>
-        {["L","M","M","J","V","S","D"].map((d,i)=><div key={i} style={{ fontSize:11, color:"#444", textAlign:"center", paddingBottom:6, fontWeight:600 }}>{d}</div>)}
+        {["L","M","M","J","V","S","D"].map((d,i)=><div key={i} style={{ fontSize:11, color:isLight?"#bbb":"#444", textAlign:"center", paddingBottom:6, fontWeight:600 }}>{d}</div>)}
         {cells.map((d,i)=>{
           if(!d) return <div key={i}/>;
           const iso=y+"-"+m+"-"+d;
@@ -235,14 +616,14 @@ function Calendar({ calDate, setCalDate, sessions }) {
           const isSel=calDate.getDate()===d&&calDate.getMonth()===m&&calDate.getFullYear()===y;
           const hasSess=sessSet.has(iso);
           return (
-            <div key={i} onClick={()=>setCalDate(new Date(y,m,d))} style={{ height:32, display:"flex", alignItems:"center", justifyContent:"center", fontSize:13, fontWeight:isSel||isT?600:400, cursor:"pointer", borderRadius:7, background:isSel?"#e8e8e8":hasSess?"#252525":"transparent", color:isSel?"#111":isT?C.text:hasSess?"#bbb":C.muted, border:isT&&!isSel?"1px solid #555":"1px solid transparent" }}>
+            <div key={i} onClick={()=>setCalDate(new Date(y,m,d))} style={{ height:32, display:"flex", alignItems:"center", justifyContent:"center", fontSize:13, fontWeight:isSel||isT?600:400, cursor:"pointer", borderRadius:7, background:isSel?accent:hasSess?S._surface:"transparent", color:isSel?(isLight?"#fff":"#111"):isT?S._text:hasSess?S._text:S._muted, border:isT&&!isSel?`1px solid ${accent}`:"1px solid transparent" }}>
               {d}
             </div>
           );
         })}
       </div>
-      <div style={{ fontSize:12, color:C.muted, textAlign:"right", marginTop:9 }}>
-        Séance le <span style={{ color:C.text, fontWeight:600 }}>{calDate.toLocaleDateString("fr-FR")}</span>
+      <div style={{ fontSize:12, color:S._muted, textAlign:"right", marginTop:9 }}>
+        Séance le <span style={{ color:S._text, fontWeight:600 }}>{calDate.toLocaleDateString("fr-FR")}</span>
       </div>
     </Card>
   );
@@ -273,7 +654,7 @@ function LogFormWidget({ logForm, setLogForm, exo }) {
     const s = sets.map((x,i) => i<idx ? x : {...x, kg:Math.max(0,Math.round(((x.kg||0)+delta)*10)/10)});
     setLogForm({...logForm, sets:s});
   }
-  const iBtn = { background:C.card, border:"1px solid #2a2a2a", borderRadius:7, width:30, height:30, color:C.text, cursor:"pointer", fontSize:16, display:"flex", alignItems:"center", justifyContent:"center" };
+  const iBtn = { background:C.card, border:"1px solid "+C.border, borderRadius:7, width:30, height:30, color:C.text, cursor:"pointer", fontSize:16, display:"flex", alignItems:"center", justifyContent:"center" };
   return (
     <div>
       {mode==="reps" && (
@@ -281,25 +662,25 @@ function LogFormWidget({ logForm, setLogForm, exo }) {
           <div style={{ display:"flex", justifyContent:"center", marginBottom:20 }}>
             <Stepper label="Séries" value={logForm.series} onChange={updateSeries} step={1} min={1}/>
           </div>
-          <div style={{ fontSize:11, color:"#444", fontWeight:600, textTransform:"uppercase", letterSpacing:1.5, marginBottom:9 }}>Détail par série</div>
+          <div style={{ fontSize:11, color:S._isLight?"#999":"#444", fontWeight:600, textTransform:"uppercase", letterSpacing:1.5, marginBottom:9 }}>Détail par série</div>
           <div style={{ display:"flex", flexDirection:"column", gap:7, marginBottom:18 }}>
             {sets.map((s,idx) => (
-              <div key={idx} style={{ background:C.surface, border:"1px solid #2a2a2a", borderRadius:10, padding:"10px 13px", display:"flex", alignItems:"center", gap:9 }}>
-                <div style={{ fontSize:11, color:"#444", fontWeight:600, minWidth:22 }}>S{idx+1}</div>
+              <div key={idx} style={{ background:C.surface, border:S._cardBorder, borderRadius:10, padding:"10px 13px", display:"flex", alignItems:"center", gap:9 }}>
+                <div style={{ fontSize:11, color:S._isLight?"#bbb":"#444", fontWeight:600, minWidth:22 }}>S{idx+1}</div>
                 <div style={{ flex:1 }}>
-                  <div style={{ fontSize:10, color:"#444", textTransform:"uppercase", letterSpacing:1, marginBottom:5 }}>Reps</div>
+                  <div style={{ fontSize:10, color:S._isLight?"#aaa":"#444", textTransform:"uppercase", letterSpacing:1, marginBottom:5 }}>Reps</div>
                   <div style={{ display:"flex", alignItems:"center", gap:6 }}>
                     <button onClick={()=>updateReps(idx,-1)} style={iBtn}>−</button>
                     <div style={{ fontSize:18, fontWeight:700, minWidth:28, textAlign:"center" }}>{s.reps||0}</div>
                     <button onClick={()=>updateReps(idx,1)} style={iBtn}>+</button>
                   </div>
                 </div>
-                <div style={{ width:1, height:34, background:"#2a2a2a", flexShrink:0 }}/>
+                <div style={{ width:1, height:34, background:C.border, flexShrink:0 }}/>
                 <div style={{ flex:1 }}>
-                  <div style={{ fontSize:10, color:"#444", textTransform:"uppercase", letterSpacing:1, marginBottom:5 }}>Poids (kg)</div>
+                  <div style={{ fontSize:10, color:S._isLight?"#aaa":"#444", textTransform:"uppercase", letterSpacing:1, marginBottom:5 }}>Poids (kg)</div>
                   <div style={{ display:"flex", alignItems:"center", gap:6 }}>
                     <button onClick={()=>updateWeight(idx,-2.5)} style={iBtn}>−</button>
-                    <div style={{ fontSize:15, fontWeight:700, minWidth:42, textAlign:"center" }}>{s.kg||0}<span style={{ fontSize:10, color:"#444", fontWeight:400 }}>kg</span></div>
+                    <div style={{ fontSize:15, fontWeight:700, minWidth:42, textAlign:"center" }}>{s.kg||0}<span style={{ fontSize:10, color:S._muted, fontWeight:400 }}>kg</span></div>
                     <button onClick={()=>updateWeight(idx,2.5)} style={iBtn}>+</button>
                   </div>
                 </div>
@@ -316,7 +697,7 @@ function LogFormWidget({ logForm, setLogForm, exo }) {
         </div>
       )}
       <div style={{ marginBottom:4 }}>
-        <div style={{ fontSize:11, color:"#444", fontWeight:600, textTransform:"uppercase", letterSpacing:1.5, marginBottom:7 }}>Note</div>
+        <div style={{ fontSize:11, color:S._isLight?"#999":"#444", fontWeight:600, textTransform:"uppercase", letterSpacing:1.5, marginBottom:7 }}>Note</div>
         <input style={S.input} placeholder="Sensation, ressenti…" value={logForm.note||""} onChange={e=>setLogForm({...logForm,note:e.target.value})}/>
       </div>
     </div>
@@ -330,7 +711,7 @@ function PerfTags({ entry }) {
     <div style={{ display:"flex", gap:7, flexWrap:"wrap", marginTop:8 }}>
       <div style={S.tag}><span style={S.tagVal}>{entry.series||"—"}</span><span style={S.tagLabel}>séries</span></div>
       <div style={S.tag}><span style={S.tagVal}>{entry.timeMin||0}:{String(entry.timeSec||0).padStart(2,"0")}</span><span style={S.tagLabel}>temps</span></div>
-      {entry.note && <div style={{ fontSize:12, color:C.muted, alignSelf:"center", fontStyle:"italic" }}>{entry.note}</div>}
+      {entry.note && <div style={{ fontSize:12, color:S._muted, alignSelf:"center", fontStyle:"italic" }}>{entry.note}</div>}
     </div>
   );
   const sets = entry.sets || [];
@@ -346,10 +727,10 @@ function PerfTags({ entry }) {
       <div style={{ display:"flex", gap:5, flexWrap:"wrap", marginTop:8, alignItems:"center" }}>
         {groups.map((g,i) => (
           <div key={i} style={{ ...S.tag, minWidth:"auto", padding:"5px 10px" }}>
-            <span style={{ ...S.tagVal, fontSize:13 }}>{g.count>1?g.count+"×":""}{g.reps}r<span style={{ fontSize:11, color:C.muted, fontWeight:400 }}> {g.w}kg</span></span>
+            <span style={{ ...S.tagVal, fontSize:13 }}>{g.count>1?g.count+"×":""}{g.reps}r<span style={{ fontSize:11, color:S._muted, fontWeight:400 }}> {g.w}kg</span></span>
           </div>
         ))}
-        {entry.note && <div style={{ fontSize:12, color:C.muted, fontStyle:"italic" }}>{entry.note}</div>}
+        {entry.note && <div style={{ fontSize:12, color:S._muted, fontStyle:"italic" }}>{entry.note}</div>}
       </div>
     );
   }
@@ -359,7 +740,7 @@ function PerfTags({ entry }) {
       <div style={S.tag}><span style={S.tagVal}>{entry.series||"—"}</span><span style={S.tagLabel}>séries</span></div>
       <div style={{ ...S.tag, minWidth:"auto" }}><span style={{ ...S.tagVal, fontSize:14 }}>{setsStr}</span><span style={S.tagLabel}>reps</span></div>
       <div style={S.tag}><span style={S.tagVal}>{entry.kg||"—"}</span><span style={S.tagLabel}>kg</span></div>
-      {entry.note && <div style={{ fontSize:12, color:C.muted, fontStyle:"italic" }}>{entry.note}</div>}
+      {entry.note && <div style={{ fontSize:12, color:S._muted, fontStyle:"italic" }}>{entry.note}</div>}
     </div>
   );
 }
@@ -373,36 +754,36 @@ function ExoSettingsCard({ exo, onSave, onDelete, onNavigate, defaultOpen, force
   useEffect(() => { if(defaultOpen) setOpen(true); }, [defaultOpen]);
   function save() { onSave({...exo, mode, defaultKg:kg}); setOpen(false); }
   return (
-    <div style={{ background:C.card, border:"1px solid #2a2a2a", borderRadius:12, marginBottom:10, overflow:"hidden" }}>
+    <div style={{ background:S._cardBg, border:S._cardBorder, borderRadius:12, marginBottom:10, overflow:"hidden" }}>
       <div onClick={() => setOpen(o => !o)} style={{ display:"flex", alignItems:"center", padding:"14px 16px", gap:10, cursor:"pointer" }}>
         <div style={{ flex:1 }}>
           <div style={{ fontSize:15, fontWeight:500 }}>{exo.name}</div>
-          <div style={{ fontSize:12, color:C.muted, marginTop:3 }}>
+          <div style={{ fontSize:12, color:S._muted, marginTop:3 }}>
             {exo.mode==="time"?"Temps":"Reps / KG"}{exo.defaultKg>0&&exo.mode!=="time" ? " · "+exo.defaultKg+"kg habituel" : ""}
           </div>
-          {exo.canonicalId && <div style={{ fontSize:11, color:C.sub, marginTop:2 }}>données partagées</div>}
+          {exo.canonicalId && <div style={{ fontSize:11, color:S._sub, marginTop:2 }}>données partagées</div>}
         </div>
-        <button onClick={e=>{e.stopPropagation();onNavigate(exo.id);}} style={{ background:"transparent", border:"1px solid #2a2a2a", borderRadius:8, padding:"6px 12px", color:C.accent, fontSize:13, cursor:"pointer", fontWeight:500, flexShrink:0 }}>
+        <button onClick={e=>{e.stopPropagation();onNavigate(exo.id);}} style={{ background:"transparent", border:S._cardBorder, borderRadius:8, padding:"6px 12px", color:S._accent, fontSize:13, cursor:"pointer", fontWeight:500, flexShrink:0 }}>
           Performances
         </button>
-        <span style={{ color:"#3a3a3a", fontSize:14, display:"inline-block", transform:open?"rotate(90deg)":"rotate(0deg)", transition:"transform 0.2s" }}>›</span>
+        <span style={{ color:S._isLight?"#aaa":"#3a3a3a", fontSize:14, display:"inline-block", transform:open?"rotate(90deg)":"rotate(0deg)", transition:"transform 0.2s" }}>›</span>
       </div>
       {open && (
-        <div style={{ padding:"0 16px 16px", borderTop:"1px solid #2a2a2a" }} className="fade-in">
+        <div style={{ padding:"0 16px 16px", borderTop:S._cardBorder }} className="fade-in">
           <div style={{ paddingTop:14 }}>
-            <div style={{ fontSize:11, color:"#444", fontWeight:600, textTransform:"uppercase", letterSpacing:1.5, marginBottom:9 }}>Type d'exercice</div>
+            <div style={{ fontSize:11, color:S._isLight?"#999":"#444", fontWeight:600, textTransform:"uppercase", letterSpacing:1.5, marginBottom:9 }}>Type d'exercice</div>
             <div style={{ display:"flex", gap:7, marginBottom:18 }}>
               <button style={S.toggle(mode==="reps")} onClick={()=>setMode("reps")}>Répétitions / KG</button>
               <button style={S.toggle(mode==="time")} onClick={()=>setMode("time")}>Temps</button>
             </div>
             {mode==="reps" && (
               <div style={{ marginBottom:18 }}>
-                <div style={{ fontSize:11, color:"#444", fontWeight:600, textTransform:"uppercase", letterSpacing:1.5, marginBottom:9 }}>Poids habituel</div>
+                <div style={{ fontSize:11, color:S._isLight?"#999":"#444", fontWeight:600, textTransform:"uppercase", letterSpacing:1.5, marginBottom:9 }}>Poids habituel</div>
                 <div style={{ display:"flex", alignItems:"center", gap:9 }}>
-                  <button onClick={()=>setKg(v=>Math.max(0,Math.round((v-2.5)*10)/10))} style={{ background:C.surface, border:"1px solid #2a2a2a", borderRadius:8, width:38, height:38, fontSize:18, color:C.text, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>−</button>
+                  <button onClick={()=>setKg(v=>Math.max(0,Math.round((v-2.5)*10)/10))} style={{ background:S._surface, border:S._cardBorder, borderRadius:8, width:38, height:38, fontSize:18, color:S._text, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>−</button>
                   <input type="number" value={kg} onChange={e=>setKg(parseFloat(e.target.value)||0)} style={{ ...S.input, textAlign:"center", fontSize:18, fontWeight:700, width:90 }}/>
-                  <span style={{ color:C.muted, fontSize:14 }}>kg</span>
-                  <button onClick={()=>setKg(v=>Math.round((v+2.5)*10)/10)} style={{ background:C.surface, border:"1px solid #2a2a2a", borderRadius:8, width:38, height:38, fontSize:18, color:C.text, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>+</button>
+                  <span style={{ color:S._muted, fontSize:14 }}>kg</span>
+                  <button onClick={()=>setKg(v=>Math.round((v+2.5)*10)/10)} style={{ background:S._surface, border:S._cardBorder, borderRadius:8, width:38, height:38, fontSize:18, color:S._text, cursor:"pointer", display:"flex", alignItems:"center", justifyContent:"center" }}>+</button>
                 </div>
               </div>
             )}
@@ -417,6 +798,137 @@ function ExoSettingsCard({ exo, onSave, onDelete, onNavigate, defaultOpen, force
   );
 }
 
+// ─── Premium Theme Card ───────────────────────────────────────────────────────
+function PremiumThemeCard({ id, t, isActive, onSelect }) {
+  const [hov, setHov] = useState(false);
+  return (
+    <div
+      onClick={() => onSelect(id)}
+      onMouseEnter={() => setHov(true)}
+      onMouseLeave={() => setHov(false)}
+      style={{
+        background: isActive ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.01)",
+        border: isActive ? `1px solid ${t.accent}55` : "1px solid rgba(255,255,255,0.07)",
+        borderRadius: 16,
+        padding: "14px 16px",
+        display: "flex",
+        alignItems: "center",
+        gap: 14,
+        cursor: "pointer",
+        transition: "all 0.15s ease",
+        marginBottom: 8,
+        transform: hov && !isActive ? "translateX(2px)" : "none",
+        boxShadow: isActive ? `0 0 30px ${t.accent}20, inset 0 0 30px ${t.accent}05` : "none",
+      }}
+    >
+      {/* Theme preview swatch */}
+      <div style={{ position: "relative", flexShrink: 0 }}>
+        <div style={{
+          width: 48,
+          height: 48,
+          borderRadius: 12,
+          background: t.grad,
+          boxShadow: isActive ? `0 4px 20px ${t.accent}50` : "none",
+          transition: "box-shadow 0.2s",
+          overflow: "hidden",
+        }}>
+          {/* Font preview strip */}
+          <div style={{
+            position: "absolute",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            height: 16,
+            background: t.bg,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}>
+            <span style={{ fontSize: 8, color: t.text, fontFamily: t.fontFamily, fontWeight: 600, letterSpacing: 0.5 }}>Aa</span>
+          </div>
+        </div>
+        {/* Light/dark indicator */}
+        <div style={{
+          position: "absolute",
+          top: -3,
+          right: -3,
+          width: 12,
+          height: 12,
+          borderRadius: "50%",
+          background: t.isLight ? "#f0f0f0" : "#111",
+          border: "2px solid rgba(255,255,255,0.15)",
+        }}/>
+      </div>
+
+      {/* Info */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{
+          fontSize: 14,
+          fontWeight: isActive ? 700 : 500,
+          color: isActive ? t.accent : "rgba(255,255,255,0.85)",
+          marginBottom: 2,
+          letterSpacing: -0.2,
+        }}>
+          {t.name}
+        </div>
+        <div style={{
+          fontSize: 11,
+          color: "rgba(255,255,255,0.35)",
+          fontStyle: "italic",
+          letterSpacing: 0.3,
+        }}>
+          {t.tagline}
+        </div>
+        {/* Font family preview */}
+        <div style={{
+          fontSize: 10,
+          color: "rgba(255,255,255,0.2)",
+          marginTop: 3,
+          fontFamily: t.fontFamily,
+          textTransform: "uppercase",
+          letterSpacing: 1,
+        }}>
+          {t.fontFamily.split(",")[0].replace(/'/g, "")}
+        </div>
+      </div>
+
+      {/* Checkmark / Premium badge */}
+      <div style={{ flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 5 }}>
+        {isActive ? (
+          <div style={{
+            width: 24,
+            height: 24,
+            borderRadius: "50%",
+            background: t.grad,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            boxShadow: `0 2px 10px ${t.accent}50`,
+          }}>
+            <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+              <path d="M2 6l3 3 5-5" stroke={t.isLight ? "#111" : "#fff"} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+        ) : (
+          <div style={{
+            fontSize: 9,
+            fontWeight: 700,
+            color: "#c8a840",
+            background: "rgba(200,168,64,0.12)",
+            border: "1px solid rgba(200,168,64,0.25)",
+            borderRadius: 5,
+            padding: "2px 6px",
+            letterSpacing: 1,
+            textTransform: "uppercase",
+          }}>
+            PRO
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // ─── Main App ─────────────────────────────────────────────────────────────────
 export default function App() {
   const [session, setSession] = useState(null);
@@ -425,6 +937,9 @@ export default function App() {
   const [syncing, setSyncing] = useState(false);
   const [themeId, setThemeId] = useState(() => {
     try { return localStorage.getItem("sportup_theme") || 'obsidian'; } catch { return 'obsidian'; }
+  });
+  const [premiumThemeId, setPremiumThemeId] = useState(() => {
+    try { return localStorage.getItem("sportup_premium_theme") || null; } catch { return null; }
   });
 
   const [view, setView] = useState("home");
@@ -443,16 +958,54 @@ export default function App() {
   const pageKey = useRef(0);
   const exoTopRef = useRef(null);
   const saveTimeout = useRef(null);
+  const fontRef = useRef(null);
 
   // ── Apply theme globally before render ──
   const theme = THEMES[themeId] || THEMES['obsidian'];
+  const premiumTheme = premiumThemeId ? PREMIUM_THEMES[premiumThemeId] : null;
   CURRENT_THEME = theme;
-  CURRENT_THEME_ID = themeId;
-  C.accent = theme.accent;
+  CURRENT_THEME_ID = premiumThemeId ? premiumThemeId : themeId;
+  CURRENT_PREMIUM = premiumTheme;
+
+  if(premiumTheme) {
+    applyPremiumToC(premiumTheme);
+  } else {
+    C.bg = "#0a0a0a"; C.surface = "#141414"; C.card = "#1c1c1c"; C.border = "#2a2a2a";
+    C.text = "#f0f0f0"; C.muted = "#777"; C.faint = "#3a3a3a"; C.sub = "#999";
+    C.accent = theme.accent;
+    C.font = "'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif";
+  }
+  S = buildStyles(premiumTheme);
+
+  // Inject premium font
+  useEffect(() => {
+    if(premiumTheme?.fontImport) {
+      if(fontRef.current) fontRef.current.remove();
+      const link = document.createElement("link");
+      link.rel = "stylesheet";
+      link.href = premiumTheme.fontImport;
+      document.head.appendChild(link);
+      fontRef.current = link;
+    }
+  }, [premiumThemeId]);
+
+  // Inject premium bg effect
+  useEffect(() => {
+    if(premiumTheme?.bgEffect) {
+      document.body.style.cssText = premiumTheme.bgEffect;
+    } else {
+      document.body.style.cssText = "background:#0a0a0a";
+    }
+  }, [premiumThemeId]);
 
   function applyTheme(id) {
+    setPremiumThemeId(null);
     setThemeId(id);
-    try { localStorage.setItem("sportup_theme", id); } catch {}
+    try { localStorage.setItem("sportup_theme", id); localStorage.removeItem("sportup_premium_theme"); } catch {}
+  }
+  function applyPremiumTheme(id) {
+    setPremiumThemeId(id);
+    try { localStorage.setItem("sportup_premium_theme", id); } catch {}
   }
 
   // ─── Supabase helpers ───
@@ -679,12 +1232,12 @@ export default function App() {
 
         <div style={S.sec}>Mon compte</div>
         <Card style={{ cursor:"default", marginBottom:6 }}>
-          <div style={{ fontSize:10, color:"#444", fontWeight:600, textTransform:"uppercase", letterSpacing:1, marginBottom:4 }}>Email</div>
-          <div style={{ fontSize:15, color:C.text, fontWeight:500, wordBreak:"break-all", marginBottom:14 }}>{email}</div>
+          <div style={{ fontSize:10, color:S._isLight?"#aaa":"#444", fontWeight:600, textTransform:"uppercase", letterSpacing:1, marginBottom:4 }}>Email</div>
+          <div style={{ fontSize:15, color:S._text, fontWeight:500, wordBreak:"break-all", marginBottom:14 }}>{email}</div>
           {createdAt && (
             <>
-              <div style={{ fontSize:10, color:"#444", fontWeight:600, textTransform:"uppercase", letterSpacing:1, marginBottom:4 }}>Membre depuis</div>
-              <div style={{ fontSize:14, color:C.muted }}>{daysAgo(createdAt)}</div>
+              <div style={{ fontSize:10, color:S._isLight?"#aaa":"#444", fontWeight:600, textTransform:"uppercase", letterSpacing:1, marginBottom:4 }}>Membre depuis</div>
+              <div style={{ fontSize:14, color:S._muted }}>{daysAgo(createdAt)}</div>
             </>
           )}
         </Card>
@@ -693,13 +1246,18 @@ export default function App() {
         <div style={S.sec}>Apparence</div>
         <Card onClick={() => navigate("themes")} style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
           <div style={{ display:"flex", alignItems:"center", gap:13 }}>
-            <div style={{ width:38, height:38, borderRadius:10, background:theme.grad, flexShrink:0, boxShadow:`0 2px 12px ${theme.accent}55` }}/>
+            <div style={{ width:38, height:38, borderRadius:10, background:(premiumTheme||theme).grad, flexShrink:0, boxShadow:`0 2px 12px ${(premiumTheme||theme).accent}55` }}/>
             <div>
               <div style={{ fontSize:15, fontWeight:500 }}>Choisir le visuel</div>
-              <div style={{ fontSize:12, color:C.muted, marginTop:2 }}>Actuel : <span style={{ color:theme.accent, fontWeight:600 }}>{theme.name}</span></div>
+              <div style={{ fontSize:12, color:S._muted, marginTop:2 }}>
+                Actuel : <span style={{ color:(premiumTheme||theme).accent, fontWeight:600 }}>
+                  {premiumTheme ? premiumTheme.name : theme.name}
+                  {premiumTheme && <span style={{ fontSize:10, marginLeft:5, color:"#c8a840", background:"rgba(200,168,64,0.15)", border:"1px solid rgba(200,168,64,0.3)", borderRadius:4, padding:"1px 5px" }}>PRO</span>}
+                </span>
+              </div>
             </div>
           </div>
-          <span style={{ color:"#3a3a3a", fontSize:18 }}>›</span>
+          <span style={{ color:S._isLight?"#aaa":"#3a3a3a", fontSize:18 }}>›</span>
         </Card>
       </div>
       <BottomNav cur="settings" onNav={navTo}/>
@@ -715,22 +1273,24 @@ export default function App() {
       <div style={S.body} className="page-enter" key={pageKey.current}>
         <button style={S.back} onClick={()=>navigate("settings")}>← Réglages</button>
         <h1 style={S.h1}>Choisir le visuel</h1>
-        <p style={{ fontSize:14, color:C.muted, marginBottom:24 }}>Sélectionne le thème de couleur de l'application</p>
-        <div style={{ display:"flex", flexDirection:"column", gap:9 }}>
+        <p style={{ fontSize:14, color:S._muted, marginBottom:24 }}>Sélectionne le thème de couleur de l'application</p>
+
+        {/* Standard themes */}
+        <div style={{ display:"flex", flexDirection:"column", gap:9, marginBottom:32 }}>
           {Object.entries(THEMES).map(([id, t]) => {
-            const isActive = themeId === id;
+            const isActive = !premiumThemeId && themeId === id;
             return (
-              <div key={id} onClick={() => applyTheme(id)} style={{ background: isActive ? "#1a1a1a" : C.card, border:`1px solid ${isActive ? t.accent : "#2a2a2a"}`, borderRadius:14, padding:"14px 16px", display:"flex", alignItems:"center", gap:14, cursor:"pointer", transition:"all 0.15s ease" }}>
+              <div key={id} onClick={() => applyTheme(id)} style={{ background: isActive ? "#1a1a1a" : C.card, border:`1px solid ${isActive ? t.accent : S._cardBorder.replace("1px solid ","") || "#2a2a2a"}`, borderRadius:14, padding:"14px 16px", display:"flex", alignItems:"center", gap:14, cursor:"pointer", transition:"all 0.15s ease" }}>
                 <div style={{ width:42, height:42, borderRadius:11, background:t.grad, flexShrink:0, boxShadow: isActive ? `0 3px 16px ${t.accent}55` : "none", transition:"box-shadow 0.15s" }}/>
                 <div style={{ flex:1 }}>
-                  <div style={{ fontSize:15, fontWeight: isActive ? 700 : 500, color: isActive ? t.accent : C.text }}>
+                  <div style={{ fontSize:15, fontWeight: isActive ? 700 : 500, color: isActive ? t.accent : S._text }}>
                     {t.name}
                   </div>
                 </div>
                 {isActive && (
-                  <div style={{ width:22, height:22, borderRadius:"50%", background:t.accent, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                  <div style={{ width:22, height:22, borderRadius:"50%", background:t.grad, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
                     <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
-                      <path d="M2 6l3 3 5-5" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M2 6l3 3 5-5" stroke={S._isLight?"#111":"#fff"} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                   </div>
                 )}
@@ -738,6 +1298,33 @@ export default function App() {
             );
           })}
         </div>
+
+        {/* Premium themes section */}
+        <div style={{ marginBottom: 12 }}>
+          <div style={{ display:"flex", alignItems:"center", gap:10, marginBottom:4 }}>
+            <div style={{ fontSize:11, fontWeight:700, color:"#c8a840", textTransform:"uppercase", letterSpacing:2.5 }}>
+              ✦ Visuels Premium
+            </div>
+            <div style={{ flex:1, height:1, background:"linear-gradient(90deg, rgba(200,168,64,0.3) 0%, transparent 100%)" }}/>
+          </div>
+          <p style={{ fontSize:12, color:S._muted, marginBottom:16, lineHeight:1.5 }}>
+            Typographies exclusives, effets visuels uniques & ambiances soignées
+          </p>
+        </div>
+
+        <div style={{ display:"flex", flexDirection:"column", gap:0 }}>
+          {Object.entries(PREMIUM_THEMES).map(([id, t]) => (
+            <PremiumThemeCard
+              key={id}
+              id={id}
+              t={t}
+              isActive={premiumThemeId === id}
+              onSelect={applyPremiumTheme}
+            />
+          ))}
+        </div>
+
+        <div style={{ height:20 }}/>
       </div>
       <BottomNav cur="settings" onNav={navTo}/>
     </div>
@@ -753,33 +1340,33 @@ export default function App() {
         <SettingsIcon onNavigate={navigate}/>
       </div>
       <div style={S.body} className="page-enter" key={pageKey.current}>
-        <button className="date-btn" onClick={() => setShowCal(!showCal)} style={{ background: showCal ? "#1a1a1a" : "#161616", border: "1px solid " + (showCal ? "#3a3a3a" : "#252525"), borderRadius: 11, cursor: "pointer", padding: "12px 15px", marginBottom: 0, textAlign: "left", display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", fontFamily: C.font }}>
+        <button className="date-btn" onClick={() => setShowCal(!showCal)} style={{ background: showCal ? S._surface : S._bg, border: S._cardBorder, borderRadius: 11, cursor: "pointer", padding: "12px 15px", marginBottom: 0, textAlign: "left", display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", fontFamily: S._font }}>
           <div>
-            <div style={{ fontSize:11, color:"#555", fontWeight:600, textTransform:"uppercase", letterSpacing:1.8, marginBottom:4 }}>Date de la séance</div>
-            <div style={{ fontSize:16, fontWeight:600, color: showCal ? C.text : "#ccc" }}>{fmtDateLong(calDate)}</div>
+            <div style={{ fontSize:11, color:S._isLight?"#bbb":"#555", fontWeight:600, textTransform:"uppercase", letterSpacing:1.8, marginBottom:4 }}>Date de la séance</div>
+            <div style={{ fontSize:16, fontWeight:600, color: showCal ? S._text : S._muted }}>{fmtDateLong(calDate)}</div>
           </div>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={showCal ? C.text : "#444"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0, transform: showCal ? "rotate(180deg)" : "rotate(0deg)", transition:"transform 0.2s" }}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={showCal ? S._text : S._muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0, transform: showCal ? "rotate(180deg)" : "rotate(0deg)", transition:"transform 0.2s" }}>
             <polyline points="6 9 12 15 18 9"/>
           </svg>
         </button>
         {showCal && <div style={{ marginTop:10 }}><Calendar calDate={calDate} setCalDate={setCalDate} sessions={db.sessions}/></div>}
         <div style={{ marginTop: 28, marginBottom: 16 }}>
-          <span style={{ fontSize: 20, fontWeight: 700, color: C.text, textTransform: "uppercase", letterSpacing: 0.8, display: "block" }}>On bosse quoi aujourd'hui ?</span>
+          <span style={{ fontSize: 20, fontWeight: 700, color: S._text, textTransform: "uppercase", letterSpacing: 0.8, display: "block" }}>On bosse quoi aujourd'hui ?</span>
         </div>
         {db.groups.length > 0 && db.groups.map(g => (
           <Card key={g.id} onClick={() => startSession(g.id)}>
             <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
               <div>
                 <div style={{ fontSize:16, fontWeight:600 }}>{g.name}</div>
-                <div style={{ fontSize:13, color:C.muted, marginTop:3 }}>{g.exercises.length} exercice{g.exercises.length>1?"s":""}</div>
+                <div style={{ fontSize:13, color:S._muted, marginTop:3 }}>{g.exercises.length} exercice{g.exercises.length>1?"s":""}</div>
               </div>
-              <span style={{ color:"#3a3a3a", fontSize:18 }}>›</span>
+              <span style={{ color:S._isLight?"#bbb":"#3a3a3a", fontSize:18 }}>›</span>
             </div>
           </Card>
         ))}
         {db.groups.length === 0 && (
-          <div style={{ background:C.surface, border:"1px solid #2a2a2a", borderRadius:12, padding:"22px 18px", textAlign:"center", marginTop:10 }}>
-            <div style={{ fontSize:15, color:C.muted, marginBottom:14 }}>Aucune séance créée</div>
+          <div style={{ background:S._surface, border:S._cardBorder, borderRadius:12, padding:"22px 18px", textAlign:"center", marginTop:10 }}>
+            <div style={{ fontSize:15, color:S._muted, marginBottom:14 }}>Aucune séance créée</div>
             <button style={{ ...S.btn, width:"auto", padding:"11px 22px", margin:0, display:"inline-block" }} onClick={() => navTo("groups")}>Créer ma première séance</button>
           </div>
         )}
@@ -810,13 +1397,13 @@ export default function App() {
             <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
               <div>
                 <div style={{ fontSize:15, fontWeight:500 }}>{g.name}</div>
-                <div style={{ fontSize:13, color:C.muted, marginTop:3 }}>{g.exercises.length} exercice{g.exercises.length>1?"s":""}</div>
+                <div style={{ fontSize:13, color:S._muted, marginTop:3 }}>{g.exercises.length} exercice{g.exercises.length>1?"s":""}</div>
               </div>
-              <span style={{ color:"#3a3a3a", fontSize:18 }}>›</span>
+              <span style={{ color:S._isLight?"#bbb":"#3a3a3a", fontSize:18 }}>›</span>
             </div>
           </Card>
         ))}
-        {db.groups.length===0 && <p style={{ color:C.muted, fontSize:14 }}>Aucune séance. Crée-en une !</p>}
+        {db.groups.length===0 && <p style={{ color:S._muted, fontSize:14 }}>Aucune séance. Crée-en une !</p>}
       </div>
       <BottomNav cur="groups" onNav={navTo}/>
     </div>
@@ -832,7 +1419,7 @@ export default function App() {
         <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:5 }}>
           <h1 style={{ ...S.h1, marginBottom:0 }}>{selGroup.name}</h1>
           {selGroup.exercises.length >= 1 && (
-            <button onClick={() => navigate("groups")} style={{ background:C.accent, color:"white", border:"none", borderRadius:9, padding:"9px 16px", fontSize:14, fontWeight:700, cursor:"pointer", fontFamily:C.font, flexShrink:0, marginLeft:12 }}>
+            <button onClick={() => navigate("groups")} style={{ background:S._accent, color:S._isLight?"#fff":"white", border:"none", borderRadius:9, padding:"9px 16px", fontSize:14, fontWeight:700, cursor:"pointer", fontFamily:S._font, flexShrink:0, marginLeft:12 }}>
               Valider ✓
             </button>
           )}
@@ -840,27 +1427,27 @@ export default function App() {
         <p style={S.sub}>{selGroup.exercises.length} exercice{selGroup.exercises.length>1?"s":""}</p>
         <div style={S.sec}>Ajouter un exercice</div>
         {mergePrompt && mergePrompt.groupId===selGroupId && (
-          <div style={{ background:"#181818", border:"1px solid #333", borderRadius:12, padding:16, marginBottom:15 }} className="fade-in">
+          <div style={{ background:S._surface, border:S._cardBorder, borderRadius:12, padding:16, marginBottom:15 }} className="fade-in">
             <div style={{ fontSize:15, fontWeight:600, marginBottom:5 }}>Exercice similaire détecté</div>
-            <div style={{ fontSize:13, color:C.muted, marginBottom:14 }}><span style={{ color:C.text, fontWeight:500 }}>"{mergePrompt.newExo.name}"</span> ressemble à :</div>
+            <div style={{ fontSize:13, color:S._muted, marginBottom:14 }}><span style={{ color:S._text, fontWeight:500 }}>"{mergePrompt.newExo.name}"</span> ressemble à :</div>
             {mergePrompt.matches.map(({exo,group}) => {
               const isLinked = mergePrompt.linked.includes(exo.id);
               return (
-                <div key={exo.id} style={{ display:"flex", alignItems:"center", gap:10, background:isLinked?"#1e2a1e":C.card, border:"1px solid "+(isLinked?"#3a5a3a":"#2a2a2a"), borderRadius:10, padding:"10px 14px", marginBottom:8, cursor:"pointer" }}
+                <div key={exo.id} style={{ display:"flex", alignItems:"center", gap:10, background:isLinked?"#1e2a1e":S._card, border:S._cardBorder, borderRadius:10, padding:"10px 14px", marginBottom:8, cursor:"pointer" }}
                   onClick={()=>{ const linked=isLinked?mergePrompt.linked.filter(id=>id!==exo.id):[...mergePrompt.linked,exo.id]; setMergePrompt({...mergePrompt,linked}); }}>
-                  <div style={{ width:19, height:19, borderRadius:5, border:"2px solid "+(isLinked?"#5a9a5a":"#2a2a2a"), background:isLinked?"#5a9a5a":"transparent", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                  <div style={{ width:19, height:19, borderRadius:5, border:"2px solid "+(isLinked?"#5a9a5a":S._border), background:isLinked?"#5a9a5a":"transparent", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
                     {isLinked && <span style={{ color:"#0a1410", fontSize:12, fontWeight:700 }}>✓</span>}
                   </div>
-                  <div><div style={{ fontSize:14, fontWeight:500 }}>{exo.name}</div><div style={{ fontSize:12, color:C.muted }}>{group.name}</div></div>
+                  <div><div style={{ fontSize:14, fontWeight:500 }}>{exo.name}</div><div style={{ fontSize:12, color:S._muted }}>{group.name}</div></div>
                 </div>
               );
             })}
-            <div style={{ fontSize:12, color:C.muted, marginBottom:13 }}>{mergePrompt.linked.length>0 ? "Coché = historique partagé" : "Coche pour partager l'historique"}</div>
+            <div style={{ fontSize:12, color:S._muted, marginBottom:13 }}>{mergePrompt.linked.length>0 ? "Coché = historique partagé" : "Coche pour partager l'historique"}</div>
             <div style={{ display:"flex", gap:8 }}>
-              <button onClick={()=>confirmAddExercise(mergePrompt.linked)} style={{ flex:1, background:"#2a2a2a", color:C.text, border:"1px solid #444", borderRadius:9, padding:"11px", fontSize:14, fontWeight:500, cursor:"pointer" }}>
+              <button onClick={()=>confirmAddExercise(mergePrompt.linked)} style={{ flex:1, background:S._surface, color:S._text, border:S._cardBorder, borderRadius:9, padding:"11px", fontSize:14, fontWeight:500, cursor:"pointer" }}>
                 {mergePrompt.linked.length>0?"Lier & ajouter":"Ajouter sans lier"}
               </button>
-              <button onClick={()=>setMergePrompt(null)} style={{ background:"transparent", color:C.muted, border:"1px solid #2a2a2a", borderRadius:9, padding:"11px 15px", fontSize:14, cursor:"pointer" }}>Annuler</button>
+              <button onClick={()=>setMergePrompt(null)} style={{ background:"transparent", color:S._muted, border:S._cardBorder, borderRadius:9, padding:"11px 15px", fontSize:14, cursor:"pointer" }}>Annuler</button>
             </div>
           </div>
         )}
@@ -880,7 +1467,7 @@ export default function App() {
             onNavigate={eid => { setSelExoId(eid); navigate("exo"); }}
           />
         ))}
-        {selGroup.exercises.length===0 && <p style={{ color:C.muted, fontSize:14 }}>Aucun exercice. Ajoute-en un !</p>}
+        {selGroup.exercises.length===0 && <p style={{ color:S._muted, fontSize:14 }}>Aucun exercice. Ajoute-en un !</p>}
         <button style={S.danger} onClick={()=>deleteGroup(selGroup.id)}>Supprimer la séance "{selGroup.name}"</button>
       </div>
       <BottomNav cur="groups" onNav={navTo}/>
@@ -930,10 +1517,10 @@ export default function App() {
                   <Card style={{ marginBottom:20, cursor:"default", padding:"15px 6px 6px" }}>
                     <ResponsiveContainer width="100%" height={130}>
                       <LineChart data={chartData}>
-                        <XAxis dataKey="date" tick={{ fontSize:10, fill:C.muted }}/>
-                        <YAxis tick={{ fontSize:10, fill:C.muted }} width={30}/>
-                        <Tooltip contentStyle={{ background:C.card, border:"1px solid #2a2a2a", color:C.text, fontSize:12, borderRadius:8 }}/>
-                        <Line type="monotone" dataKey="kg" stroke={C.accent} strokeWidth={1.5} dot={{ fill:C.accent, r:3 }}/>
+                        <XAxis dataKey="date" tick={{ fontSize:10, fill:S._muted }}/>
+                        <YAxis tick={{ fontSize:10, fill:S._muted }} width={30}/>
+                        <Tooltip contentStyle={{ background:S._card, border:S._cardBorder, color:S._text, fontSize:12, borderRadius:8 }}/>
+                        <Line type="monotone" dataKey="kg" stroke={S._accent} strokeWidth={1.5} dot={{ fill:S._accent, r:3 }}/>
                       </LineChart>
                     </ResponsiveContainer>
                   </Card>
@@ -945,9 +1532,9 @@ export default function App() {
                   <Card style={{ marginBottom:24, cursor:"default", padding:"15px 6px 6px" }}>
                     <ResponsiveContainer width="100%" height={110}>
                       <LineChart data={chartData}>
-                        <XAxis dataKey="date" tick={{ fontSize:10, fill:C.muted }}/>
-                        <YAxis tick={{ fontSize:10, fill:C.muted }} width={30}/>
-                        <Tooltip contentStyle={{ background:C.card, border:"1px solid #2a2a2a", color:C.text, fontSize:12, borderRadius:8 }}/>
+                        <XAxis dataKey="date" tick={{ fontSize:10, fill:S._muted }}/>
+                        <YAxis tick={{ fontSize:10, fill:S._muted }} width={30}/>
+                        <Tooltip contentStyle={{ background:S._card, border:S._cardBorder, color:S._text, fontSize:12, borderRadius:8 }}/>
                         <Line type="monotone" dataKey="reps" stroke="#aaa" strokeWidth={1.5} dot={{ fill:"#aaa", r:3 }}/>
                       </LineChart>
                     </ResponsiveContainer>
@@ -956,19 +1543,19 @@ export default function App() {
               )}
             </>
           )}
-          {chartData.length<2 && <p style={{ color:C.muted, fontSize:13, marginBottom:20 }}>Encore {2-chartData.length} séance{chartData.length===0?"s":""} pour voir le graphique.</p>}
+          {chartData.length<2 && <p style={{ color:S._muted, fontSize:13, marginBottom:20 }}>Encore {2-chartData.length} séance{chartData.length===0?"s":""} pour voir le graphique.</p>}
           {perfs.length>0 && (
             <>
               <div style={S.sec}>Historique</div>
               {[...perfs].reverse().map((p,i) => (
                 <Card key={i} style={{ cursor:"default" }}>
-                  <div style={{ fontSize:12, color:C.muted, marginBottom:4 }}>{p.dateLabel}</div>
+                  <div style={{ fontSize:12, color:S._muted, marginBottom:4 }}>{p.dateLabel}</div>
                   <PerfTags entry={p}/>
                 </Card>
               ))}
             </>
           )}
-          {perfs.length===0 && <p style={{ color:C.muted, fontSize:14 }}>Pas encore de données.</p>}
+          {perfs.length===0 && <p style={{ color:S._muted, fontSize:14 }}>Pas encore de données.</p>}
           <button style={S.danger} onClick={()=>{deleteExercise(group?.id, selExoId); navigate("group");}}>Supprimer "{exo?.name}"</button>
         </div>
         <BottomNav cur="groups" onNav={navTo}/>
@@ -992,24 +1579,24 @@ export default function App() {
       <div style={S.app}>
         <div style={S.hdr}>
           <Logo/>
-          <span style={{ fontSize:11, color:C.sub, fontWeight:600, background:"#1a1a1a", padding:"5px 11px", borderRadius:20, letterSpacing:1.5, textTransform:"uppercase", border:"1px solid #2a2a2a" }}>En cours</span>
+          <span style={{ fontSize:11, color:S._sub, fontWeight:600, background:S._surface, padding:"5px 11px", borderRadius:20, letterSpacing:1.5, textTransform:"uppercase", border:S._cardBorder }}>En cours</span>
         </div>
         <div style={S.body} className="page-enter">
           {total>1 && (
             <div style={{ marginBottom:16 }}>
               <div style={{ display:"flex", justifyContent:"space-between", marginBottom:6 }}>
-                <span style={{ fontSize:12, color:C.muted }}>{activeSession.name}</span>
-                <span style={{ fontSize:12, color:C.muted, fontWeight:600 }}>{done+1} / {total}</span>
+                <span style={{ fontSize:12, color:S._muted }}>{activeSession.name}</span>
+                <span style={{ fontSize:12, color:S._muted, fontWeight:600 }}>{done+1} / {total}</span>
               </div>
-              <div style={{ background:"#222", borderRadius:3, height:2 }}>
-                <div style={{ background:C.accent, borderRadius:3, height:2, width:((done+1)/total*100)+"%", transition:"width 0.25s" }}/>
+              <div style={{ background:S._faint||"#222", borderRadius:3, height:2 }}>
+                <div style={{ background:S._accent, borderRadius:3, height:2, width:((done+1)/total*100)+"%", transition:"width 0.25s" }}/>
               </div>
             </div>
           )}
           <h1 style={{ ...S.h1, marginBottom:5 }}>{exo?.name}</h1>
           {last && (
-            <Card style={{ cursor:"default", marginBottom:18, background:"#161616", borderColor:"#2a2a2a" }}>
-              <div style={{ fontSize:12, color:C.sub, fontWeight:500, marginBottom:4 }}>Dernière fois — {fmt(last.date)}</div>
+            <Card style={{ cursor:"default", marginBottom:18 }}>
+              <div style={{ fontSize:12, color:S._sub, fontWeight:500, marginBottom:4 }}>Dernière fois — {fmt(last.date)}</div>
               <PerfTags entry={last}/>
             </Card>
           )}
@@ -1019,15 +1606,15 @@ export default function App() {
               {activeSession.entries.map((e,i) => {
                 const eg = db.groups.find(g=>g.exercises.some(x=>x.id===e.exoId));
                 const ee = eg?.exercises.find(x=>x.id===e.exoId);
-                return <div key={i} style={{ fontSize:13, color:C.muted, marginBottom:4 }}>✓ {ee?.name||"—"}</div>;
+                return <div key={i} style={{ fontSize:13, color:S._muted, marginBottom:4 }}>✓ {ee?.name||"—"}</div>;
               })}
             </div>
           )}
           <LogFormWidget logForm={logForm} setLogForm={setLogForm} exo={exo}/>
           <div style={{ height:18 }}/>
-          <button style={{ ...S.ghost, borderColor:C.accent, color:C.accent, fontWeight:700, marginBottom:8 }} onClick={() => finishAndSave(activeSession.entries)}>✓ Valider la séance</button>
+          <button style={{ ...S.ghost, borderColor:S._accent, color:S._accent, fontWeight:700, marginBottom:8 }} onClick={() => finishAndSave(activeSession.entries)}>✓ Valider la séance</button>
           <button style={S.btn} onClick={logEntry}>{nextName ? "Valider → " + nextName : "Valider cet exercice"}</button>
-          <button style={{ ...S.ghost, color:C.muted, borderColor:"#2a2a2a", marginBottom:8 }} onClick={skipEntry}>{nextName ? "Passer → "+nextName : "Passer sans enregistrer"}</button>
+          <button style={{ ...S.ghost, color:S._muted, marginBottom:8 }} onClick={skipEntry}>{nextName ? "Passer → "+nextName : "Passer sans enregistrer"}</button>
           <button style={S.danger} onClick={()=>{setActiveSession(null); navigate("home");}}>Annuler la séance</button>
         </div>
       </div>
@@ -1046,17 +1633,17 @@ export default function App() {
       <div style={S.body} className="page-enter" key={pageKey.current}>
         <h1 style={S.h1}>Historique</h1>
         <p style={S.sub}>{db.sessions.length} séance{db.sessions.length>1?"s":""}</p>
-        {db.sessions.length===0 && <p style={{ color:C.muted, fontSize:14 }}>Aucune séance enregistrée.</p>}
+        {db.sessions.length===0 && <p style={{ color:S._muted, fontSize:14 }}>Aucune séance enregistrée.</p>}
         {[...db.sessions].sort((a,b)=>new Date(b.date)-new Date(a.date)).map(s => (
           <Card key={s.id} onClick={()=>{setSelSessionId(s.id); navigate("sessionDetail");}}>
             <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
               <div>
                 <div style={{ fontSize:15, fontWeight:500 }}>{s.name}</div>
-                <div style={{ fontSize:13, color:C.muted, marginTop:3 }}>{s.entries?.length||0} exercice{(s.entries?.length||0)>1?"s":""}</div>
+                <div style={{ fontSize:13, color:S._muted, marginTop:3 }}>{s.entries?.length||0} exercice{(s.entries?.length||0)>1?"s":""}</div>
               </div>
               <div style={{ textAlign:"right" }}>
-                <div style={{ fontSize:13, color:C.muted }}>{fmt(s.date)}</div>
-                <span style={{ color:"#3a3a3a", fontSize:18 }}>›</span>
+                <div style={{ fontSize:13, color:S._muted }}>{fmt(s.date)}</div>
+                <span style={{ color:S._isLight?"#bbb":"#3a3a3a", fontSize:18 }}>›</span>
               </div>
             </div>
           </Card>
@@ -1074,7 +1661,7 @@ export default function App() {
       <div style={S.hdr}><Logo/></div>
       <div style={S.body} className="page-enter" key={pageKey.current}>
         <button style={S.back} onClick={()=>navigate("history")}>← Historique</button>
-        <div style={{ fontSize:12, color:C.muted, marginBottom:4 }}>{fmt(selSession.date)}</div>
+        <div style={{ fontSize:12, color:S._muted, marginBottom:4 }}>{fmt(selSession.date)}</div>
         <h1 style={{ ...S.h1, marginBottom:20 }}>{selSession.name}</h1>
         {(selSession.entries||[]).map((e,i) => {
           const g = db.groups.find(g=>g.exercises.some(x=>x.id===e.exoId));
@@ -1086,7 +1673,7 @@ export default function App() {
             </Card>
           );
         })}
-        {(selSession.entries||[]).length===0 && <p style={{ color:C.muted, fontSize:14 }}>Aucun exercice enregistré.</p>}
+        {(selSession.entries||[]).length===0 && <p style={{ color:S._muted, fontSize:14 }}>Aucun exercice enregistré.</p>}
         <button style={S.danger} onClick={()=>deleteSession(selSession.id)}>Supprimer cette séance</button>
       </div>
       <BottomNav cur="history" onNav={navTo}/>
