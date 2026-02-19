@@ -121,7 +121,6 @@ const S = {
 };
 
 // ─── Cloud sync helpers ───────────────────────────────────────────────────────
-// Données stockées dans Supabase table "user_data" : { user_id, data (jsonb) }
 async function loadFromCloud(userId) {
   const { data, error } = await supabase
     .from('user_data')
@@ -558,12 +557,10 @@ const saveToCloud = async (uid, dataToSave) => {
       if(cloudData) {
         setDb(cloudData);
       } else {
-        // Première connexion : essaye de récupérer localStorage comme migration
         try {
           const local = localStorage.getItem("sportup_v1");
           const localData = local ? JSON.parse(local) : seed;
           setDb(localData);
-          // Sauvegarde immédiate du localStorage vers le cloud
           saveToCloud(session.user.id, localData);
         } catch { setDb(seed); }
       }
@@ -582,7 +579,6 @@ const saveToCloud = async (uid, dataToSave) => {
         table: 'user_data',
         filter: `user_id=eq.${session.user.id}`
       }, (payload) => {
-        // Mise à jour reçue depuis un autre appareil
         if(payload.new?.data) setDb(payload.new.data);
       })
       .subscribe();
@@ -592,10 +588,8 @@ const saveToCloud = async (uid, dataToSave) => {
   // ── Sauvegarde cloud debouncée (300ms après chaque changement) ──
   const saveDb = useCallback((next) => {
     setDb(next);
-    // Sauvegarde locale de secours
     try { localStorage.setItem("sportup_v1", JSON.stringify(next)); } catch {} 
     
-    // Sauvegarde Cloud
     if(!session) return;
     if(saveTimeout.current) clearTimeout(saveTimeout.current);
     saveTimeout.current = setTimeout(() => {
@@ -743,7 +737,6 @@ const saveToCloud = async (uid, dataToSave) => {
       </div>
       <div style={S.body} className="page-enter" key={pageKey.current}>
 
-        {/* ── Date cliquable avec affordance visuelle ── */}
         <button
           className="date-btn"
           onClick={() => setShowCal(!showCal)}
@@ -786,7 +779,6 @@ const saveToCloud = async (uid, dataToSave) => {
           </div>
         )}
 
-        {/* ── Titre de section ── */}
         <div style={{ marginTop: 28, marginBottom: 16 }}>
           <span style={{
             fontSize: 20,
@@ -866,7 +858,18 @@ const saveToCloud = async (uid, dataToSave) => {
         <button style={S.back} onClick={()=>navigate("groups")}>← Séances</button>
       </div>
       <div style={S.body} className="page-enter" key={pageKey.current}>
-        <h1 style={S.h1}>{selGroup.name}</h1>
+        {/* ── Titre + bouton Valider ── */}
+        <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:5 }}>
+          <h1 style={{ ...S.h1, marginBottom:0 }}>{selGroup.name}</h1>
+          {selGroup.exercises.length >= 1 && (
+            <button
+              onClick={() => navigate("groups")}
+              style={{ background:"#e8924a", color:"white", border:"none", borderRadius:9, padding:"9px 16px", fontSize:14, fontWeight:700, cursor:"pointer", fontFamily:C.font, flexShrink:0, marginLeft:12 }}
+            >
+              Valider ✓
+            </button>
+          )}
+        </div>
         <p style={S.sub}>{selGroup.exercises.length} exercice{selGroup.exercises.length>1?"s":""}</p>
         <div style={S.sec}>Ajouter un exercice</div>
 
@@ -1067,7 +1070,6 @@ const saveToCloud = async (uid, dataToSave) => {
           <LogFormWidget logForm={logForm} setLogForm={setLogForm} exo={exo}/>
           <div style={{ height:18 }}/>
 
-          {/* Valider la séance — toujours visible */}
           <button
             style={{ ...S.ghost, borderColor:C.accent, color:C.accent, fontWeight:700, marginBottom:8 }}
             onClick={() => finishAndSave(activeSession.entries)}
