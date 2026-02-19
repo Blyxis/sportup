@@ -6,80 +6,25 @@ const supabaseUrl = 'https://rnypcpzblmnpirwpregh.supabase.co';
 const supabaseKey = 'sb_publishable_URXAdXQihgYxTNwsOoOd3A_Qy7RR_D5';
 const supabase = createClient(supabaseUrl, supabaseKey);
 
-// ─── Auth Form ────────────────────────────────────────────────────────────────
-const AuthForm = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-
-  const handleAuth = async (type) => {
-    setLoading(true);
-    const { error } = type === 'login'
-      ? await supabase.auth.signInWithPassword({ email, password })
-      : await supabase.auth.signUp({ email, password });
-    if (error) alert(error.message);
-    else if (type === 'signup') alert("Inscription réussie ! Connecte-toi maintenant.");
-    setLoading(false);
-  };
-
-  return (
-    <div style={{ padding:'40px 20px', textAlign:'center', background:'#111', color:'white', height:'100vh', display:'flex', flexDirection:'column', justifyContent:'center', fontFamily:"'DM Sans', sans-serif" }}>
-      <h1 style={{ color:'#e8924a', marginBottom:'30px', fontSize:28, fontWeight:700, letterSpacing:-0.5 }}>SPORTUP</h1>
-      <div style={{ maxWidth:'300px', margin:'0 auto', width:'100%' }}>
-        <input type="email" placeholder="Email" onChange={e => setEmail(e.target.value)}
-          style={{ width:'100%', padding:'13px', marginBottom:'10px', borderRadius:'9px', border:'1px solid #333', background:'#1a1a1a', color:'white', fontSize:15, fontFamily:"'DM Sans', sans-serif" }} />
-        <input type="password" placeholder="Mot de passe" onChange={e => setPassword(e.target.value)}
-          style={{ width:'100%', padding:'13px', marginBottom:'20px', borderRadius:'9px', border:'1px solid #333', background:'#1a1a1a', color:'white', fontSize:15, fontFamily:"'DM Sans', sans-serif" }} />
-        <button onClick={() => handleAuth('login')} disabled={loading}
-          style={{ width:'100%', padding:'13px', marginBottom:'10px', background:'#e8924a', color:'white', border:'none', borderRadius:'9px', fontWeight:700, cursor:'pointer', fontSize:15, fontFamily:"'DM Sans', sans-serif" }}>
-          {loading ? 'Chargement...' : 'Se connecter'}
-        </button>
-        <button onClick={() => handleAuth('signup')} disabled={loading}
-          style={{ width:'100%', padding:'13px', background:'transparent', color:'#888', border:'1px solid #333', borderRadius:'9px', cursor:'pointer', fontSize:14, fontFamily:"'DM Sans', sans-serif" }}>
-          Créer un compte
-        </button>
-      </div>
-    </div>
-  );
+// ─── Themes ───────────────────────────────────────────────────────────────────
+const THEMES = {
+  '1':  { name: 'Dark Pro',   accent: '#e8924a', grad: 'linear-gradient(145deg,#f0a060,#e8924a,#d07840)', logoGrad: 'linear-gradient(135deg,#e8924a 0%,#d07840 40%,#f0ece6 100%)', stopA:'#e8924a', stopB:'#d07840', stopC:'#f2ede6' },
+  '2':  { name: 'Cobalt',     accent: '#4a8ee8', grad: 'linear-gradient(145deg,#60a8f8,#4a8ee8,#3070d0)', logoGrad: 'linear-gradient(135deg,#4a8ee8 0%,#3070d0 40%,#c8dcf8 100%)', stopA:'#4a8ee8', stopB:'#3070d0', stopC:'#c8dcf8' },
+  '5':  { name: 'Jungle',     accent: '#4ab86a', grad: 'linear-gradient(145deg,#60cc80,#4ab86a,#309050)', logoGrad: 'linear-gradient(135deg,#4ab86a 0%,#309050 40%,#c8ecd8 100%)', stopA:'#4ab86a', stopB:'#309050', stopC:'#c8ecd8' },
+  '6':  { name: 'Storm',      accent: '#9a5ae8', grad: 'linear-gradient(145deg,#b070f8,#9a5ae8,#7840d0)', logoGrad: 'linear-gradient(135deg,#9a5ae8 0%,#7840d0 40%,#e0ccf8 100%)', stopA:'#9a5ae8', stopB:'#7840d0', stopC:'#e0ccf8' },
+  '8':  { name: 'RED IMPACT', accent: '#e84a4a', grad: 'linear-gradient(145deg,#f06868,#e84a4a,#c83030)', logoGrad: 'linear-gradient(135deg,#e84a4a 0%,#c83030 40%,#f8cccc 100%)', stopA:'#e84a4a', stopB:'#c83030', stopC:'#f8cccc' },
+  '9':  { name: 'Arctic',     accent: '#4acce8', grad: 'linear-gradient(145deg,#60ddf8,#4acce8,#30a8cc)', logoGrad: 'linear-gradient(135deg,#4acce8 0%,#30a8cc 40%,#c8f0f8 100%)', stopA:'#4acce8', stopB:'#30a8cc', stopC:'#c8f0f8' },
+  '10': { name: 'Gold Rush',  accent: '#e8c84a', grad: 'linear-gradient(145deg,#f8dc60,#e8c84a,#c8a030)', logoGrad: 'linear-gradient(135deg,#e8c84a 0%,#c8a030 40%,#f8ecc8 100%)', stopA:'#e8c84a', stopB:'#c8a030', stopC:'#f8ecc8' },
 };
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-const seed = { groups: [], sessions: [] };
-const uid = () => Date.now() + Math.random();
-
-function fmt(iso) {
-  return new Date(iso).toLocaleDateString("fr-FR", { day:"2-digit", month:"short", year:"numeric" });
-}
-function fmtDateLong(date) {
-  return date.toLocaleDateString("fr-FR", { weekday:"long", day:"numeric", month:"long", year:"numeric" });
-}
-function normalize(s) { return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]/g,""); }
-function levenshtein(a, b) {
-  const m=a.length, n=b.length;
-  const dp=Array.from({length:m+1},(_,i)=>Array.from({length:n+1},(_,j)=>i===0?j:j===0?i:0));
-  for(let i=1;i<=m;i++) for(let j=1;j<=n;j++) dp[i][j]=a[i-1]===b[j-1]?dp[i-1][j-1]:1+Math.min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1]);
-  return dp[m][n];
-}
-function isSimilar(a, b) {
-  const na=normalize(a), nb=normalize(b);
-  if(na===nb||na.includes(nb)||nb.includes(na)) return true;
-  return Math.max(na.length,nb.length)>0 && levenshtein(na,nb)/Math.max(na.length,nb.length)<0.35;
-}
-function findSimilarExos(db, name, excludeExoId) {
-  const matches=[];
-  db.groups.forEach(g=>g.exercises.forEach(e=>{
-    if(e.id!==excludeExoId && isSimilar(e.name,name)) matches.push({exo:e,group:g});
-  }));
-  return matches;
-}
-
-// ─── Design tokens ────────────────────────────────────────────────────────────
-const C = {
+// ─── Design tokens (mutable for theming) ──────────────────────────────────────
+let C = {
   bg:"#0a0a0a", surface:"#141414", card:"#1c1c1c", border:"#2a2a2a",
   text:"#f0f0f0", muted:"#777", faint:"#3a3a3a", sub:"#999",
   danger:"#c47070", accent:"#e8924a",
   font:"'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif",
 };
+let CURRENT_THEME = THEMES['1'];
 
 const globalCss = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&display=swap');
@@ -122,22 +67,12 @@ const S = {
 
 // ─── Cloud sync helpers ───────────────────────────────────────────────────────
 async function loadFromCloud(userId) {
-  const { data, error } = await supabase
-    .from('user_data')
-    .select('data')
-    .eq('user_id', userId)
-    .single();
-  if (error && error.code !== 'PGRST116') {
-    console.error('Cloud load error:', error);
-    return null;
-  }
+  const { data, error } = await supabase.from('user_data').select('data').eq('user_id', userId).single();
+  if (error && error.code !== 'PGRST116') { console.error('Cloud load error:', error); return null; }
   return data?.data || null;
 }
-
 async function saveToCloud(userId, db) {
-  const { error } = await supabase
-    .from('user_data')
-    .upsert({ user_id: userId, data: db, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
+  const { error } = await supabase.from('user_data').upsert({ user_id: userId, data: db, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
   if (error) console.error('Cloud save error:', error);
 }
 
@@ -151,7 +86,7 @@ function BottomNav({ cur, onNav }) {
         </svg>
         Séances
       </button>
-      <button onClick={() => onNav("home")} style={{ background:"linear-gradient(145deg,#f0a060,#e8924a,#d07840)", border:"none", borderRadius:"50%", width:56, height:56, display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", boxShadow:"0 4px 20px rgba(232,146,74,0.45)", transform:"translateY(-10px)", flexShrink:0 }}>
+      <button onClick={() => onNav("home")} style={{ background:CURRENT_THEME.grad, border:"none", borderRadius:"50%", width:56, height:56, display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", boxShadow:`0 4px 20px ${CURRENT_THEME.accent}70`, transform:"translateY(-10px)", flexShrink:0 }}>
         <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
       </button>
       <button onClick={() => onNav("history")} style={{ background:"none", border:"none", color:cur==="history"?C.text:C.muted, fontSize:11, fontWeight:cur==="history"?600:400, cursor:"pointer", fontFamily:C.font, display:"flex", flexDirection:"column", alignItems:"center", gap:5, flex:1, padding:"4px 0" }}>
@@ -166,12 +101,13 @@ function BottomNav({ cur, onNav }) {
 
 // ─── Logo ─────────────────────────────────────────────────────────────────────
 function Logo() {
+  const t = CURRENT_THEME;
   return (
     <div style={{ display:"flex", alignItems:"center", gap:7 }}>
       <svg width="26" height="26" viewBox="0 0 28 28" fill="none">
         <defs>
           <linearGradient id="dg" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#e8924a"/><stop offset="55%" stopColor="#d07840"/><stop offset="100%" stopColor="#f2ede6"/>
+            <stop offset="0%" stopColor={t.stopA}/><stop offset="55%" stopColor={t.stopB}/><stop offset="100%" stopColor={t.stopC}/>
           </linearGradient>
         </defs>
         <rect x="1" y="7" width="5.5" height="14" rx="2" fill="url(#dg)"/>
@@ -180,47 +116,22 @@ function Logo() {
         <rect x="18.5" y="9.5" width="3.5" height="9" rx="1.5" fill="url(#dg)"/>
         <rect x="21.5" y="7" width="5.5" height="14" rx="2" fill="url(#dg)"/>
       </svg>
-      <span style={{ fontSize:16, fontWeight:700, letterSpacing:-0.3, background:"linear-gradient(135deg,#e8924a 0%,#d07840 40%,#f0ece6 100%)", WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent" }}>
+      <span style={{ fontSize:16, fontWeight:700, letterSpacing:-0.3, background:t.logoGrad, WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent" }}>
         Sport'Up
       </span>
     </div>
   );
 }
 
-// ─── AccountIcon ──────────────────────────────────────────────────────────────
-function AccountIcon({ session }) {
-  const [open, setOpen] = useState(false);
-  const email = session?.user?.email || "";
-  const createdAt = session?.user?.created_at ? new Date(session.user.created_at) : null;
-
-  function daysAgo(date) {
-    const diff = Math.floor((Date.now() - date.getTime()) / (1000*60*60*24));
-    if(diff === 0) return "aujourd'hui";
-    if(diff === 1) return "il y a 1 jour";
-    return `il y a ${diff} jours`;
-  }
-
+// ─── SettingsIcon ─────────────────────────────────────────────────────────────
+function SettingsIcon({ onNavigate }) {
   return (
-    <div style={{ position:"relative" }}>
-      <button onClick={() => setOpen(o => !o)} style={{ background:open?"#222":"transparent", border:"1px solid "+(open?"#3a3a3a":"#2a2a2a"), borderRadius:8, width:36, height:36, display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", color:open?C.text:C.muted }}>
-        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-          <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
-        </svg>
-      </button>
-      {open && (
-        <>
-          <div onClick={() => setOpen(false)} style={{ position:"fixed", inset:0, zIndex:199 }}/>
-          <div className="fade-in" style={{ position:"absolute", top:44, right:0, background:"#1a1a1a", border:"1px solid #2a2a2a", borderRadius:12, padding:"15px 17px", minWidth:230, boxShadow:"0 10px 40px rgba(0,0,0,0.7)", zIndex:200 }}>
-            <div style={{ fontSize:11, color:"#444", fontWeight:600, textTransform:"uppercase", letterSpacing:1.5, marginBottom:9 }}>Mon compte</div>
-            <div style={{ fontSize:14, color:C.text, fontWeight:500, marginBottom:4, wordBreak:"break-all" }}>{email}</div>
-            {createdAt && <div style={{ fontSize:12, color:C.muted, marginBottom:16 }}>Membre depuis {daysAgo(createdAt)}</div>}
-            <button onClick={() => supabase.auth.signOut()} style={{ width:"100%", background:"transparent", border:"1px solid #2a1818", borderRadius:8, padding:"10px 12px", fontSize:14, fontWeight:500, color:"#c47070", cursor:"pointer", fontFamily:C.font, textAlign:"left" }}>
-              Se déconnecter
-            </button>
-          </div>
-        </>
-      )}
-    </div>
+    <button onClick={() => onNavigate("settings")} style={{ background:"transparent", border:"1px solid #2a2a2a", borderRadius:8, width:36, height:36, display:"flex", alignItems:"center", justifyContent:"center", cursor:"pointer", color:C.muted }}>
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+    </button>
   );
 }
 
@@ -300,7 +211,6 @@ function Calendar({ calDate, setCalDate, sessions }) {
 function LogFormWidget({ logForm, setLogForm, exo }) {
   const mode = exo?.mode || "reps";
   const series = parseInt(logForm.series) || 1;
-
   function buildSets(n, existing, defReps, defKg) {
     return Array.from({length:n}, (_,i) => {
       const ex = existing && existing[i];
@@ -309,9 +219,7 @@ function LogFormWidget({ logForm, setLogForm, exo }) {
       return { reps:r, kg:parseFloat(defKg)||0 };
     });
   }
-
   const sets = buildSets(series, logForm.sets, logForm.reps, logForm.kg);
-
   function updateSeries(v) {
     const n = Math.max(1, parseInt(v)||1);
     setLogForm({...logForm, series:n, sets:buildSets(n, sets, logForm.reps, logForm.kg)});
@@ -324,9 +232,7 @@ function LogFormWidget({ logForm, setLogForm, exo }) {
     const s = sets.map((x,i) => i<idx ? x : {...x, kg:Math.max(0,Math.round(((x.kg||0)+delta)*10)/10)});
     setLogForm({...logForm, sets:s});
   }
-
   const iBtn = { background:C.card, border:"1px solid #2a2a2a", borderRadius:7, width:30, height:30, color:C.text, cursor:"pointer", fontSize:16, display:"flex", alignItems:"center", justifyContent:"center" };
-
   return (
     <div>
       {mode==="reps" && (
@@ -422,12 +328,9 @@ function ExoSettingsCard({ exo, onSave, onDelete, onNavigate, defaultOpen, force
   const [open, setOpen] = useState(defaultOpen ? true : false);
   const [mode, setMode] = useState(exo.mode || "reps");
   const [kg, setKg] = useState(exo.defaultKg || 0);
-
   useEffect(() => { if(forceCollapse) setOpen(false); }, [forceCollapse]);
   useEffect(() => { if(defaultOpen) setOpen(true); }, [defaultOpen]);
-
   function save() { onSave({...exo, mode, defaultKg:kg}); setOpen(false); }
-
   return (
     <div style={{ background:C.card, border:"1px solid #2a2a2a", borderRadius:12, marginBottom:10, overflow:"hidden" }}>
       <div onClick={() => setOpen(o => !o)} style={{ display:"flex", alignItems:"center", padding:"14px 16px", gap:10, cursor:"pointer" }}>
@@ -479,6 +382,9 @@ export default function App() {
   const [authLoading, setAuthLoading] = useState(true);
   const [db, setDb] = useState(null);
   const [syncing, setSyncing] = useState(false);
+  const [themeId, setThemeId] = useState(() => {
+    try { return localStorage.getItem("sportup_theme") || '1'; } catch { return '1'; }
+  });
 
   const [view, setView] = useState("home");
   const [selGroupId, setSelGroupId] = useState(null);
@@ -496,52 +402,38 @@ export default function App() {
   const pageKey = useRef(0);
   const exoTopRef = useRef(null);
   const saveTimeout = useRef(null);
-  
-// ─── 1. Outils Supabase (Ajoutés pour que ça marche) ───
-  const loadFromCloud = async (uid) => {
+
+  // ── Apply theme globally before render ──
+  const theme = THEMES[themeId] || THEMES['1'];
+  CURRENT_THEME = theme;
+  C.accent = theme.accent;
+
+  function applyTheme(id) {
+    setThemeId(id);
+    try { localStorage.setItem("sportup_theme", id); } catch {}
+  }
+
+  // ─── Supabase in-component helpers ───
+  const loadFromCloudInner = async (uid) => {
     try {
-      const { data, error } = await supabase
-        .from('user_data')
-        .select('data')
-        .eq('user_id', uid)
-        .maybeSingle();
+      const { data, error } = await supabase.from('user_data').select('data').eq('user_id', uid).maybeSingle();
       if (error) throw error;
       return data ? data.data : null;
-    } catch (e) {
-      console.error("Erreur chargement:", e);
-      return null;
-    }
+    } catch (e) { console.error("Erreur chargement:", e); return null; }
+  };
+  const saveToCloudInner = async (uid, dataToSave) => {
+    try {
+      const { error } = await supabase.from('user_data').upsert({ user_id: uid, data: dataToSave, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
+      if (error) { alert("Erreur Supabase : " + error.message); }
+    } catch (e) { console.error("Erreur sauvegarde:", e); }
   };
 
-const saveToCloud = async (uid, dataToSave) => {
-  try {
-    const { error } = await supabase.from('user_data').upsert(
-      {
-        user_id: uid,
-        data: dataToSave,
-        updated_at: new Date().toISOString()
-      }, 
-      { onConflict: 'user_id' } 
-    );
-
-    if (error) {
-      alert("Erreur Supabase : " + error.message);
-    }
-  } catch (e) {
-    console.error("Erreur sauvegarde:", e);
-  }
-};
-
-  // ─── 2. Tes Effets (Auth, CSS, etc.) ───
-  
-  // Auth
   useEffect(() => {
     supabase.auth.getSession().then(({data:{session}}) => { setSession(session); setAuthLoading(false); });
     const {data:{subscription}} = supabase.auth.onAuthStateChange((_,s) => setSession(s));
     return () => subscription.unsubscribe();
   }, []);
 
-  // CSS
   useEffect(() => {
     const s = document.createElement("style");
     s.textContent = globalCss;
@@ -549,73 +441,83 @@ const saveToCloud = async (uid, dataToSave) => {
     return () => document.head.removeChild(s);
   }, []);
 
-  // ── Chargement depuis le cloud au login ──
   useEffect(() => {
     if(!session) return;
     setSyncing(true);
-    loadFromCloud(session.user.id).then(cloudData => {
+    loadFromCloudInner(session.user.id).then(cloudData => {
       if(cloudData) {
         setDb(cloudData);
       } else {
         try {
           const local = localStorage.getItem("sportup_v1");
-          const localData = local ? JSON.parse(local) : seed;
+          const localData = local ? JSON.parse(local) : { groups: [], sessions: [] };
           setDb(localData);
-          saveToCloud(session.user.id, localData);
-        } catch { setDb(seed); }
+          saveToCloudInner(session.user.id, localData);
+        } catch { setDb({ groups: [], sessions: [] }); }
       }
       setSyncing(false);
     });
   }, [session]);
 
-  // ── Écoute en temps réel des changements Supabase ──
   useEffect(() => {
     if(!session) return;
-    const channel = supabase
-      .channel('user_data_changes')
-      .on('postgres_changes', {
-        event: 'UPDATE',
-        schema: 'public',
-        table: 'user_data',
-        filter: `user_id=eq.${session.user.id}`
-      }, (payload) => {
-        if(payload.new?.data) setDb(payload.new.data);
-      })
+    const channel = supabase.channel('user_data_changes')
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'user_data', filter: `user_id=eq.${session.user.id}` },
+        (payload) => { if(payload.new?.data) setDb(payload.new.data); })
       .subscribe();
     return () => supabase.removeChannel(channel);
   }, [session]);
 
-  // ── Sauvegarde cloud debouncée (300ms après chaque changement) ──
   const saveDb = useCallback((next) => {
     setDb(next);
-    try { localStorage.setItem("sportup_v1", JSON.stringify(next)); } catch {} 
-    
+    try { localStorage.setItem("sportup_v1", JSON.stringify(next)); } catch {}
     if(!session) return;
     if(saveTimeout.current) clearTimeout(saveTimeout.current);
-    saveTimeout.current = setTimeout(() => {
-      saveToCloud(session.user.id, next);
-    }, 300);
+    saveTimeout.current = setTimeout(() => { saveToCloudInner(session.user.id, next); }, 300);
   }, [session]);
 
-  
-  function navigate(newView, fn) {
-    pageKey.current += 1;
-    if(fn) fn();
-    setView(newView);
-  }
+  function navigate(newView, fn) { pageKey.current += 1; if(fn) fn(); setView(newView); }
   function navTo(v) { setNewGName(""); navigate(v); }
+
+  const uid = () => Date.now() + Math.random();
+  function fmt(iso) { return new Date(iso).toLocaleDateString("fr-FR", { day:"2-digit", month:"short", year:"numeric" }); }
+  function fmtDateLong(date) { return date.toLocaleDateString("fr-FR", { weekday:"long", day:"numeric", month:"long", year:"numeric" }); }
+  function normalize(s) { return s.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]/g,""); }
+  function levenshtein(a, b) {
+    const m=a.length, n=b.length;
+    const dp=Array.from({length:m+1},(_,i)=>Array.from({length:n+1},(_,j)=>i===0?j:j===0?i:0));
+    for(let i=1;i<=m;i++) for(let j=1;j<=n;j++) dp[i][j]=a[i-1]===b[j-1]?dp[i-1][j-1]:1+Math.min(dp[i-1][j],dp[i][j-1],dp[i-1][j-1]);
+    return dp[m][n];
+  }
+  function isSimilar(a, b) {
+    const na=normalize(a), nb=normalize(b);
+    if(na===nb||na.includes(nb)||nb.includes(na)) return true;
+    return Math.max(na.length,nb.length)>0 && levenshtein(na,nb)/Math.max(na.length,nb.length)<0.35;
+  }
+  function findSimilarExos(dbRef, name, excludeExoId) {
+    const matches=[];
+    dbRef.groups.forEach(g=>g.exercises.forEach(e=>{ if(e.id!==excludeExoId && isSimilar(e.name,name)) matches.push({exo:e,group:g}); }));
+    return matches;
+  }
 
   if(authLoading) return <div style={{ background:'#0a0a0a', height:'100vh', display:'flex', alignItems:'center', justifyContent:'center', color:'#555', fontFamily:C.font }}>Vérification…</div>;
   if(!session) return <AuthForm/>;
   if(syncing || !db) return (
     <div style={{ background:'#0a0a0a', height:'100vh', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', color:'#555', fontFamily:C.font, gap:12 }}>
-      <Logo/>
-      <div style={{ fontSize:13, marginTop:8 }}>Chargement de tes données…</div>
+      <Logo/><div style={{ fontSize:13, marginTop:8 }}>Chargement de tes données…</div>
     </div>
   );
 
   const selGroup = db.groups.find(g => g.id===selGroupId) || null;
   const selSession = db.sessions.find(s => s.id===selSessionId) || null;
+  const email = session?.user?.email || "";
+  const createdAt = session?.user?.created_at ? new Date(session.user.created_at) : null;
+  function daysAgo(date) {
+    const diff = Math.floor((Date.now() - date.getTime()) / (1000*60*60*24));
+    if(diff === 0) return "aujourd'hui";
+    if(diff === 1) return "il y a 1 jour";
+    return `il y a ${diff} jours`;
+  }
 
   function getAllLinkedIds(exoId) {
     let canon = exoId;
@@ -624,13 +526,11 @@ const saveToCloud = async (uid, dataToSave) => {
     db.groups.forEach(g=>g.exercises.forEach(e=>{ if(e.id===exoId||e.canonicalId===canon||e.id===canon) ids.add(e.id); }));
     return ids;
   }
-
   function perfsForExo(exoId) {
     const ids=getAllLinkedIds(exoId), res=[];
     db.sessions.forEach(s=>(s.entries||[]).forEach(e=>{ if(ids.has(e.exoId)) res.push({date:s.date,dateLabel:fmt(s.date),...e}); }));
     return res.sort((a,b)=>new Date(a.date)-new Date(b.date));
   }
-
   function makeDefaultForm(exo, lastPerf) {
     const mode=exo?.mode||"reps";
     const series=lastPerf?(parseInt(lastPerf.series)||4):4;
@@ -644,7 +544,6 @@ const saveToCloud = async (uid, dataToSave) => {
     } else { sets=Array(series).fill(null).map(()=>({reps,kg})); }
     return {series,reps,kg,sets,mode,timeMin:lastPerf?.timeMin||1,timeSec:lastPerf?.timeSec||0,note:""};
   }
-
   function addGroup() {
     if(!newGName.trim()) return;
     const newId = uid();
@@ -727,71 +626,104 @@ const saveToCloud = async (uid, dataToSave) => {
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
+  // SETTINGS
+  // ═══════════════════════════════════════════════════════════════════════════
+  if(view==="settings") return (
+    <div style={S.app}>
+      <div style={S.hdr}><Logo/></div>
+      <div style={S.body} className="page-enter" key={pageKey.current}>
+        <button style={S.back} onClick={()=>navigate("home")}>← Accueil</button>
+        <h1 style={S.h1}>Réglages</h1>
+
+        <div style={S.sec}>Mon compte</div>
+        <Card style={{ cursor:"default", marginBottom:6 }}>
+          <div style={{ fontSize:10, color:"#444", fontWeight:600, textTransform:"uppercase", letterSpacing:1, marginBottom:4 }}>Email</div>
+          <div style={{ fontSize:15, color:C.text, fontWeight:500, wordBreak:"break-all", marginBottom:14 }}>{email}</div>
+          {createdAt && (
+            <>
+              <div style={{ fontSize:10, color:"#444", fontWeight:600, textTransform:"uppercase", letterSpacing:1, marginBottom:4 }}>Membre depuis</div>
+              <div style={{ fontSize:14, color:C.muted }}>{daysAgo(createdAt)}</div>
+            </>
+          )}
+        </Card>
+        <button onClick={() => supabase.auth.signOut()} style={S.danger}>Se déconnecter</button>
+
+        <div style={S.sec}>Apparence</div>
+        <Card onClick={() => navigate("themes")} style={{ display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+          <div style={{ display:"flex", alignItems:"center", gap:13 }}>
+            <div style={{ width:38, height:38, borderRadius:10, background:theme.grad, flexShrink:0, boxShadow:`0 2px 12px ${theme.accent}55` }}/>
+            <div>
+              <div style={{ fontSize:15, fontWeight:500 }}>Choisir le visuel</div>
+              <div style={{ fontSize:12, color:C.muted, marginTop:2 }}>Actuel : <span style={{ color:theme.accent, fontWeight:600 }}>{theme.name}</span></div>
+            </div>
+          </div>
+          <span style={{ color:"#3a3a3a", fontSize:18 }}>›</span>
+        </Card>
+      </div>
+      <BottomNav cur="settings" onNav={navTo}/>
+    </div>
+  );
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // THEMES
+  // ═══════════════════════════════════════════════════════════════════════════
+  if(view==="themes") return (
+    <div style={S.app}>
+      <div style={S.hdr}><Logo/></div>
+      <div style={S.body} className="page-enter" key={pageKey.current}>
+        <button style={S.back} onClick={()=>navigate("settings")}>← Réglages</button>
+        <h1 style={S.h1}>Choisir le visuel</h1>
+        <p style={{ fontSize:14, color:C.muted, marginBottom:24 }}>Sélectionne le thème de couleur de l'application</p>
+        <div style={{ display:"flex", flexDirection:"column", gap:9 }}>
+          {Object.entries(THEMES).map(([id, t]) => {
+            const isActive = themeId === id;
+            return (
+              <div key={id} onClick={() => applyTheme(id)} style={{ background: isActive ? "#1a1a1a" : C.card, border:`1px solid ${isActive ? t.accent : "#2a2a2a"}`, borderRadius:14, padding:"14px 16px", display:"flex", alignItems:"center", gap:14, cursor:"pointer", transition:"all 0.15s ease" }}>
+                <div style={{ width:42, height:42, borderRadius:11, background:t.grad, flexShrink:0, boxShadow: isActive ? `0 3px 16px ${t.accent}55` : "none", transition:"box-shadow 0.15s" }}/>
+                <div style={{ flex:1 }}>
+                  <div style={{ fontSize:15, fontWeight: isActive ? 700 : 500, color: isActive ? t.accent : C.text, letterSpacing: id==='8' ? 0.8 : 0 }}>
+                    {t.name}
+                  </div>
+                </div>
+                {isActive && (
+                  <div style={{ width:22, height:22, borderRadius:"50%", background:t.accent, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
+                    <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
+                      <path d="M2 6l3 3 5-5" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+      <BottomNav cur="settings" onNav={navTo}/>
+    </div>
+  );
+
+  // ═══════════════════════════════════════════════════════════════════════════
   // HOME
   // ═══════════════════════════════════════════════════════════════════════════
   if(view==="home") return (
     <div style={S.app}>
       <div style={S.hdr}>
         <Logo/>
-        <AccountIcon session={session}/>
+        <SettingsIcon onNavigate={navigate}/>
       </div>
       <div style={S.body} className="page-enter" key={pageKey.current}>
-
-        <button
-          className="date-btn"
-          onClick={() => setShowCal(!showCal)}
-          style={{
-            background: showCal ? "#1a1a1a" : "#161616",
-            border: "1px solid " + (showCal ? "#3a3a3a" : "#252525"),
-            borderRadius: 11,
-            cursor: "pointer",
-            padding: "12px 15px",
-            marginBottom: 0,
-            textAlign: "left",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            width: "100%",
-            fontFamily: C.font,
-          }}
-        >
+        <button className="date-btn" onClick={() => setShowCal(!showCal)} style={{ background: showCal ? "#1a1a1a" : "#161616", border: "1px solid " + (showCal ? "#3a3a3a" : "#252525"), borderRadius: 11, cursor: "pointer", padding: "12px 15px", marginBottom: 0, textAlign: "left", display: "flex", alignItems: "center", justifyContent: "space-between", width: "100%", fontFamily: C.font }}>
           <div>
-            <div style={{ fontSize:11, color:"#555", fontWeight:600, textTransform:"uppercase", letterSpacing:1.8, marginBottom:4 }}>
-              Date de la séance
-            </div>
-            <div style={{ fontSize:16, fontWeight:600, color: showCal ? C.text : "#ccc" }}>
-              {fmtDateLong(calDate)}
-            </div>
+            <div style={{ fontSize:11, color:"#555", fontWeight:600, textTransform:"uppercase", letterSpacing:1.8, marginBottom:4 }}>Date de la séance</div>
+            <div style={{ fontSize:16, fontWeight:600, color: showCal ? C.text : "#ccc" }}>{fmtDateLong(calDate)}</div>
           </div>
-          <svg
-            width="16" height="16" viewBox="0 0 24 24" fill="none"
-            stroke={showCal ? C.text : "#444"}
-            strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
-            style={{ flexShrink:0, transform: showCal ? "rotate(180deg)" : "rotate(0deg)", transition:"transform 0.2s" }}
-          >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={showCal ? C.text : "#444"} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink:0, transform: showCal ? "rotate(180deg)" : "rotate(0deg)", transition:"transform 0.2s" }}>
             <polyline points="6 9 12 15 18 9"/>
           </svg>
         </button>
-
-        {showCal && (
-          <div style={{ marginTop:10 }}>
-            <Calendar calDate={calDate} setCalDate={setCalDate} sessions={db.sessions}/>
-          </div>
-        )}
-
+        {showCal && <div style={{ marginTop:10 }}><Calendar calDate={calDate} setCalDate={setCalDate} sessions={db.sessions}/></div>}
         <div style={{ marginTop: 28, marginBottom: 16 }}>
-          <span style={{
-            fontSize: 20,
-            fontWeight: 700,
-            color: C.text,
-            textTransform: "uppercase",
-            letterSpacing: 0.8,
-            display: "block",
-          }}>
-            On bosse quoi aujourd'hui ?
-          </span>
+          <span style={{ fontSize: 20, fontWeight: 700, color: C.text, textTransform: "uppercase", letterSpacing: 0.8, display: "block" }}>On bosse quoi aujourd'hui ?</span>
         </div>
-
         {db.groups.length > 0 && db.groups.map(g => (
           <Card key={g.id} onClick={() => startSession(g.id)}>
             <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center" }}>
@@ -803,13 +735,10 @@ const saveToCloud = async (uid, dataToSave) => {
             </div>
           </Card>
         ))}
-
         {db.groups.length === 0 && (
           <div style={{ background:C.surface, border:"1px solid #2a2a2a", borderRadius:12, padding:"22px 18px", textAlign:"center", marginTop:10 }}>
             <div style={{ fontSize:15, color:C.muted, marginBottom:14 }}>Aucune séance créée</div>
-            <button style={{ ...S.btn, width:"auto", padding:"11px 22px", margin:0, display:"inline-block" }} onClick={() => navTo("groups")}>
-              Créer ma première séance
-            </button>
+            <button style={{ ...S.btn, width:"auto", padding:"11px 22px", margin:0, display:"inline-block" }} onClick={() => navTo("groups")}>Créer ma première séance</button>
           </div>
         )}
       </div>
@@ -853,32 +782,22 @@ const saveToCloud = async (uid, dataToSave) => {
   // ═══════════════════════════════════════════════════════════════════════════
   if(view==="group" && selGroup) return (
     <div style={S.app}>
-      <div style={S.hdr}>
-        <Logo/>
-        <button style={S.back} onClick={()=>navigate("groups")}>← Séances</button>
-      </div>
+      <div style={S.hdr}><Logo/><button style={S.back} onClick={()=>navigate("groups")}>← Séances</button></div>
       <div style={S.body} className="page-enter" key={pageKey.current}>
-        {/* ── Titre + bouton Valider ── */}
         <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:5 }}>
           <h1 style={{ ...S.h1, marginBottom:0 }}>{selGroup.name}</h1>
           {selGroup.exercises.length >= 1 && (
-            <button
-              onClick={() => navigate("groups")}
-              style={{ background:"#e8924a", color:"white", border:"none", borderRadius:9, padding:"9px 16px", fontSize:14, fontWeight:700, cursor:"pointer", fontFamily:C.font, flexShrink:0, marginLeft:12 }}
-            >
+            <button onClick={() => navigate("groups")} style={{ background:C.accent, color:"white", border:"none", borderRadius:9, padding:"9px 16px", fontSize:14, fontWeight:700, cursor:"pointer", fontFamily:C.font, flexShrink:0, marginLeft:12 }}>
               Valider ✓
             </button>
           )}
         </div>
         <p style={S.sub}>{selGroup.exercises.length} exercice{selGroup.exercises.length>1?"s":""}</p>
         <div style={S.sec}>Ajouter un exercice</div>
-
         {mergePrompt && mergePrompt.groupId===selGroupId && (
           <div style={{ background:"#181818", border:"1px solid #333", borderRadius:12, padding:16, marginBottom:15 }} className="fade-in">
             <div style={{ fontSize:15, fontWeight:600, marginBottom:5 }}>Exercice similaire détecté</div>
-            <div style={{ fontSize:13, color:C.muted, marginBottom:14 }}>
-              <span style={{ color:C.text, fontWeight:500 }}>"{mergePrompt.newExo.name}"</span> ressemble à :
-            </div>
+            <div style={{ fontSize:13, color:C.muted, marginBottom:14 }}><span style={{ color:C.text, fontWeight:500 }}>"{mergePrompt.newExo.name}"</span> ressemble à :</div>
             {mergePrompt.matches.map(({exo,group}) => {
               const isLinked = mergePrompt.linked.includes(exo.id);
               return (
@@ -887,16 +806,11 @@ const saveToCloud = async (uid, dataToSave) => {
                   <div style={{ width:19, height:19, borderRadius:5, border:"2px solid "+(isLinked?"#5a9a5a":"#2a2a2a"), background:isLinked?"#5a9a5a":"transparent", display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
                     {isLinked && <span style={{ color:"#0a1410", fontSize:12, fontWeight:700 }}>✓</span>}
                   </div>
-                  <div>
-                    <div style={{ fontSize:14, fontWeight:500 }}>{exo.name}</div>
-                    <div style={{ fontSize:12, color:C.muted }}>{group.name}</div>
-                  </div>
+                  <div><div style={{ fontSize:14, fontWeight:500 }}>{exo.name}</div><div style={{ fontSize:12, color:C.muted }}>{group.name}</div></div>
                 </div>
               );
             })}
-            <div style={{ fontSize:12, color:C.muted, marginBottom:13 }}>
-              {mergePrompt.linked.length>0 ? "Coché = historique partagé" : "Coche pour partager l'historique"}
-            </div>
+            <div style={{ fontSize:12, color:C.muted, marginBottom:13 }}>{mergePrompt.linked.length>0 ? "Coché = historique partagé" : "Coche pour partager l'historique"}</div>
             <div style={{ display:"flex", gap:8 }}>
               <button onClick={()=>confirmAddExercise(mergePrompt.linked)} style={{ flex:1, background:"#2a2a2a", color:C.text, border:"1px solid #444", borderRadius:9, padding:"11px", fontSize:14, fontWeight:500, cursor:"pointer" }}>
                 {mergePrompt.linked.length>0?"Lier & ajouter":"Ajouter sans lier"}
@@ -905,7 +819,6 @@ const saveToCloud = async (uid, dataToSave) => {
             </div>
           </div>
         )}
-
         {!mergePrompt && (
           <>
             <input style={{ ...S.input, marginBottom:10 }} placeholder="ex : Tractions, Développé couché…" value={newEName}
@@ -913,7 +826,6 @@ const saveToCloud = async (uid, dataToSave) => {
             <button style={{ ...S.btn, marginBottom:24 }} onClick={()=>addExercise()}>Ajouter l'exercice</button>
           </>
         )}
-
         <div style={S.sec} ref={exoTopRef}>Exercices</div>
         {selGroup.exercises.map((e) => (
           <ExoSettingsCard key={e.id} exo={e} defaultOpen={e.id===lastAddedExoId}
@@ -1031,7 +943,6 @@ const saveToCloud = async (uid, dataToSave) => {
     const total = g?.exercises.length || 0;
     const done = total - queue.length - 1;
     const nextName = queue.length>0 ? db.groups.find(x=>x.id===queue[0]?.groupId)?.exercises.find(e=>e.id===queue[0]?.exoId)?.name : null;
-
     return (
       <div style={S.app}>
         <div style={S.hdr}>
@@ -1069,21 +980,9 @@ const saveToCloud = async (uid, dataToSave) => {
           )}
           <LogFormWidget logForm={logForm} setLogForm={setLogForm} exo={exo}/>
           <div style={{ height:18 }}/>
-
-          <button
-            style={{ ...S.ghost, borderColor:C.accent, color:C.accent, fontWeight:700, marginBottom:8 }}
-            onClick={() => finishAndSave(activeSession.entries)}
-          >
-            ✓ Valider la séance
-          </button>
-
-          <button style={S.btn} onClick={logEntry}>
-            {nextName ? "Valider → " + nextName : "Valider cet exercice"}
-          </button>
-
-          <button style={{ ...S.ghost, color:C.muted, borderColor:"#2a2a2a", marginBottom:8 }} onClick={skipEntry}>
-            {nextName ? "Passer → "+nextName : "Passer sans enregistrer"}
-          </button>
+          <button style={{ ...S.ghost, borderColor:C.accent, color:C.accent, fontWeight:700, marginBottom:8 }} onClick={() => finishAndSave(activeSession.entries)}>✓ Valider la séance</button>
+          <button style={S.btn} onClick={logEntry}>{nextName ? "Valider → " + nextName : "Valider cet exercice"}</button>
+          <button style={{ ...S.ghost, color:C.muted, borderColor:"#2a2a2a", marginBottom:8 }} onClick={skipEntry}>{nextName ? "Passer → "+nextName : "Passer sans enregistrer"}</button>
           <button style={S.danger} onClick={()=>{setActiveSession(null); navigate("home");}}>Annuler la séance</button>
         </div>
       </div>
@@ -1147,4 +1046,39 @@ const saveToCloud = async (uid, dataToSave) => {
   );
 
   return null;
+}
+
+// ─── Auth Form (moved to bottom to avoid hoisting issues) ─────────────────────
+function AuthForm() {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const handleAuth = async (type) => {
+    setLoading(true);
+    const { error } = type === 'login'
+      ? await supabase.auth.signInWithPassword({ email, password })
+      : await supabase.auth.signUp({ email, password });
+    if (error) alert(error.message);
+    else if (type === 'signup') alert("Inscription réussie ! Connecte-toi maintenant.");
+    setLoading(false);
+  };
+  return (
+    <div style={{ padding:'40px 20px', textAlign:'center', background:'#111', color:'white', height:'100vh', display:'flex', flexDirection:'column', justifyContent:'center', fontFamily:"'DM Sans', sans-serif" }}>
+      <h1 style={{ color:'#e8924a', marginBottom:'30px', fontSize:28, fontWeight:700, letterSpacing:-0.5 }}>SPORTUP</h1>
+      <div style={{ maxWidth:'300px', margin:'0 auto', width:'100%' }}>
+        <input type="email" placeholder="Email" onChange={e => setEmail(e.target.value)}
+          style={{ width:'100%', padding:'13px', marginBottom:'10px', borderRadius:'9px', border:'1px solid #333', background:'#1a1a1a', color:'white', fontSize:15, fontFamily:"'DM Sans', sans-serif" }} />
+        <input type="password" placeholder="Mot de passe" onChange={e => setPassword(e.target.value)}
+          style={{ width:'100%', padding:'13px', marginBottom:'20px', borderRadius:'9px', border:'1px solid #333', background:'#1a1a1a', color:'white', fontSize:15, fontFamily:"'DM Sans', sans-serif" }} />
+        <button onClick={() => handleAuth('login')} disabled={loading}
+          style={{ width:'100%', padding:'13px', marginBottom:'10px', background:'#e8924a', color:'white', border:'none', borderRadius:'9px', fontWeight:700, cursor:'pointer', fontSize:15, fontFamily:"'DM Sans', sans-serif" }}>
+          {loading ? 'Chargement...' : 'Se connecter'}
+        </button>
+        <button onClick={() => handleAuth('signup')} disabled={loading}
+          style={{ width:'100%', padding:'13px', background:'transparent', color:'#888', border:'1px solid #333', borderRadius:'9px', cursor:'pointer', fontSize:14, fontFamily:"'DM Sans', sans-serif" }}>
+          Créer un compte
+        </button>
+      </div>
+    </div>
+  );
 }
