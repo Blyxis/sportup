@@ -55,353 +55,347 @@ const THEMES = {
 // ─── Premium Themes ───────────────────────────────────────────────────────────
 const PREMIUM_THEMES = {
 
-  // ── 1. AURORA ──
+  // ── 1. AURORA — Vert néon sur noir profond, Space Grotesk ──
   'aurora': {
     name: 'Aurora Borealis',
     tagline: 'Lumières du Nord',
-    accent: '#5effc8',
-    grad: 'linear-gradient(135deg,#00c896,#5effc8,#a78bfa)',
-    logoGrad: 'linear-gradient(135deg,#00c896 0%,#5effc8 50%,#a78bfa 100%)',
-    stopA: '#00c896', stopB: '#5effc8', stopC: '#a78bfa',
-    bg: '#030b10',
-    surface: '#071520',
-    card: '#0b1e2e',
-    border: '#102838',
-    text: '#e8fffa',
-    muted: '#4db896',
-    faint: '#0d2030',
-    sub: '#3a9a7a',
+    accent: '#00ffb0',
+    grad: 'linear-gradient(135deg,#00c896,#00ffb0,#a78bfa)',
+    logoGrad: 'linear-gradient(135deg,#00c896 0%,#00ffb0 50%,#a78bfa 100%)',
+    stopA: '#00c896', stopB: '#00ffb0', stopC: '#a78bfa',
+    bg: '#020e0a',
+    surface: '#051a10',
+    card: '#082418',
+    border: '#0d3020',
+    text: '#c8fff0',
+    muted: '#38c890',
+    faint: '#0a2818',
+    sub: '#28a070',
     fontFamily: "'Space Grotesk', -apple-system, sans-serif",
     fontImport: "https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&display=swap",
     bgEffect: `
-      background: #030b10;
+      background: #020e0a;
       background-image: 
-        radial-gradient(ellipse at 15% 40%, rgba(0,200,150,0.14) 0%, transparent 55%),
-        radial-gradient(ellipse at 85% 15%, rgba(167,139,250,0.12) 0%, transparent 50%),
-        radial-gradient(ellipse at 50% 90%, rgba(0,150,120,0.06) 0%, transparent 40%);
+        radial-gradient(ellipse at 20% 30%, rgba(0,255,176,0.18) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 70%, rgba(167,139,250,0.14) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 100%, rgba(0,200,150,0.08) 0%, transparent 40%);
     `,
-    cardBg: 'linear-gradient(135deg, rgba(0,200,150,0.07) 0%, rgba(11,30,46,1) 100%)',
-    borderStyle: '1px solid rgba(94,255,200,0.18)',
-    navGlow: '0 -1px 40px rgba(0,200,150,0.15)',
-    btnGlow: '0 4px 28px rgba(94,255,200,0.45)',
-    headerBg: 'rgba(3,11,16,0.97)',
-    headerBorder: '1px solid rgba(94,255,200,0.12)',
-    textGradient: 'linear-gradient(135deg,#5effc8,#a78bfa)',
+    cardBg: 'linear-gradient(135deg, rgba(0,255,176,0.08) 0%, rgba(8,36,24,1) 100%)',
+    borderStyle: '1px solid rgba(0,255,176,0.2)',
+    navGlow: '0 -1px 40px rgba(0,255,176,0.18)',
+    btnGlow: '0 4px 28px rgba(0,255,176,0.5)',
+    headerBg: 'rgba(2,14,10,0.97)',
+    headerBorder: '1px solid rgba(0,255,176,0.14)',
+    textGradient: 'linear-gradient(135deg,#00ffb0,#a78bfa)',
   },
 
-  // ── 2. VELVET ──
+  // ── 2. VELVET — Violet profond, Cormorant Garamond, luxe ──
   'velvet': {
     name: 'Velvet Noir',
     tagline: 'Luxe & Profondeur',
-    accent: '#c084fc',
-    grad: 'linear-gradient(135deg,#7c3aed,#c084fc,#f0abfc)',
-    logoGrad: 'linear-gradient(135deg,#7c3aed 0%,#c084fc 50%,#f0abfc 100%)',
-    stopA: '#7c3aed', stopB: '#c084fc', stopC: '#f0abfc',
-    bg: '#07040f',
-    surface: '#0f0820',
-    card: '#160c2e',
-    border: '#241438',
-    text: '#f5eeff',
-    muted: '#9d6ec0',
-    faint: '#1a1030',
-    sub: '#7a4aaa',
+    accent: '#d4a8ff',
+    grad: 'linear-gradient(135deg,#5a1a9a,#9b50e8,#d4a8ff)',
+    logoGrad: 'linear-gradient(135deg,#5a1a9a 0%,#9b50e8 50%,#d4a8ff 100%)',
+    stopA: '#5a1a9a', stopB: '#9b50e8', stopC: '#d4a8ff',
+    bg: '#08040f',
+    surface: '#100820',
+    card: '#180e30',
+    border: '#261640',
+    text: '#f0e8ff',
+    muted: '#9060c0',
+    faint: '#1c1035',
+    sub: '#6a40a0',
     fontFamily: "'Cormorant Garamond', Georgia, serif",
     fontImport: "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap",
     bgEffect: `
-      background: #07040f;
+      background: #08040f;
       background-image: 
-        radial-gradient(ellipse at 25% 25%, rgba(124,58,237,0.18) 0%, transparent 55%),
-        radial-gradient(ellipse at 75% 75%, rgba(192,132,252,0.1) 0%, transparent 50%),
-        radial-gradient(ellipse at 50% 0%, rgba(240,171,252,0.05) 0%, transparent 40%);
+        radial-gradient(ellipse at 30% 20%, rgba(90,26,154,0.35) 0%, transparent 50%),
+        radial-gradient(ellipse at 70% 80%, rgba(212,168,255,0.12) 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 50%, rgba(155,80,232,0.06) 0%, transparent 60%);
     `,
-    cardBg: 'linear-gradient(145deg, rgba(124,58,237,0.1) 0%, rgba(22,12,46,1) 100%)',
-    borderStyle: '1px solid rgba(192,132,252,0.22)',
-    navGlow: '0 -1px 50px rgba(124,58,237,0.2)',
-    btnGlow: '0 4px 32px rgba(192,132,252,0.5)',
-    headerBg: 'rgba(7,4,15,0.98)',
-    headerBorder: '1px solid rgba(192,132,252,0.18)',
-    textGradient: 'linear-gradient(135deg,#c084fc,#f0abfc)',
+    cardBg: 'linear-gradient(145deg, rgba(155,80,232,0.14) 0%, rgba(24,14,48,1) 100%)',
+    borderStyle: '1px solid rgba(212,168,255,0.25)',
+    navGlow: '0 -1px 50px rgba(90,26,154,0.3)',
+    btnGlow: '0 4px 32px rgba(212,168,255,0.55)',
+    headerBg: 'rgba(8,4,15,0.98)',
+    headerBorder: '1px solid rgba(212,168,255,0.2)',
+    textGradient: 'linear-gradient(135deg,#d4a8ff,#f0e8ff)',
   },
 
-  // ── 3. TITANIUM ──
+  // ── 3. TITANIUM — Monospace, grille technique, gris acier ──
   'titanium': {
     name: 'Titanium Pro',
     tagline: 'Précision industrielle',
-    accent: '#a8c4d8',
-    grad: 'linear-gradient(135deg,#607080,#a8c4d8,#d0e4f0)',
-    logoGrad: 'linear-gradient(135deg,#607080 0%,#a8c4d8 50%,#d0e4f0 100%)',
-    stopA: '#607080', stopB: '#a8c4d8', stopC: '#d0e4f0',
-    bg: '#0a0b0d',
-    surface: '#111316',
-    card: '#171a1e',
-    border: '#222830',
-    text: '#dde6ee',
-    muted: '#6a8090',
-    faint: '#1a1e24',
-    sub: '#5a7080',
+    accent: '#78c0e0',
+    grad: 'linear-gradient(135deg,#304858,#78c0e0,#c0e0f0)',
+    logoGrad: 'linear-gradient(135deg,#304858 0%,#78c0e0 50%,#c0e0f0 100%)',
+    stopA: '#304858', stopB: '#78c0e0', stopC: '#c0e0f0',
+    bg: '#07090c',
+    surface: '#0d1014',
+    card: '#131820',
+    border: '#1e2830',
+    text: '#c8dcea',
+    muted: '#5888a8',
+    faint: '#181e28',
+    sub: '#486880',
     fontFamily: "'DM Mono', 'Courier New', monospace",
     fontImport: "https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&display=swap",
     bgEffect: `
-      background: #0a0b0d;
+      background: #07090c;
       background-image: 
-        repeating-linear-gradient(0deg, transparent, transparent 48px, rgba(168,196,216,0.025) 48px, rgba(168,196,216,0.025) 49px),
-        repeating-linear-gradient(90deg, transparent, transparent 48px, rgba(168,196,216,0.018) 48px, rgba(168,196,216,0.018) 49px),
-        radial-gradient(ellipse at 80% 20%, rgba(168,196,216,0.04) 0%, transparent 50%);
+        repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(120,192,224,0.04) 39px, rgba(120,192,224,0.04) 40px),
+        repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(120,192,224,0.025) 39px, rgba(120,192,224,0.025) 40px),
+        radial-gradient(ellipse at 85% 15%, rgba(120,192,224,0.1) 0%, transparent 45%),
+        radial-gradient(ellipse at 15% 85%, rgba(48,72,88,0.2) 0%, transparent 40%);
     `,
-    cardBg: 'linear-gradient(145deg, rgba(168,196,216,0.06) 0%, rgba(23,26,30,1) 100%)',
-    borderStyle: '1px solid rgba(168,196,216,0.14)',
-    navGlow: '0 -1px 20px rgba(168,196,216,0.07)',
-    btnGlow: '0 4px 22px rgba(168,196,216,0.3)',
-    headerBg: 'rgba(10,11,13,0.98)',
-    headerBorder: '1px solid rgba(168,196,216,0.08)',
-    textGradient: 'linear-gradient(135deg,#a8c4d8,#d0e4f0)',
+    cardBg: 'linear-gradient(145deg, rgba(120,192,224,0.08) 0%, rgba(19,24,32,1) 100%)',
+    borderStyle: '1px solid rgba(120,192,224,0.18)',
+    navGlow: '0 -1px 20px rgba(120,192,224,0.1)',
+    btnGlow: '0 4px 22px rgba(120,192,224,0.4)',
+    headerBg: 'rgba(7,9,12,0.99)',
+    headerBorder: '1px solid rgba(120,192,224,0.12)',
+    textGradient: 'linear-gradient(135deg,#78c0e0,#c0e0f0)',
   },
 
-  // ── 4. EMBER ──
+  // ── 4. EMBER — Orange braise intense, Bebas Neue, fond carbone ──
   'ember': {
     name: 'Ember Forge',
     tagline: 'Feu & Puissance',
-    accent: '#ff7040',
-    grad: 'linear-gradient(135deg,#cc2200,#ff5522,#ffaa00)',
-    logoGrad: 'linear-gradient(135deg,#cc2200 0%,#ff5522 50%,#ffaa00 100%)',
-    stopA: '#cc2200', stopB: '#ff5522', stopC: '#ffaa00',
-    bg: '#0a0500',
-    surface: '#150a00',
-    card: '#1e0e00',
-    border: '#301800',
-    text: '#ffe8d0',
-    muted: '#aa6030',
-    faint: '#220f00',
-    sub: '#883318',
+    accent: '#ff6820',
+    grad: 'linear-gradient(135deg,#aa1800,#ff4800,#ffaa00)',
+    logoGrad: 'linear-gradient(135deg,#aa1800 0%,#ff4800 50%,#ffaa00 100%)',
+    stopA: '#aa1800', stopB: '#ff4800', stopC: '#ffaa00',
+    bg: '#080300',
+    surface: '#120600',
+    card: '#1c0a00',
+    border: '#2e1200',
+    text: '#ffd8b0',
+    muted: '#c05020',
+    faint: '#200c00',
+    sub: '#902810',
     fontFamily: "'Bebas Neue', 'Impact', sans-serif",
     fontImport: "https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap",
     bgEffect: `
-      background: #0a0500;
+      background: #080300;
       background-image: 
-        radial-gradient(ellipse at 50% 110%, rgba(255,80,0,0.22) 0%, rgba(255,40,0,0.08) 35%, transparent 60%),
-        radial-gradient(ellipse at 20% 80%, rgba(200,50,0,0.1) 0%, transparent 40%),
-        radial-gradient(ellipse at 80% 90%, rgba(255,120,0,0.08) 0%, transparent 35%),
-        radial-gradient(ellipse at 50% 0%, rgba(80,20,0,0.4) 0%, transparent 50%);
+        radial-gradient(ellipse at 50% 100%, rgba(255,80,0,0.35) 0%, rgba(200,40,0,0.12) 40%, transparent 65%),
+        radial-gradient(ellipse at 0% 60%, rgba(180,40,0,0.15) 0%, transparent 40%),
+        radial-gradient(ellipse at 100% 40%, rgba(255,160,0,0.1) 0%, transparent 35%);
     `,
-    cardBg: 'linear-gradient(165deg, rgba(255,100,30,0.1) 0%, rgba(30,14,0,1) 60%)',
-    borderStyle: '1px solid rgba(255,100,40,0.2)',
-    navGlow: '0 -2px 50px rgba(255,80,0,0.25)',
-    btnGlow: '0 4px 30px rgba(255,112,64,0.6), 0 0 60px rgba(255,80,0,0.2)',
-    headerBg: 'rgba(10,5,0,0.99)',
-    headerBorder: '1px solid rgba(255,100,40,0.16)',
-    textGradient: 'linear-gradient(135deg,#ff7040,#ffaa00)',
+    cardBg: 'linear-gradient(165deg, rgba(255,104,32,0.14) 0%, rgba(28,10,0,1) 60%)',
+    borderStyle: '1px solid rgba(255,104,32,0.25)',
+    navGlow: '0 -2px 50px rgba(255,72,0,0.3)',
+    btnGlow: '0 4px 30px rgba(255,104,32,0.7), 0 0 70px rgba(255,80,0,0.25)',
+    headerBg: 'rgba(8,3,0,0.99)',
+    headerBorder: '1px solid rgba(255,104,32,0.2)',
+    textGradient: 'linear-gradient(135deg,#ff6820,#ffaa00)',
   },
 
-  // ── 5. GLACIER ──
+  // ── 5. GLACIER — Bleu arctique très foncé, cristallin ──
   'glacier': {
     name: 'Glacier Ice',
     tagline: 'Clarté cristalline',
-    accent: '#60c8f0',
-    grad: 'linear-gradient(135deg,#0a6090,#60c8f0,#b0e8ff)',
-    logoGrad: 'linear-gradient(135deg,#0a6090 0%,#60c8f0 50%,#b0e8ff 100%)',
-    stopA: '#0a6090', stopB: '#60c8f0', stopC: '#b0e8ff',
-    bg: '#040c14',
-    surface: '#081624',
-    card: '#0c1e30',
-    border: '#102840',
-    text: '#d8f0ff',
-    muted: '#4a90b8',
-    faint: '#0e2030',
-    sub: '#3a7898',
+    accent: '#40c8f8',
+    grad: 'linear-gradient(135deg,#0050a0,#40c8f8,#a0e8ff)',
+    logoGrad: 'linear-gradient(135deg,#0050a0 0%,#40c8f8 50%,#a0e8ff 100%)',
+    stopA: '#0050a0', stopB: '#40c8f8', stopC: '#a0e8ff',
+    bg: '#02080e',
+    surface: '#04101c',
+    card: '#071828',
+    border: '#0c2438',
+    text: '#c0e8ff',
+    muted: '#3888b8',
+    faint: '#091c2e',
+    sub: '#2870a0',
     fontFamily: "'Plus Jakarta Sans', -apple-system, sans-serif",
     fontImport: "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap",
     bgEffect: `
-      background: #040c14;
+      background: #02080e;
       background-image: 
-        radial-gradient(ellipse at 60% 10%, rgba(96,200,240,0.12) 0%, transparent 50%),
-        radial-gradient(ellipse at 10% 60%, rgba(10,96,144,0.15) 0%, transparent 45%),
-        radial-gradient(ellipse at 90% 90%, rgba(176,232,255,0.05) 0%, transparent 40%);
+        radial-gradient(ellipse at 70% 5%, rgba(64,200,248,0.22) 0%, transparent 45%),
+        radial-gradient(ellipse at 5% 70%, rgba(0,80,160,0.28) 0%, transparent 40%),
+        radial-gradient(ellipse at 50% 50%, rgba(64,200,248,0.04) 0%, transparent 70%);
     `,
-    cardBg: 'linear-gradient(145deg, rgba(96,200,240,0.08) 0%, rgba(12,30,48,1) 100%)',
-    borderStyle: '1px solid rgba(96,200,240,0.18)',
-    navGlow: '0 -1px 40px rgba(10,96,144,0.2)',
-    btnGlow: '0 4px 26px rgba(96,200,240,0.45)',
-    headerBg: 'rgba(4,12,20,0.98)',
-    headerBorder: '1px solid rgba(96,200,240,0.14)',
-    textGradient: 'linear-gradient(135deg,#60c8f0,#b0e8ff)',
+    cardBg: 'linear-gradient(145deg, rgba(64,200,248,0.1) 0%, rgba(7,24,40,1) 100%)',
+    borderStyle: '1px solid rgba(64,200,248,0.22)',
+    navGlow: '0 -1px 40px rgba(0,80,160,0.25)',
+    btnGlow: '0 4px 26px rgba(64,200,248,0.55)',
+    headerBg: 'rgba(2,8,14,0.98)',
+    headerBorder: '1px solid rgba(64,200,248,0.18)',
+    textGradient: 'linear-gradient(135deg,#40c8f8,#a0e8ff)',
   },
 
-  // ── 6. MIDNIGHT ──
+  // ── 6. MIDNIGHT — Vert néon hacker, mono, grille ultra-fine ──
   'midnight': {
     name: 'Minuit Circuit',
     tagline: 'Néon & Data',
-    accent: '#00f090',
-    grad: 'linear-gradient(135deg,#00b870,#00f090,#00d4ff)',
-    logoGrad: 'linear-gradient(135deg,#00b870 0%,#00f090 50%,#00d4ff 100%)',
-    stopA: '#00b870', stopB: '#00f090', stopC: '#00d4ff',
+    accent: '#00ff88',
+    grad: 'linear-gradient(135deg,#008848,#00ff88,#00e0ff)',
+    logoGrad: 'linear-gradient(135deg,#008848 0%,#00ff88 50%,#00e0ff 100%)',
+    stopA: '#008848', stopB: '#00ff88', stopC: '#00e0ff',
     bg: '#010408',
     surface: '#030810',
-    card: '#050d18',
-    border: '#0a1828',
-    text: '#d0ffe8',
-    muted: '#2a8860',
-    faint: '#071020',
-    sub: '#1a7050',
+    card: '#040c18',
+    border: '#081828',
+    text: '#b8ffe0',
+    muted: '#208858',
+    faint: '#061018',
+    sub: '#106840',
     fontFamily: "'JetBrains Mono', 'Courier New', monospace",
     fontImport: "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&display=swap",
     bgEffect: `
       background: #010408;
       background-image: 
-        repeating-linear-gradient(0deg, transparent, transparent 58px, rgba(0,240,144,0.022) 58px, rgba(0,240,144,0.022) 59px),
-        repeating-linear-gradient(90deg, transparent, transparent 58px, rgba(0,240,144,0.012) 58px, rgba(0,240,144,0.012) 59px),
-        radial-gradient(ellipse at 50% 0%, rgba(0,240,144,0.1) 0%, transparent 45%),
-        radial-gradient(ellipse at 50% 100%, rgba(0,180,112,0.06) 0%, transparent 40%);
+        repeating-linear-gradient(0deg, transparent, transparent 29px, rgba(0,255,136,0.035) 29px, rgba(0,255,136,0.035) 30px),
+        repeating-linear-gradient(90deg, transparent, transparent 29px, rgba(0,255,136,0.02) 29px, rgba(0,255,136,0.02) 30px),
+        radial-gradient(ellipse at 50% 0%, rgba(0,255,136,0.18) 0%, transparent 40%),
+        radial-gradient(ellipse at 50% 100%, rgba(0,224,255,0.08) 0%, transparent 35%);
     `,
-    cardBg: 'linear-gradient(145deg, rgba(0,240,144,0.06) 0%, rgba(5,13,24,1) 100%)',
-    borderStyle: '1px solid rgba(0,240,144,0.14)',
-    navGlow: '0 -1px 50px rgba(0,240,144,0.18)',
-    btnGlow: '0 0 28px rgba(0,240,144,0.55), 0 0 70px rgba(0,200,120,0.2)',
+    cardBg: 'linear-gradient(145deg, rgba(0,255,136,0.08) 0%, rgba(4,12,24,1) 100%)',
+    borderStyle: '1px solid rgba(0,255,136,0.18)',
+    navGlow: '0 -1px 50px rgba(0,255,136,0.22)',
+    btnGlow: '0 0 28px rgba(0,255,136,0.65), 0 0 70px rgba(0,200,120,0.25)',
     headerBg: 'rgba(1,4,8,0.99)',
-    headerBorder: '1px solid rgba(0,240,144,0.1)',
-    textGradient: 'linear-gradient(135deg,#00f090,#00d4ff)',
+    headerBorder: '1px solid rgba(0,255,136,0.14)',
+    textGradient: 'linear-gradient(135deg,#00ff88,#00e0ff)',
   },
 
-  // ── 7. DESERT SAND ──
+  // ── 7. DESERT SAND — Thème CLAIR, beige chaud, texte brun foncé ──
   'sand': {
     name: 'Desert Sand',
     tagline: 'Dune & Sérénité',
-    accent: '#c8963c',
-    grad: 'linear-gradient(135deg,#9a6018,#c8963c,#e8c070)',
-    logoGrad: 'linear-gradient(135deg,#9a6018 0%,#c8963c 50%,#e8c070 100%)',
-    stopA: '#9a6018', stopB: '#c8963c', stopC: '#e8c070',
-    bg: '#1a1208',
-    surface: '#221808',
-    card: '#2a1e0a',
-    border: '#382810',
-    text: '#f0e0c0',
-    muted: '#9a7840',
-    faint: '#2e2210',
-    sub: '#7a5a28',
+    isLight: true,
+    accent: '#9a5c10',
+    grad: 'linear-gradient(135deg,#9a5c10,#c8883c,#e8b870)',
+    logoGrad: 'linear-gradient(135deg,#9a5c10 0%,#c8883c 50%,#e8b870 100%)',
+    stopA: '#9a5c10', stopB: '#c8883c', stopC: '#e8b870',
+    bg: '#f5ead8',
+    surface: '#ede0c8',
+    card: '#e4d4b4',
+    border: '#c8b080',
+    text: '#3a2408',
+    muted: '#7a5428',
+    faint: '#dcc89e',
+    sub: '#9a7040',
     fontFamily: "'Playfair Display', Georgia, serif",
     fontImport: "https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&display=swap",
     bgEffect: `
-      background: #1a1208;
+      background: #f5ead8;
       background-image: 
-        radial-gradient(ellipse at 30% 20%, rgba(200,150,60,0.12) 0%, transparent 50%),
-        radial-gradient(ellipse at 70% 80%, rgba(154,96,24,0.1) 0%, transparent 50%),
-        repeating-linear-gradient(
-          102deg,
-          transparent,
-          transparent 80px,
-          rgba(200,150,60,0.015) 80px,
-          rgba(200,150,60,0.015) 81px
-        );
+        radial-gradient(ellipse at 80% 10%, rgba(200,136,60,0.2) 0%, transparent 50%),
+        radial-gradient(ellipse at 10% 80%, rgba(154,92,16,0.12) 0%, transparent 50%),
+        repeating-linear-gradient(108deg, transparent, transparent 60px, rgba(154,92,16,0.04) 60px, rgba(154,92,16,0.04) 61px);
     `,
-    cardBg: 'linear-gradient(155deg, rgba(200,150,60,0.1) 0%, rgba(42,30,10,1) 60%)',
-    borderStyle: '1px solid rgba(200,150,60,0.22)',
-    navGlow: '0 -2px 30px rgba(154,96,24,0.2)',
-    btnGlow: '0 4px 24px rgba(200,150,60,0.45)',
-    headerBg: 'rgba(26,18,8,0.98)',
-    headerBorder: '1px solid rgba(200,150,60,0.18)',
-    textGradient: 'linear-gradient(135deg,#c8963c,#e8c070)',
+    cardBg: '#e4d4b4',
+    borderStyle: '1px solid rgba(154,92,16,0.3)',
+    navGlow: '0 -2px 20px rgba(154,92,16,0.1)',
+    btnGlow: '0 4px 18px rgba(154,92,16,0.3)',
+    headerBg: 'rgba(245,234,216,0.97)',
+    headerBorder: '1px solid rgba(154,92,16,0.25)',
+    textGradient: 'linear-gradient(135deg,#9a5c10,#c8883c)',
   },
 
-  // ── 8. COBALT ──
+  // ── 8. COBALT — Bleu nuit intense, Syne, contraste élevé ──
   'cobalt': {
     name: 'Cobalt Deep',
     tagline: 'Abyssal & Précis',
-    accent: '#5aaeff',
-    grad: 'linear-gradient(135deg,#1a4aaa,#5aaeff,#90ccff)',
-    logoGrad: 'linear-gradient(135deg,#1a4aaa 0%,#5aaeff 50%,#90ccff 100%)',
-    stopA: '#1a4aaa', stopB: '#5aaeff', stopC: '#90ccff',
-    bg: '#020408',
-    surface: '#04080e',
-    card: '#060c18',
-    border: '#0c1830',
-    text: '#c8e0ff',
-    muted: '#4878a8',
-    faint: '#080e20',
-    sub: '#346090',
+    accent: '#4090ff',
+    grad: 'linear-gradient(135deg,#0828a0,#4090ff,#80c0ff)',
+    logoGrad: 'linear-gradient(135deg,#0828a0 0%,#4090ff 50%,#80c0ff 100%)',
+    stopA: '#0828a0', stopB: '#4090ff', stopC: '#80c0ff',
+    bg: '#010208',
+    surface: '#030510',
+    card: '#050a1e',
+    border: '#0a1438',
+    text: '#b0ccff',
+    muted: '#3060b0',
+    faint: '#070c24',
+    sub: '#2050a0',
     fontFamily: "'Syne', -apple-system, sans-serif",
     fontImport: "https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&display=swap",
     bgEffect: `
-      background: #020408;
+      background: #010208;
       background-image: 
-        radial-gradient(ellipse at 5% 95%, rgba(26,74,170,0.28) 0%, transparent 50%),
-        radial-gradient(ellipse at 95% 5%, rgba(90,174,255,0.12) 0%, transparent 45%),
-        radial-gradient(ellipse at 50% 50%, rgba(26,74,170,0.06) 0%, transparent 60%);
+        radial-gradient(ellipse at 10% 90%, rgba(8,40,160,0.5) 0%, transparent 50%),
+        radial-gradient(ellipse at 90% 10%, rgba(64,144,255,0.2) 0%, transparent 45%),
+        radial-gradient(ellipse at 50% 50%, rgba(8,40,160,0.1) 0%, transparent 70%);
     `,
-    cardBg: 'linear-gradient(145deg, rgba(90,174,255,0.08) 0%, rgba(6,12,24,1) 100%)',
-    borderStyle: '1px solid rgba(90,174,255,0.16)',
-    navGlow: '0 -1px 50px rgba(26,74,170,0.25)',
-    btnGlow: '0 4px 30px rgba(90,174,255,0.5)',
-    headerBg: 'rgba(2,4,8,0.99)',
-    headerBorder: '1px solid rgba(90,174,255,0.12)',
-    textGradient: 'linear-gradient(135deg,#5aaeff,#90ccff)',
+    cardBg: 'linear-gradient(145deg, rgba(64,144,255,0.1) 0%, rgba(5,10,30,1) 100%)',
+    borderStyle: '1px solid rgba(64,144,255,0.2)',
+    navGlow: '0 -1px 50px rgba(8,40,160,0.35)',
+    btnGlow: '0 4px 30px rgba(64,144,255,0.6)',
+    headerBg: 'rgba(1,2,8,0.99)',
+    headerBorder: '1px solid rgba(64,144,255,0.16)',
+    textGradient: 'linear-gradient(135deg,#4090ff,#80c0ff)',
   },
 
-  // ── 9. SAKURA ──
+  // ── 9. SAKURA — Thème CLAIR, rose doux, fond blanc rosé lisible ──
   'sakura': {
     name: 'Sakura Studio',
     tagline: 'Zen & Raffinement',
-    accent: '#f080a0',
-    grad: 'linear-gradient(135deg,#a02050,#f080a0,#ffc0d8)',
-    logoGrad: 'linear-gradient(135deg,#a02050 0%,#f080a0 50%,#ffc0d8 100%)',
-    stopA: '#a02050', stopB: '#f080a0', stopC: '#ffc0d8',
-    bg: '#0e060a',
-    surface: '#180a10',
-    card: '#200c16',
-    border: '#301020',
-    text: '#ffe0ec',
-    muted: '#b05070',
-    faint: '#280e18',
-    sub: '#8a3858',
+    isLight: true,
+    accent: '#c0305a',
+    grad: 'linear-gradient(135deg,#c0305a,#f06090,#ffb0c8)',
+    logoGrad: 'linear-gradient(135deg,#c0305a 0%,#f06090 50%,#ffb0c8 100%)',
+    stopA: '#c0305a', stopB: '#f06090', stopC: '#ffb0c8',
+    bg: '#fff0f5',
+    surface: '#fce0ea',
+    card: '#f8d0e0',
+    border: '#e8a0b8',
+    text: '#3a0818',
+    muted: '#a03060',
+    faint: '#f4c8d8',
+    sub: '#c06080',
     fontFamily: "'Noto Serif JP', Georgia, serif",
     fontImport: "https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;500;600;700&display=swap",
     bgEffect: `
-      background: #0e060a;
+      background: #fff0f5;
       background-image: 
-        radial-gradient(ellipse at 80% 10%, rgba(240,128,160,0.14) 0%, transparent 45%),
-        radial-gradient(ellipse at 20% 80%, rgba(160,32,80,0.12) 0%, transparent 45%),
-        radial-gradient(ellipse at 50% 50%, rgba(255,192,216,0.03) 0%, transparent 60%);
+        radial-gradient(ellipse at 80% 15%, rgba(240,96,144,0.18) 0%, transparent 45%),
+        radial-gradient(ellipse at 15% 80%, rgba(192,48,90,0.1) 0%, transparent 40%),
+        radial-gradient(ellipse at 50% 50%, rgba(255,176,200,0.15) 0%, transparent 60%);
     `,
-    cardBg: 'linear-gradient(145deg, rgba(240,128,160,0.09) 0%, rgba(32,12,22,1) 100%)',
-    borderStyle: '1px solid rgba(240,128,160,0.2)',
-    navGlow: '0 -1px 40px rgba(160,32,80,0.2)',
-    btnGlow: '0 4px 28px rgba(240,128,160,0.5)',
-    headerBg: 'rgba(14,6,10,0.98)',
-    headerBorder: '1px solid rgba(240,128,160,0.15)',
-    textGradient: 'linear-gradient(135deg,#f080a0,#ffc0d8)',
+    cardBg: '#f8d0e0',
+    borderStyle: '1px solid rgba(192,48,90,0.3)',
+    navGlow: '0 -1px 20px rgba(192,48,90,0.1)',
+    btnGlow: '0 4px 20px rgba(192,48,90,0.3)',
+    headerBg: 'rgba(255,240,245,0.97)',
+    headerBorder: '1px solid rgba(192,48,90,0.2)',
+    textGradient: 'linear-gradient(135deg,#c0305a,#f06090)',
   },
 
-  // ── 10. ABYSS ──
+  // ── 10. ABYSS — Noir absolu, micro-texture, contraste maximal ──
   'abyss': {
     name: 'Abyss Matter',
     tagline: 'Graphite & Vide',
-    accent: '#b0b8c0',
-    grad: 'linear-gradient(135deg,#404850,#b0b8c0,#e8ecf0)',
-    logoGrad: 'linear-gradient(135deg,#404850 0%,#b0b8c0 50%,#e8ecf0 100%)',
-    stopA: '#404850', stopB: '#b0b8c0', stopC: '#e8ecf0',
-    bg: '#060606',
-    surface: '#0e0e0e',
-    card: '#141414',
-    border: '#1e1e1e',
-    text: '#eeeeee',
-    muted: '#666666',
-    faint: '#161616',
-    sub: '#444444',
+    accent: '#e0e8f0',
+    grad: 'linear-gradient(135deg,#303840,#90a0b0,#e0e8f0)',
+    logoGrad: 'linear-gradient(135deg,#303840 0%,#90a0b0 50%,#e0e8f0 100%)',
+    stopA: '#303840', stopB: '#90a0b0', stopC: '#e0e8f0',
+    bg: '#030303',
+    surface: '#0a0a0a',
+    card: '#111111',
+    border: '#1c1c1c',
+    text: '#f0f0f0',
+    muted: '#707070',
+    faint: '#141414',
+    sub: '#484848',
     fontFamily: "'Outfit', -apple-system, sans-serif",
     fontImport: "https://fonts.googleapis.com/css2?family=Outfit:wght@200;300;400;500;600;700&display=swap",
     bgEffect: `
-      background: #060606;
+      background: #030303;
       background-image: 
-        repeating-linear-gradient(0deg, transparent, transparent 1px, rgba(255,255,255,0.008) 1px, rgba(255,255,255,0.008) 2px),
-        radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.02) 0%, transparent 60%),
-        radial-gradient(ellipse at 50% 100%, rgba(255,255,255,0.01) 0%, transparent 50%);
-      background-size: 100% 100%, 100% 100%, 100% 100%;
+        repeating-linear-gradient(0deg, transparent, transparent 0px, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px),
+        radial-gradient(ellipse at 50% 0%, rgba(255,255,255,0.035) 0%, transparent 55%);
     `,
-    cardBg: 'linear-gradient(145deg, rgba(255,255,255,0.035) 0%, rgba(20,20,20,1) 100%)',
-    borderStyle: '1px solid rgba(255,255,255,0.08)',
-    navGlow: '0 -2px 20px rgba(0,0,0,0.9)',
-    btnGlow: '0 2px 20px rgba(176,184,192,0.25)',
-    headerBg: 'rgba(6,6,6,0.99)',
-    headerBorder: '1px solid rgba(255,255,255,0.055)',
-    textGradient: 'linear-gradient(135deg,#b0b8c0,#e8ecf0)',
+    cardBg: 'linear-gradient(145deg, rgba(255,255,255,0.05) 0%, rgba(17,17,17,1) 100%)',
+    borderStyle: '1px solid rgba(255,255,255,0.1)',
+    navGlow: '0 -2px 20px rgba(0,0,0,0.95)',
+    btnGlow: '0 2px 20px rgba(224,232,240,0.3)',
+    headerBg: 'rgba(3,3,3,0.99)',
+    headerBorder: '1px solid rgba(255,255,255,0.07)',
+    textGradient: 'linear-gradient(135deg,#90a0b0,#e0e8f0)',
   },
 };
 
@@ -469,8 +463,8 @@ function buildStyles(pt) {
     body:     { padding:"22px 20px" },
     h1:       { fontSize:26, fontWeight:700, letterSpacing:-0.5, lineHeight:1.15, marginBottom:5, color:text },
     sub:      { fontSize:14, color:muted, marginBottom:22 },
-    sec:      { fontSize:11, fontWeight:600, color:isLight?"#999":"#444", textTransform:"uppercase", letterSpacing:2, marginBottom:11, marginTop:24 },
-    btn:      { background:isLight?"#1a1a1a":"#e8e8e8", color:isLight?"#f0f0f0":"#111", border:"none", borderRadius:10, padding:"14px 20px", fontSize:15, fontWeight:700, cursor:"pointer", fontFamily:font, width:"100%", marginBottom:10, display:"block" },
+    sec:      { fontSize:11, fontWeight:600, color:isLight?"#7a5428":"#444", textTransform:"uppercase", letterSpacing:2, marginBottom:11, marginTop:24 },
+    btn:      { background:isLight?"#3a2010":"#e8e8e8", color:isLight?"#f5ead8":"#111", border:"none", borderRadius:10, padding:"14px 20px", fontSize:15, fontWeight:700, cursor:"pointer", fontFamily:font, width:"100%", marginBottom:10, display:"block" },
     ghost:    { background:"transparent", color:text, border:cardBorder, borderRadius:10, padding:"13px 20px", fontSize:14, fontWeight:400, cursor:"pointer", fontFamily:font, width:"100%", marginBottom:10, display:"block" },
     btnSave:  { background:pt?"rgba(255,255,255,0.08)":"#2a2a2a", color:text, border:cardBorder, borderRadius:9, padding:"11px 16px", fontSize:14, fontWeight:500, cursor:"pointer", fontFamily:font },
     danger:   { background:"none", color:"#c47070", border:"1px solid #2a1818", borderRadius:9, padding:"12px 16px", fontSize:14, fontWeight:400, cursor:"pointer", fontFamily:font, width:"100%", marginTop:8 },
@@ -478,10 +472,10 @@ function buildStyles(pt) {
     back:     { background:"none", border:"none", color:muted, fontSize:14, fontWeight:400, cursor:"pointer", fontFamily:font, padding:0, marginBottom:22 },
     tag:      { background:card, border:cardBorder, borderRadius:8, padding:"6px 11px", fontSize:13, color:muted, textAlign:"center", minWidth:50 },
     tagVal:   { fontSize:15, fontWeight:600, color:text, display:"block" },
-    tagLabel: { fontSize:10, color:isLight?"#aaa":"#444", display:"block", marginTop:1, textTransform:"uppercase", letterSpacing:1 },
+    tagLabel: { fontSize:10, color:isLight?"#9a6030":"#444", display:"block", marginTop:1, textTransform:"uppercase", letterSpacing:1 },
     statBox:  { background:surface, border:cardBorder, borderRadius:11, padding:"13px 8px", textAlign:"center" },
     statNum:  { fontSize:28, fontWeight:700, color:text, lineHeight:1 },
-    statLabel:{ fontSize:10, color:isLight?"#aaa":"#444", marginTop:4, textTransform:"uppercase", letterSpacing:1 },
+    statLabel:{ fontSize:10, color:isLight?"#9a6030":"#444", marginTop:4, textTransform:"uppercase", letterSpacing:1 },
     toggle:   (active) => ({ flex:1, padding:"10px", borderRadius:8, fontSize:14, fontWeight:active?600:400, cursor:"pointer", fontFamily:font, background:active?(pt?"rgba(255,255,255,0.12)":"#2a2a2a"):"transparent", color:active?text:muted, border:`1px solid ${active?(pt?"rgba(255,255,255,0.2)":border):border}` }),
     _cardBg: cardBg,
     _cardBorder: cardBorder,
@@ -564,9 +558,16 @@ function BottomNav({ cur, onNav }) {
 function Logo() {
   const t = CURRENT_PREMIUM || CURRENT_THEME;
   const gradId = `logo-grad-${CURRENT_THEME_ID}`;
-  const textStyle = CURRENT_PREMIUM
-    ? { fontSize:16, fontWeight:700, letterSpacing:-0.3, background:t.textGradient, WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text", fontFamily:CURRENT_PREMIUM.fontFamily }
-    : { fontSize:16, fontWeight:700, letterSpacing:-0.3, background:t.logoGrad, WebkitBackgroundClip:"text", WebkitTextFillColor:"transparent", backgroundClip:"text" };
+  // Use solid accent color for text to avoid WebkitBackgroundClip rectangle bug on theme switch
+  const textColor = CURRENT_PREMIUM ? CURRENT_PREMIUM.accent : t.accent;
+  const fontFamily = CURRENT_PREMIUM ? CURRENT_PREMIUM.fontFamily : undefined;
+  const textStyle = {
+    fontSize: 16,
+    fontWeight: 700,
+    letterSpacing: -0.3,
+    color: textColor,
+    fontFamily,
+  };
   return (
     <div style={{ display:"flex", alignItems:"center", gap:7 }}>
       <svg width="26" height="26" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -583,9 +584,7 @@ function Logo() {
         <rect x="18.5" y="9.5" width="3.5" height="9" rx="1.5" fill={`url(#${gradId})`}/>
         <rect x="21.5" y="7" width="5.5" height="14" rx="2" fill={`url(#${gradId})`}/>
       </svg>
-      <span style={textStyle}>
-        Sport'Up
-      </span>
+      <span style={textStyle}>Sport'Up</span>
     </div>
   );
 }
@@ -656,7 +655,7 @@ function TimerStepper({ label, totalSecs, onChange }) {
         <button style={bS} onClick={dec}>−</button>
         <div style={{ textAlign:"center", minWidth:90 }}>
           <div style={{ fontSize:22, fontWeight:700, color:S._text, lineHeight:1.1 }}>{formatDuration(totalSecs)}</div>
-          <div style={{ fontSize:10, color:S._isLight?"#aaa":"#444", marginTop:3, letterSpacing:1, textTransform:"uppercase" }}>par séance</div>
+          <div style={{ fontSize:10, color:S._isLight?"#aaa":"#444", marginTop:3, letterSpacing:1, textTransform:"uppercase" }}>par série</div>
         </div>
         <button style={bS} onClick={inc}>+</button>
       </div>
@@ -1582,11 +1581,6 @@ export default function App() {
       <div style={S.body} className="page-enter" key={pageKey.current}>
         <div style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:5 }}>
           <h1 style={{ ...S.h1, marginBottom:0 }}>{selGroup.name}</h1>
-          {selGroup.exercises.length >= 1 && (
-            <button onClick={() => navigate("groups")} style={{ background:S._accent, color:S._isLight?"#fff":"white", border:"none", borderRadius:9, padding:"9px 16px", fontSize:14, fontWeight:700, cursor:"pointer", fontFamily:S._font, flexShrink:0, marginLeft:12 }}>
-              Valider ✓
-            </button>
-          )}
         </div>
         <p style={S.sub}>{selGroup.exercises.length} exercice{selGroup.exercises.length>1?"s":""}</p>
         <div style={S.sec}>Ajouter un exercice</div>
@@ -1632,6 +1626,11 @@ export default function App() {
           />
         ))}
         {selGroup.exercises.length===0 && <p style={{ color:S._muted, fontSize:14 }}>Aucun exercice. Ajoute-en un !</p>}
+        {selGroup.exercises.length >= 1 && (
+          <button onClick={() => navigate("groups")} style={{ background:S._accent, color:"#fff", border:"none", borderRadius:10, padding:"14px 20px", fontSize:15, fontWeight:700, cursor:"pointer", fontFamily:S._font, width:"100%", marginTop:16, marginBottom:0, display:"block" }}>
+            ✓ Valider la séance
+          </button>
+        )}
         <button style={S.danger} onClick={()=>deleteGroup(selGroup.id)}>Supprimer la séance "{selGroup.name}"</button>
       </div>
       <BottomNav cur="groups" onNav={navTo}/>
