@@ -664,42 +664,118 @@ function TimerStepper({ label, totalSecs, onChange }) {
 }
 
 // ─── Calendar ─────────────────────────────────────────────────────────────────
-function Calendar({ calDate, setCalDate, sessions }) {
+function Calendar({ calDate, setCalDate, sessions, planned, groups, onPlan, onUnplan }) {
   const y=calDate.getFullYear(), m=calDate.getMonth();
   const first=new Date(y,m,1).getDay();
   const days=new Date(y,m+1,0).getDate();
   const today=new Date();
+  const todayIso = today.getFullYear()+"-"+today.getMonth()+"-"+today.getDate();
   const sessSet=new Set(sessions.map(s=>{const d=new Date(s.date);return d.getFullYear()+"-"+d.getMonth()+"-"+d.getDate();}));
+  // Build a map: iso -> array of planned group names
+  const plannedMap={};
+  (planned||[]).forEach(p=>{
+    const key=p.year+"-"+p.month+"-"+p.day;
+    if(!plannedMap[key]) plannedMap[key]=[];
+    plannedMap[key].push(p);
+  });
   const cells=[];
   const off=(first+6)%7;
   for(let i=0;i<off;i++) cells.push(null);
   for(let d=1;d<=days;d++) cells.push(d);
   const accent = S._accent;
   const isLight = S._isLight;
+  const [planPopup, setPlanPopup] = useState(null); // {day, x, y}
+  const [planGroupId, setPlanGroupId] = useState("");
+  const calRef = useRef(null);
+
+  function handleDayClick(d, e) {
+    const clickedDate = new Date(y,m,d);
+    const isoParts = y+"-"+m+"-"+d;
+    // Always select the date
+    setCalDate(new Date(y,m,d));
+    // If future date, show planning popup
+    const dayStart = new Date(y,m,d); dayStart.setHours(0,0,0,0);
+    const todayStart = new Date(); todayStart.setHours(0,0,0,0);
+    if(dayStart > todayStart && onPlan) {
+      const rect = e.currentTarget.getBoundingClientRect();
+      const calRect = calRef.current?.getBoundingClientRect() || {left:0,top:0};
+      setPlanPopup({day:d, iso:isoParts, relX: rect.right - calRect.left, relY: rect.top - calRect.top});
+      setPlanGroupId("");
+    } else {
+      setPlanPopup(null);
+    }
+  }
+
   return (
-    <Card style={{ marginBottom:18, cursor:"default" }}>
-      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:13 }}>
-        <button onClick={()=>setCalDate(new Date(y,m-1,1))} style={S.back}>←</button>
-        <span style={{ fontSize:14, fontWeight:500 }}>{calDate.toLocaleDateString("fr-FR",{month:"long",year:"numeric"})}</span>
-        <button onClick={()=>setCalDate(new Date(y,m+1,1))} style={S.back}>→</button>
-      </div>
-      <div style={{ display:"grid", gridTemplateColumns:"repeat(7,1fr)", gap:2 }}>
-        {["L","M","M","J","V","S","D"].map((d,i)=><div key={i} style={{ fontSize:11, color:isLight?"#bbb":"#444", textAlign:"center", paddingBottom:6, fontWeight:600 }}>{d}</div>)}
-        {cells.map((d,i)=>{
-          if(!d) return <div key={i}/>;
-          const iso=y+"-"+m+"-"+d;
-          const isT=today.getDate()===d&&today.getMonth()===m&&today.getFullYear()===y;
-          const isSel=calDate.getDate()===d&&calDate.getMonth()===m&&calDate.getFullYear()===y;
-          const hasSess=sessSet.has(iso);
-          return (
-            <div key={i} onClick={()=>setCalDate(new Date(y,m,d))} style={{ height:32, display:"flex", alignItems:"center", justifyContent:"center", fontSize:13, fontWeight:isSel||isT?600:400, cursor:"pointer", borderRadius:7, background:isSel?accent:hasSess?S._surface:"transparent", color:isSel?(isLight?"#fff":"#111"):isT?S._text:hasSess?S._text:S._muted, border:isT&&!isSel?`1px solid ${accent}`:"1px solid transparent" }}>
-              {d}
+    <Card style={{ marginBottom:18, cursor:"default", position:"relative" }}>
+      <div ref={calRef} style={{ position:"relative" }}>
+        <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:13 }}>
+          <button onClick={()=>{setPlanPopup(null);setCalDate(new Date(y,m-1,1));}} style={S.back}>←</button>
+          <span style={{ fontSize:14, fontWeight:500 }}>{calDate.toLocaleDateString("fr-FR",{month:"long",year:"numeric"})}</span>
+          <button onClick={()=>{setPlanPopup(null);setCalDate(new Date(y,m+1,1));}} style={S.back}>→</button>
+        </div>
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(7,1fr)", gap:2 }}>
+          {["L","M","M","J","V","S","D"].map((d,i)=><div key={i} style={{ fontSize:11, color:isLight?"#999":"#444", textAlign:"center", paddingBottom:6, fontWeight:600 }}>{d}</div>)}
+          {cells.map((d,i)=>{
+            if(!d) return <div key={i}/>;
+            const iso=y+"-"+m+"-"+d;
+            const isT=today.getDate()===d&&today.getMonth()===m&&today.getFullYear()===y;
+            const isSel=calDate.getDate()===d&&calDate.getMonth()===m&&calDate.getFullYear()===y;
+            const hasSess=sessSet.has(iso);
+            const hasPlanned=!!plannedMap[iso];
+            const dayStart=new Date(y,m,d); dayStart.setHours(0,0,0,0);
+            const todayStart=new Date(); todayStart.setHours(0,0,0,0);
+            const isFuture=dayStart>todayStart;
+            // Color priority: selected > has session > has planned > future > normal
+            let bg="transparent", color=S._muted, border="1px solid transparent";
+            if(isSel) { bg=accent; color=isLight?"#fff":"#111"; }
+            else if(hasSess) { bg=S._surface; color=S._text; }
+            else if(hasPlanned) { bg=isLight?"rgba(100,160,255,0.18)":"rgba(100,160,255,0.2)"; color=isLight?"#2255cc":"#80b8ff"; border="1px solid "+(isLight?"rgba(80,140,255,0.4)":"rgba(100,160,255,0.4)"); }
+            if(isT&&!isSel) { border=`1px solid ${accent}`; if(!hasPlanned&&!hasSess) color=S._text; }
+            return (
+              <div key={i} onClick={(e)=>handleDayClick(d,e)} style={{ height:32, display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", fontSize:13, fontWeight:isSel||isT?600:400, cursor:"pointer", borderRadius:7, background:bg, color, border, position:"relative", transition:"background 0.1s" }}>
+                {d}
+                {hasPlanned&&!isSel&&<div style={{ position:"absolute", bottom:2, width:4, height:4, borderRadius:"50%", background:isLight?"#4488ff":"#80b8ff" }}/>}
+              </div>
+            );
+          })}
+        </div>
+        <div style={{ fontSize:12, color:S._muted, textAlign:"right", marginTop:9 }}>
+          Séance le <span style={{ color:S._text, fontWeight:600 }}>{calDate.toLocaleDateString("fr-FR")}</span>
+        </div>
+
+        {/* Planning popup */}
+        {planPopup && onPlan && (
+          <div style={{ position:"absolute", top: planPopup.relY - 10, left: Math.min(planPopup.relX, 260), zIndex:50, background:isLight?"#fff":"#1e1e1e", border:"1px solid "+(isLight?"#ddd":"#333"), borderRadius:12, padding:"13px 14px", boxShadow:"0 8px 32px rgba(0,0,0,0.35)", minWidth:200 }} onClick={e=>e.stopPropagation()}>
+            <div style={{ fontSize:12, fontWeight:700, color:S._text, marginBottom:10 }}>
+              📅 Planifier le {new Date(y,m,planPopup.day).toLocaleDateString("fr-FR",{day:"numeric",month:"short"})}
             </div>
-          );
-        })}
-      </div>
-      <div style={{ fontSize:12, color:S._muted, textAlign:"right", marginTop:9 }}>
-        Séance le <span style={{ color:S._text, fontWeight:600 }}>{calDate.toLocaleDateString("fr-FR")}</span>
+            {/* Already planned for this day */}
+            {plannedMap[planPopup.iso]?.map((p,i)=>(
+              <div key={i} style={{ display:"flex", alignItems:"center", justifyContent:"space-between", marginBottom:6, background:isLight?"#f0f5ff":"rgba(100,160,255,0.1)", borderRadius:8, padding:"6px 9px" }}>
+                <span style={{ fontSize:12, color:isLight?"#2255cc":"#80b8ff", fontWeight:500 }}>{p.groupName}</span>
+                <button onClick={()=>{ onUnplan(p); setPlanPopup(null); }} style={{ background:"none", border:"none", color:"#c47070", fontSize:16, cursor:"pointer", padding:"0 2px", lineHeight:1 }}>×</button>
+              </div>
+            ))}
+            {(groups||[]).length>0 ? (
+              <>
+                <select value={planGroupId} onChange={e=>setPlanGroupId(e.target.value)} style={{ width:"100%", background:isLight?"#f5f5f5":"#2a2a2a", border:"1px solid "+(isLight?"#ccc":"#444"), borderRadius:8, color:S._text, padding:"8px 10px", fontSize:13, marginBottom:8, fontFamily:S._font, outline:"none" }}>
+                  <option value="">— Choisir une séance —</option>
+                  {(groups||[]).map(g=><option key={g.id} value={g.id}>{g.name}</option>)}
+                </select>
+                <button disabled={!planGroupId} onClick={()=>{
+                  const g=(groups||[]).find(x=>x.id===planGroupId);
+                  if(g) { onPlan({year:y,month:m,day:planPopup.day,groupId:g.id,groupName:g.name}); setPlanPopup(null); }
+                }} style={{ width:"100%", background:planGroupId?"#4488ff":"#2a2a2a", color:"#fff", border:"none", borderRadius:8, padding:"9px", fontSize:13, fontWeight:700, cursor:planGroupId?"pointer":"default", opacity:planGroupId?1:0.5, fontFamily:S._font }}>
+                  Planifier ✓
+                </button>
+              </>
+            ) : (
+              <div style={{ fontSize:12, color:S._muted }}>Crée d'abord une séance.</div>
+            )}
+            <button onClick={()=>setPlanPopup(null)} style={{ background:"none", border:"none", color:S._muted, fontSize:11, cursor:"pointer", marginTop:6, width:"100%", fontFamily:S._font }}>Annuler</button>
+          </div>
+        )}
       </div>
     </Card>
   );
@@ -715,7 +791,8 @@ function LogFormWidget({ logForm, setLogForm, exo }) {
       const ex = existing && existing[i];
       if(ex && typeof ex === "object") return ex;
       const r = typeof ex === "number" ? ex : (parseInt(defReps)||12);
-      return { reps:r, kg:parseFloat(defKg)||0 };
+      // touched:false = not yet manually edited, cascade updates allowed
+      return { reps:r, kg:parseFloat(defKg)||0, touched:false };
     });
   }
   const sets = buildSets(series, logForm.sets, logForm.reps, logForm.kg);
@@ -725,11 +802,18 @@ function LogFormWidget({ logForm, setLogForm, exo }) {
     setLogForm({...logForm, series:n, sets:buildSets(n, sets, logForm.reps, logForm.kg)});
   }
   function updateReps(idx, delta) {
-    const s = sets.map((x,i) => i===idx ? {...x, reps:Math.max(0,(x.reps||0)+delta)} : x);
+    // Only touch the target set, mark it as manually edited
+    const s = sets.map((x,i) => i===idx ? {...x, reps:Math.max(0,(x.reps||0)+delta), touched:true} : x);
     setLogForm({...logForm, sets:s});
   }
   function updateWeight(idx, delta) {
-    const s = sets.map((x,i) => i<idx ? x : {...x, kg:Math.max(0,Math.round(((x.kg||0)+delta)*10)/10)});
+    // Cascade forward only to sets not yet manually touched
+    const s = sets.map((x,i) => {
+      if(i < idx) return x;
+      if(i === idx) return {...x, kg:Math.max(0,Math.round(((x.kg||0)+delta)*10)/10), touched:true};
+      if(x.touched) return x;  // already modified — stop cascade
+      return {...x, kg:Math.max(0,Math.round(((x.kg||0)+delta)*10)/10)};
+    });
     setLogForm({...logForm, sets:s});
   }
 
@@ -959,118 +1043,64 @@ function ExoSettingsCard({ exo, onSave, onDelete, onNavigate, defaultOpen, force
 // ─── Premium Theme Card ───────────────────────────────────────────────────────
 function PremiumThemeCard({ id, t, isActive, onSelect }) {
   const [hov, setHov] = useState(false);
+  // Always use dark-anchored colors so it's readable regardless of current app theme
+  const cardBg = isActive ? "#1c1c1c" : (hov ? "#181818" : "#111");
+  const cardBorder = isActive ? `1.5px solid ${t.accent}` : "1px solid #282828";
   return (
     <div
       onClick={() => onSelect(id)}
       onMouseEnter={() => setHov(true)}
       onMouseLeave={() => setHov(false)}
       style={{
-        background: isActive ? "rgba(255,255,255,0.04)" : "rgba(255,255,255,0.01)",
-        border: isActive ? `1px solid ${t.accent}55` : "1px solid rgba(255,255,255,0.07)",
+        background: cardBg,
+        border: cardBorder,
         borderRadius: 16,
-        padding: "14px 16px",
+        padding: "15px 16px",
         display: "flex",
         alignItems: "center",
         gap: 14,
         cursor: "pointer",
-        transition: "all 0.15s ease",
+        transition: "background 0.12s, border-color 0.12s",
         marginBottom: 8,
-        transform: hov && !isActive ? "translateX(2px)" : "none",
-        boxShadow: isActive ? `0 0 30px ${t.accent}20, inset 0 0 30px ${t.accent}05` : "none",
+        boxShadow: isActive ? `0 0 24px ${t.accent}22` : "none",
       }}
     >
+      {/* Swatch */}
       <div style={{ position: "relative", flexShrink: 0 }}>
-        <div style={{
-          width: 48,
-          height: 48,
-          borderRadius: 12,
-          background: t.grad,
-          boxShadow: isActive ? `0 4px 20px ${t.accent}50` : "none",
-          transition: "box-shadow 0.2s",
-          overflow: "hidden",
-        }}>
-          <div style={{
-            position: "absolute",
-            bottom: 0,
-            left: 0,
-            right: 0,
-            height: 16,
-            background: t.bg,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-          }}>
-            <span style={{ fontSize: 8, color: t.text, fontFamily: t.fontFamily, fontWeight: 600, letterSpacing: 0.5 }}>Aa</span>
+        <div style={{ width:52, height:52, borderRadius:13, background:t.grad, boxShadow: isActive ? `0 4px 18px ${t.accent}55` : "none", overflow:"hidden", position:"relative" }}>
+          <div style={{ position:"absolute", bottom:0, left:0, right:0, height:18, background:t.bg, display:"flex", alignItems:"center", justifyContent:"center" }}>
+            <span style={{ fontSize:10, color:t.text, fontFamily:t.fontFamily, fontWeight:700 }}>Aa</span>
           </div>
         </div>
-        <div style={{
-          position: "absolute",
-          top: -3,
-          right: -3,
-          width: 12,
-          height: 12,
-          borderRadius: "50%",
-          background: t.isLight ? "#f0f0f0" : "#111",
-          border: "2px solid rgba(255,255,255,0.15)",
-        }}/>
+        {/* light indicator dot */}
+        <div style={{ position:"absolute", top:-4, right:-4, width:14, height:14, borderRadius:"50%", background:t.isLight?"#e8e8e8":"#111", border:"2px solid #333", display:"flex", alignItems:"center", justifyContent:"center" }}>
+          <div style={{ width:6, height:6, borderRadius:"50%", background:t.isLight?"#aaa":"#555" }}/>
+        </div>
       </div>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{
-          fontSize: 14,
-          fontWeight: isActive ? 700 : 500,
-          color: isActive ? t.accent : "rgba(255,255,255,0.85)",
-          marginBottom: 2,
-          letterSpacing: -0.2,
-        }}>
+
+      {/* Info — always white text, large enough */}
+      <div style={{ flex:1, minWidth:0 }}>
+        <div style={{ fontSize:16, fontWeight:700, color: isActive ? t.accent : "#f0f0f0", marginBottom:3, letterSpacing:-0.3 }}>
           {t.name}
         </div>
-        <div style={{
-          fontSize: 11,
-          color: "rgba(255,255,255,0.35)",
-          fontStyle: "italic",
-          letterSpacing: 0.3,
-        }}>
+        <div style={{ fontSize:12, color:"#888", fontStyle:"italic", marginBottom:3 }}>
           {t.tagline}
         </div>
-        <div style={{
-          fontSize: 10,
-          color: "rgba(255,255,255,0.2)",
-          marginTop: 3,
-          fontFamily: t.fontFamily,
-          textTransform: "uppercase",
-          letterSpacing: 1,
-        }}>
+        <div style={{ fontSize:11, color:"#555", fontFamily:t.fontFamily, textTransform:"uppercase", letterSpacing:0.8, fontWeight:500 }}>
           {t.fontFamily.split(",")[0].replace(/'/g, "")}
         </div>
       </div>
-      <div style={{ flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "center", gap: 5 }}>
+
+      {/* Badge / Check */}
+      <div style={{ flexShrink:0 }}>
         {isActive ? (
-          <div style={{
-            width: 24,
-            height: 24,
-            borderRadius: "50%",
-            background: t.grad,
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            boxShadow: `0 2px 10px ${t.accent}50`,
-          }}>
-            <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
-              <path d="M2 6l3 3 5-5" stroke={t.isLight ? "#111" : "#fff"} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+          <div style={{ width:28, height:28, borderRadius:"50%", background:t.grad, display:"flex", alignItems:"center", justifyContent:"center", boxShadow:`0 2px 10px ${t.accent}55` }}>
+            <svg width="13" height="13" viewBox="0 0 12 12" fill="none">
+              <path d="M2 6l3 3 5-5" stroke="#fff" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </div>
         ) : (
-          <div style={{
-            fontSize: 9,
-            fontWeight: 700,
-            color: "#c8a840",
-            background: "rgba(200,168,64,0.12)",
-            border: "1px solid rgba(200,168,64,0.25)",
-            borderRadius: 5,
-            padding: "2px 6px",
-            letterSpacing: 1,
-            textTransform: "uppercase",
-          }}>
+          <div style={{ fontSize:10, fontWeight:700, color:"#d4a820", background:"rgba(212,168,32,0.14)", border:"1px solid rgba(212,168,32,0.3)", borderRadius:5, padding:"3px 7px", letterSpacing:1, textTransform:"uppercase" }}>
             PRO
           </div>
         )}
@@ -1363,6 +1393,19 @@ export default function App() {
     saveDb({...db, sessions:db.sessions.filter(s=>s.id!==sid)});
     navigate("history", ()=>setSelSessionId(null));
   }
+  function planSession(entry) {
+    // entry = {year, month, day, groupId, groupName}
+    const planned = [...(db.planned||[])];
+    // Prevent duplicates of same group on same day
+    const dup = planned.findIndex(p=>p.year===entry.year&&p.month===entry.month&&p.day===entry.day&&p.groupId===entry.groupId);
+    if(dup>=0) return;
+    planned.push({...entry, id:uid()});
+    saveDb({...db, planned});
+  }
+  function unplanSession(entry) {
+    const planned = (db.planned||[]).filter(p=>p.id!==entry.id);
+    saveDb({...db, planned});
+  }
   function startSession(gid) {
     const g = db.groups.find(x=>x.id===gid);
     if(!g||g.exercises.length===0) return;
@@ -1443,30 +1486,30 @@ export default function App() {
     </div>
   );
 
-  // THEMES
+  // THEMES — always rendered on dark background regardless of active theme
   if(view==="themes") return (
-    <div style={S.app}>
-      <div style={S.hdr}><Logo/></div>
+    <div style={{ ...S.app, background:"#0d0d0d", color:"#f0f0f0" }}>
+      <div style={{ ...S.hdr, background:"rgba(13,13,13,0.97)", borderBottom:"1px solid #222" }}><Logo/></div>
       <div style={S.body} className="page-enter" key={pageKey.current}>
-        <button style={S.back} onClick={()=>navigate("settings")}>← Réglages</button>
-        <h1 style={S.h1}>Choisir le visuel</h1>
-        <p style={{ fontSize:14, color:S._muted, marginBottom:24 }}>Sélectionne le thème de couleur de l'application</p>
+        <button style={{ ...S.back, color:"#888" }} onClick={()=>navigate("settings")}>← Réglages</button>
+        <h1 style={{ ...S.h1, color:"#f0f0f0" }}>Choisir le visuel</h1>
+        <p style={{ fontSize:14, color:"#666", marginBottom:24 }}>Sélectionne le thème de couleur de l'application</p>
 
         <div style={{ display:"flex", flexDirection:"column", gap:9, marginBottom:32 }}>
           {Object.entries(THEMES).map(([id, t]) => {
             const isActive = !premiumThemeId && themeId === id;
             return (
-              <div key={id} onClick={() => applyTheme(id)} style={{ background: isActive ? "#1a1a1a" : C.card, border:`1px solid ${isActive ? t.accent : S._cardBorder.replace("1px solid ","") || "#2a2a2a"}`, borderRadius:14, padding:"14px 16px", display:"flex", alignItems:"center", gap:14, cursor:"pointer", transition:"all 0.15s ease" }}>
-                <div style={{ width:42, height:42, borderRadius:11, background:t.grad, flexShrink:0, boxShadow: isActive ? `0 3px 16px ${t.accent}55` : "none", transition:"box-shadow 0.15s" }}/>
+              <div key={id} onClick={() => applyTheme(id)} style={{ background: isActive ? "#1e1e1e" : "#141414", border:`1px solid ${isActive ? t.accent : "#2a2a2a"}`, borderRadius:14, padding:"14px 16px", display:"flex", alignItems:"center", gap:14, cursor:"pointer", transition:"all 0.15s ease" }}>
+                <div style={{ width:44, height:44, borderRadius:11, background:t.grad, flexShrink:0, boxShadow: isActive ? `0 3px 16px ${t.accent}55` : "none" }}/>
                 <div style={{ flex:1 }}>
-                  <div style={{ fontSize:15, fontWeight: isActive ? 700 : 500, color: isActive ? t.accent : S._text }}>
+                  <div style={{ fontSize:15, fontWeight: isActive ? 700 : 500, color: isActive ? t.accent : "#e8e8e8" }}>
                     {t.name}
                   </div>
                 </div>
                 {isActive && (
                   <div style={{ width:22, height:22, borderRadius:"50%", background:t.grad, display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0 }}>
                     <svg width="11" height="11" viewBox="0 0 12 12" fill="none">
-                      <path d="M2 6l3 3 5-5" stroke={S._isLight?"#111":"#fff"} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M2 6l3 3 5-5" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"/>
                     </svg>
                   </div>
                 )}
@@ -1482,7 +1525,7 @@ export default function App() {
             </div>
             <div style={{ flex:1, height:1, background:"linear-gradient(90deg, rgba(200,168,64,0.3) 0%, transparent 100%)" }}/>
           </div>
-          <p style={{ fontSize:12, color:S._muted, marginBottom:16, lineHeight:1.5 }}>
+          <p style={{ fontSize:12, color:"#555", marginBottom:16, lineHeight:1.5 }}>
             Typographies exclusives, effets visuels uniques & ambiances soignées
           </p>
         </div>
@@ -1516,7 +1559,40 @@ export default function App() {
             <polyline points="6 9 12 15 18 9"/>
           </svg>
         </button>
-        {showCal && <div style={{ marginTop:10 }}><Calendar calDate={calDate} setCalDate={setCalDate} sessions={db.sessions}/></div>}
+        {showCal && <div style={{ marginTop:10 }}><Calendar calDate={calDate} setCalDate={setCalDate} sessions={db.sessions} planned={db.planned||[]} groups={db.groups} onPlan={planSession} onUnplan={unplanSession}/></div>}
+
+        {/* Upcoming planned sessions */}
+        {(()=>{
+          const today=new Date(); today.setHours(0,0,0,0);
+          const upcoming=(db.planned||[]).filter(p=>{const d=new Date(p.year,p.month,p.day);d.setHours(0,0,0,0);return d>=today;}).sort((a,b)=>new Date(a.year,a.month,a.day)-new Date(b.year,b.month,b.day)).slice(0,3);
+          if(upcoming.length===0) return null;
+          return (
+            <div style={{ marginTop:18, marginBottom:0 }}>
+              <div style={S.sec}>Séances planifiées</div>
+              {upcoming.map((p,i)=>{
+                const d=new Date(p.year,p.month,p.day);
+                const isToday=d.toDateString()===new Date().toDateString();
+                return (
+                  <div key={p.id||i} style={{ background:S._isLight?"rgba(80,130,255,0.1)":"rgba(80,130,255,0.12)", border:"1px solid "+(S._isLight?"rgba(80,130,255,0.35)":"rgba(100,160,255,0.3)"), borderRadius:11, padding:"11px 14px", marginBottom:8, display:"flex", alignItems:"center", justifyContent:"space-between" }}>
+                    <div>
+                      <div style={{ fontSize:14, fontWeight:700, color:S._isLight?"#1a44cc":"#80b8ff" }}>{p.groupName}</div>
+                      <div style={{ fontSize:12, color:S._muted, marginTop:2 }}>{isToday?"Aujourd'hui 💪":d.toLocaleDateString("fr-FR",{weekday:"long",day:"numeric",month:"short"})}</div>
+                    </div>
+                    <div style={{ display:"flex", gap:7 }}>
+                      {isToday && (
+                        <button onClick={()=>{ const g=db.groups.find(x=>x.id===p.groupId); if(g) startSession(g.id); }} style={{ background:S._accent, color:"#fff", border:"none", borderRadius:8, padding:"7px 13px", fontSize:13, fontWeight:700, cursor:"pointer", fontFamily:S._font }}>
+                          C'est parti →
+                        </button>
+                      )}
+                      <button onClick={()=>unplanSession(p)} style={{ background:"none", border:"1px solid #2a1818", color:"#c47070", borderRadius:8, padding:"7px 10px", fontSize:12, cursor:"pointer", fontFamily:S._font }}>✕</button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })()}
+
         <div style={{ marginTop: 28, marginBottom: 16 }}>
           <span style={{ fontSize: 20, fontWeight: 700, color: S._text, textTransform: "uppercase", letterSpacing: 0.8, display: "block" }}>On bosse quoi aujourd'hui ?</span>
         </div>
