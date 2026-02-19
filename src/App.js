@@ -972,12 +972,18 @@ export default function App() {
   const [authLoading, setAuthLoading] = useState(true);
   const [db, setDb] = useState(null);
   const [syncing, setSyncing] = useState(false);
+  
+  // --- Gestion des Thèmes ---
   const [themeId, setThemeId] = useState(() => {
     try { return localStorage.getItem("sportup_theme") || 'obsidian'; } catch { return 'obsidian'; }
   });
   const [premiumThemeId, setPremiumThemeId] = useState(() => {
     try { return localStorage.getItem("sportup_premium_theme") || null; } catch { return null; }
   });
+
+  // --- NOUVEAU : Gestion de la Pop-up ---
+  const [popup, setPopup] = useState(null);
+  const [showPopup, setShowPopup] = useState(false);
 
   const [view, setView] = useState("home");
   const [selGroupId, setSelGroupId] = useState(null);
@@ -992,6 +998,8 @@ export default function App() {
   const [collapseVersion, setCollapseVersion] = useState(0);
   const [logForm, setLogForm] = useState({ series:4, reps:10, kg:0, sets:[], timeMin:1, timeSec:0, note:"" });
   const [mergePrompt, setMergePrompt] = useState(null);
+  const [popup, setPopup] = useState(null);
+  const [popupVisible, setPopupVisible] = useState(false);
   const pageKey = useRef(0);
   const exoTopRef = useRef(null);
   const saveTimeout = useRef(null);
@@ -1066,6 +1074,20 @@ export default function App() {
     return () => subscription.unsubscribe();
   }, []);
 
+  // ─── Fetch popup config (public, no auth needed) ───
+  useEffect(() => {
+    supabase.from('app_popup').select('*').eq('id', 1).maybeSingle().then(({ data }) => {
+      if (data && data.active && data.image_url) {
+        // Only show if user hasn't dismissed it this session
+        const dismissed = sessionStorage.getItem('sportup_popup_dismissed_' + data.updated_at);
+        if (!dismissed) {
+          setPopup(data);
+          setTimeout(() => setPopupVisible(true), 800);
+        }
+      }
+    });
+  }, []);
+
   useEffect(() => {
     const s = document.createElement("style");
     s.textContent = globalCss;
@@ -1100,6 +1122,7 @@ export default function App() {
     return () => supabase.removeChannel(channel);
   }, [session]);
 
+  // --- SAUVEGARDE ---
   const saveDb = useCallback((next) => {
     setDb(next);
     try { localStorage.setItem("sportup_v1", JSON.stringify(next)); } catch {}
@@ -1108,6 +1131,37 @@ export default function App() {
     saveTimeout.current = setTimeout(() => { saveToCloudInner(session.user.id, next); }, 300);
   }, [session]);
 
+  // --- LOGIQUE POP-UP (NOUVEAU) ---
+  const [popup, setPopup] = useState(null);
+  const [popupVisible, setPopupVisible] = useState(false);
+
+  useEffect(() => {
+    const fetchPopup = async () => {
+      try {
+        const { data, error } = await supabase.from('app_popup').select('*').eq('id', 1).single();
+        if (data && data.active && data.image_url) {
+          // On vérifie si cette version précise de la popup a déjà été fermée
+          const isDismissed = sessionStorage.getItem('sportup_popup_dismissed_' + data.updated_at);
+          if (!isDismissed) {
+            setPopup(data);
+            setTimeout(() => setPopupVisible(true), 800);
+          }
+        }
+      } catch (e) { console.error("Erreur popup:", e); }
+    };
+    fetchPopup();
+  }, []);
+
+  function closePopup() {
+    setPopupVisible(false);
+    if (popup?.updated_at) {
+      sessionStorage.setItem('sportup_popup_dismissed_' + popup.updated_at, '1');
+    }
+    // On nettoie l'état après l'animation de sortie
+    setTimeout(() => setPopup(null), 350);
+  }
+
+  // --- NAVIGATION ---
   function navigate(newView, fn) { pageKey.current += 1; if(fn) fn(); setView(newView); }
   function navTo(v) { setNewGName(""); navigate(v); }
 
@@ -1258,8 +1312,10 @@ export default function App() {
   }
 
   // ═══════════════════════════════════════════════════════════════════════════
-  // SETTINGS
+  // RENDER VIEW
   // ═══════════════════════════════════════════════════════════════════════════
+  function renderView() {
+  // SETTINGS
   if(view==="settings") return (
     <div style={S.app}>
       <div style={S.hdr}><Logo/></div>
@@ -1718,6 +1774,81 @@ export default function App() {
   );
 
   return null;
+  } // end renderView
+
+  // ─── Popup Overlay ─────────────────────────────────────────────────────────
+  const renderPopup = () => {
+    if (!popup) return null;
+    return (
+      <div
+        onClick={closePopup}
+        style={{
+          position: "fixed", inset: 0, zIndex: 9999,
+          background: "rgba(0,0,0,0.72)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          padding: "24px",
+          opacity: popupVisible ? 1 : 0,
+          transition: "opacity 0.3s ease",
+          backdropFilter: popupVisible ? "blur(6px)" : "blur(0px)",
+          pointerEvents: popupVisible ? "all" : "none",
+        }}
+      >
+        <div
+          onClick={e => e.stopPropagation()}
+          style={{
+            position: "relative",
+            width: "100%",
+            maxWidth: 400,
+            borderRadius: 18,
+            overflow: "hidden",
+            boxShadow: "0 24px 80px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.08)",
+            transform: popupVisible ? "scale(1) translateY(0)" : "scale(0.92) translateY(20px)",
+            transition: "transform 0.35s cubic-bezier(0.34,1.56,0.64,1)",
+            background: "#111",
+          }}
+        >
+          {/* Bouton fermer */}
+          <button
+            onClick={closePopup}
+            style={{
+              position: "absolute", top: 10, right: 10, zIndex: 10,
+              width: 32, height: 32, borderRadius: "50%",
+              background: "rgba(0,0,0,0.6)",
+              border: "1px solid rgba(255,255,255,0.25)",
+              color: "#fff", fontSize: 18, lineHeight: 1,
+              cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+              backdropFilter: "blur(4px)",
+              fontFamily: C.font, fontWeight: 300,
+            }}
+            aria-label="Fermer"
+          >×</button>
+
+          {/* Image cliquable si lien défini */}
+          {popup.link_url ? (
+            <a href={popup.link_url} target="_blank" rel="noopener noreferrer" onClick={closePopup} style={{ display:"block" }}>
+              <img src={popup.image_url} alt="Annonce" style={{ width:"100%", display:"block", maxHeight:520, objectFit:"cover" }} />
+            </a>
+          ) : (
+            <img src={popup.image_url} alt="Annonce" style={{ width:"100%", display:"block", maxHeight:520, objectFit:"cover" }} />
+          )}
+
+          {/* Label optionnel en pied */}
+          {popup.label && (
+            <div style={{ padding:"11px 16px", fontSize:12, color:"rgba(255,255,255,0.4)", textAlign:"center", background:"#0d0d0d", fontFamily:C.font }}>
+              {popup.label}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <>
+      {renderView()}
+      {renderPopup()}
+    </>
+  );
 }
 
 // ─── Auth Form ────────────────────────────────────────────────────────────────
@@ -1751,6 +1882,21 @@ function AuthForm() {
           Créer un compte
         </button>
       </div>
+            {/* AFFICHAGE PHYSIQUE DE LA POPUP */}
+      {popup && popupVisible && (
+        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.8)', zIndex:10000, display:'flex', alignItems:'center', justifyContent:'center', padding:20, backdropFilter:'blur(5px)' }} onClick={closePopup}>
+          <div style={{ background:'#1a1a1a', borderRadius:20, overflow:'hidden', maxWidth:380, width:'100%', position:'relative', border:'1px solid #333', boxShadow:'0 10px 40px rgba(0,0,0,0.5)' }} onClick={e => e.stopPropagation()}>
+            <button onClick={closePopup} style={{ position:'absolute', top:12, right:12, background:'rgba(0,0,0,0.5)', border:'none', color:'white', borderRadius:'50%', width:30, height:30, cursor:'pointer', zIndex:2 }}>✕</button>
+            <img src={popup.image_url} style={{ width:'100%', display:'block' }} alt="Jeffrey" />
+            <div style={{ padding:20, textAlign:'center' }}>
+              <div style={{ color:'white', fontWeight:700, fontSize:18, marginBottom:10 }}>{popup.label}</div>
+              {popup.link_url && (
+                <a href={popup.link_url} target="_blank" rel="noreferrer" style={{ display:'inline-block', background:'#e8924a', color:'white', padding:'10px 20px', borderRadius:8, textDecoration:'none', fontWeight:700 }}>En savoir plus</a>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
-  );
+  )
 }
