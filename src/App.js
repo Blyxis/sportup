@@ -1896,7 +1896,7 @@ function AuthForm() {
             </div>
           </div>
         </div>
-      )}
+     )}
     </div>
-  )
+  );
 }
