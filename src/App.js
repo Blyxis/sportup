@@ -972,18 +972,12 @@ export default function App() {
   const [authLoading, setAuthLoading] = useState(true);
   const [db, setDb] = useState(null);
   const [syncing, setSyncing] = useState(false);
-  
-  // --- Gestion des Thèmes ---
   const [themeId, setThemeId] = useState(() => {
     try { return localStorage.getItem("sportup_theme") || 'obsidian'; } catch { return 'obsidian'; }
   });
   const [premiumThemeId, setPremiumThemeId] = useState(() => {
     try { return localStorage.getItem("sportup_premium_theme") || null; } catch { return null; }
   });
-
-  // --- NOUVEAU : Gestion de la Pop-up ---
-  const [popup, setPopup] = useState(null);
-  const [showPopup, setShowPopup] = useState(false);
 
   const [view, setView] = useState("home");
   const [selGroupId, setSelGroupId] = useState(null);
@@ -1122,7 +1116,6 @@ export default function App() {
     return () => supabase.removeChannel(channel);
   }, [session]);
 
-  // --- SAUVEGARDE ---
   const saveDb = useCallback((next) => {
     setDb(next);
     try { localStorage.setItem("sportup_v1", JSON.stringify(next)); } catch {}
@@ -1131,39 +1124,16 @@ export default function App() {
     saveTimeout.current = setTimeout(() => { saveToCloudInner(session.user.id, next); }, 300);
   }, [session]);
 
-  // --- LOGIQUE POP-UP (NOUVEAU) ---
-  const [popup, setPopup] = useState(null);
-  const [popupVisible, setPopupVisible] = useState(false);
-
-  useEffect(() => {
-    const fetchPopup = async () => {
-      try {
-        const { data, error } = await supabase.from('app_popup').select('*').eq('id', 1).single();
-        if (data && data.active && data.image_url) {
-          // On vérifie si cette version précise de la popup a déjà été fermée
-          const isDismissed = sessionStorage.getItem('sportup_popup_dismissed_' + data.updated_at);
-          if (!isDismissed) {
-            setPopup(data);
-            setTimeout(() => setPopupVisible(true), 800);
-          }
-        }
-      } catch (e) { console.error("Erreur popup:", e); }
-    };
-    fetchPopup();
-  }, []);
+  function navigate(newView, fn) { pageKey.current += 1; if(fn) fn(); setView(newView); }
+  function navTo(v) { setNewGName(""); navigate(v); }
 
   function closePopup() {
     setPopupVisible(false);
     if (popup?.updated_at) {
       sessionStorage.setItem('sportup_popup_dismissed_' + popup.updated_at, '1');
     }
-    // On nettoie l'état après l'animation de sortie
     setTimeout(() => setPopup(null), 350);
   }
-
-  // --- NAVIGATION ---
-  function navigate(newView, fn) { pageKey.current += 1; if(fn) fn(); setView(newView); }
-  function navTo(v) { setNewGName(""); navigate(v); }
 
   const uid = () => Date.now() + Math.random();
   function fmt(iso) { return new Date(iso).toLocaleDateString("fr-FR", { day:"2-digit", month:"short", year:"numeric" }); }
@@ -1882,21 +1852,6 @@ function AuthForm() {
           Créer un compte
         </button>
       </div>
-            {/* AFFICHAGE PHYSIQUE DE LA POPUP */}
-      {popup && popupVisible && (
-        <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.8)', zIndex:10000, display:'flex', alignItems:'center', justifyContent:'center', padding:20, backdropFilter:'blur(5px)' }} onClick={closePopup}>
-          <div style={{ background:'#1a1a1a', borderRadius:20, overflow:'hidden', maxWidth:380, width:'100%', position:'relative', border:'1px solid #333', boxShadow:'0 10px 40px rgba(0,0,0,0.5)' }} onClick={e => e.stopPropagation()}>
-            <button onClick={closePopup} style={{ position:'absolute', top:12, right:12, background:'rgba(0,0,0,0.5)', border:'none', color:'white', borderRadius:'50%', width:30, height:30, cursor:'pointer', zIndex:2 }}>✕</button>
-            <img src={popup.image_url} style={{ width:'100%', display:'block' }} alt="Jeffrey" />
-            <div style={{ padding:20, textAlign:'center' }}>
-              <div style={{ color:'white', fontWeight:700, fontSize:18, marginBottom:10 }}>{popup.label}</div>
-              {popup.link_url && (
-                <a href={popup.link_url} target="_blank" rel="noreferrer" style={{ display:'inline-block', background:'#e8924a', color:'white', padding:'10px 20px', borderRadius:8, textDecoration:'none', fontWeight:700 }}>En savoir plus</a>
-              )}
-            </div>
-          </div>
-        </div>
-     )}
     </div>
   );
 }
